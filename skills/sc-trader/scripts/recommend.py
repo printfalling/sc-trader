@@ -62,7 +62,7 @@ def filter_legs(rows: list[dict], budget: int, profile: dict,
         is_pyro = str(r.get("destination_star_system_name", "")).lower() == "pyro"
         if is_pyro and not include_pyro:
             continue
-        intra = r.get("id_planet_destination") == origin_planet
+        intra = r.get("id_planet_destination") == r.get("id_planet_origin")
         legs.append({
             "commodity": r.get("commodity_name", ""),
             "id_commodity": r.get("id_commodity"),
@@ -70,6 +70,8 @@ def filter_legs(rows: list[dict], budget: int, profile: dict,
                              "name": r.get("origin_terminal_name", "")},
             "sell_terminal": {"id": r.get("id_terminal_destination"),
                               "name": r.get("destination_terminal_name", "")},
+            "id_planet_origin": r.get("id_planet_origin"),
+            "origin_planet": r.get("origin_planet_name", ""),
             "id_planet_destination": r.get("id_planet_destination"),
             "destination_planet": r.get("destination_planet_name", ""),
             "destination_system": r.get("destination_star_system_name", ""),
@@ -102,86 +104,78 @@ def dedup_planets(legs: list[dict], limit: int) -> list[dict]:
     return out
 
 
-def partial_load_legs(client, ctx, watchlist, budget: int, profile: dict,
-                      have_pairs: set, max_extra: int = 2) -> list[dict]:
-    """跟踪商品补充路径：routes 接口下架的对子（低库存/卖端饱和）用价格行重建。
+def computed_legs_from_prices(client, ctx, budget: int, profile: dict,
+                              have_triples: set) -> list[dict]:
+    """本地算路引擎（与 sc-trade.tools 同方法）：一次拉全市场价格，本地配对。
 
-    部分装载：qty 按实际库存取，不满载也成立（用户明确需求）。
+    覆盖 routes 配对接口遗漏的航腿：精炼矿物、卖端饱和下架、跨行星货源。
+    每商品取最便宜买点 ×2、最贵卖点 ×3，配对去重后按利润排序。
     """
-    tracked = watchlist.get("tracked_commodities") or {}
-    if not tracked:
-        return []
-    origin_planet = profile["origin"]["id_planet"]
+    from collections import defaultdict
+    system_id = profile["origin"].get("id_star_system") or 68
     term_by_id = {t.id: t for t in ctx.cache.terminals} if ctx else {}
+    rows = common.throttled_get(client, "commodities_prices_all")
+    by_commodity = defaultdict(list)
+    for r in rows or []:
+        t = term_by_id.get(r.get("id_terminal"))
+        if t is None or getattr(t, "id_star_system", 0) != system_id:
+            continue
+        by_commodity[(r.get("id_commodity"), r.get("commodity_name", ""))].append((r, t))
+
+    scu_total = profile["ship"]["scu_total"]
     legs = []
-    calls = 0
-    for cid_str, cname in list(tracked.items())[:6]:
-        if calls >= max_extra:
-            break
-        cid = int(cid_str)
-        current_pairs = {k for k in have_pairs if k[0] == cid}
-        # 该商品所有已知航腿对子（来自本次 routes 结果），缺哪个才补哪个——简化：
-        # 只要本次 routes 结果里已出现该商品，就跳过
-        if current_pairs:
+    for (cid, cname), entries in by_commodity.items():
+        if not cid:
             continue
-        rows = common.throttled_get(client, "commodities_prices", {"id_commodity": cid})
-        calls += 1
-        if not rows:
-            continue
-        buy_side = []
-        sell_prices = []
-        for r in rows:
-            tid = r.get("id_terminal")
-            t = term_by_id.get(tid)
+        buys, sells = [], []
+        for r, t in entries:
             try:
                 pb = float(r.get("price_buy") or 0)
                 ps = float(r.get("price_sell") or 0)
             except (TypeError, ValueError):
                 continue
-            if t is None:
-                continue
-            if pb > 0 and t.id_planet == origin_planet:
-                buy_side.append((r, t))
+            if pb > 0:
+                buys.append((pb, r, t))
             if ps > 0:
-                sell_prices.append((ps, r, t))
-        for r, t in buy_side:
-            best_sell = max((s for s in sell_prices if s[2].id != t.id),
-                            key=lambda x: x[0], default=None)
-            if not best_sell:
-                continue
-            ps, srow, sterm = best_sell
-            buy = int(float(r["price_buy"]))
-            if ps <= buy:
-                continue
-            stock = r.get("scu_buy_stock")
-            qty = min(profile["ship"]["scu_total"], budget // buy,
-                      int(stock) if stock else profile["ship"]["scu_total"])
-            capacity = common.packable_scu(
-                common.parse_box_sizes(r.get("container_sizes_origin")), profile)
-            qty = min(qty, capacity or profile["ship"]["scu_total"])
-            if qty <= 0:
-                continue
-            is_pyro = getattr(sterm, "star_system_name", "").lower() == "pyro"
-            if is_pyro and not profile.get("include_pyro"):
-                continue
-            legs.append({
-                "commodity": cname, "id_commodity": cid,
-                "buy_terminal": {"id": t.id, "name": t.name},
-                "sell_terminal": {"id": sterm.id, "name": sterm.name},
-                "id_planet_destination": getattr(sterm, "id_planet", 0) or 0,
-                "destination_planet": getattr(sterm, "planet_name", ""),
-                "destination_system": getattr(sterm, "star_system_name", ""),
-                "price_buy": buy, "price_sell": int(ps),
-                "scu_stock": int(stock) if stock else qty,
-                "qty": qty, "box_sizes": [],
-                "leg_profit": qty * (int(ps) - buy),
-                "roi": round((ps - buy) / buy * 100, 1),
-                "intra": getattr(sterm, "id_planet", 0) == origin_planet,
-                "pyro": is_pyro,
-                "partial": bool(stock) and qty < profile["ship"]["scu_total"],
-            })
+                sells.append((ps, r, t))
+        if not buys or not sells:
+            continue
+        buys.sort(key=lambda x: x[0])
+        sells.sort(key=lambda x: -x[0])
+        for pb, br, bt in buys[:2]:
+            for ps, sr, st in sells[:3]:
+                if st.id == bt.id or ps <= pb:
+                    continue
+                if (cid, bt.id, st.id) in have_triples:
+                    continue
+                box_sizes = common.parse_box_sizes(br.get("container_sizes"))
+                capacity = common.packable_scu(box_sizes, profile) or scu_total
+                qty = min(scu_total, capacity, budget // int(pb))
+                if qty <= 0:
+                    continue
+                is_pyro = getattr(st, "star_system_name", "").lower() == "pyro"
+                if is_pyro and not profile.get("include_pyro"):
+                    continue
+                legs.append({
+                    "commodity": cname, "id_commodity": cid,
+                    "buy_terminal": {"id": bt.id, "name": bt.name},
+                    "sell_terminal": {"id": st.id, "name": st.name},
+                    "id_planet_origin": bt.id_planet,
+                    "origin_planet": getattr(bt, "planet_name", ""),
+                    "id_planet_destination": st.id_planet,
+                    "destination_planet": getattr(st, "planet_name", ""),
+                    "destination_system": getattr(st, "star_system_name", ""),
+                    "price_buy": int(pb), "price_sell": int(ps),
+                    "scu_stock": 0,
+                    "qty": qty, "box_sizes": box_sizes,
+                    "leg_profit": qty * (int(ps) - int(pb)),
+                    "roi": round((ps - pb) / pb * 100, 1),
+                    "intra": bt.id_planet == st.id_planet,
+                    "pyro": is_pyro,
+                    "source": "computed",
+                })
     legs.sort(key=lambda x: x["leg_profit"], reverse=True)
-    return legs[:4]
+    return legs[:12]
 
 
 def find_return_leg(client, origin_planet: int, budget: int,
@@ -282,7 +276,9 @@ def build_routes(legs: list[dict], budget: int, profile: dict,
                 loop_type = "one-way"
             else:
                 calls_left -= 1
-                row = find_return_leg(client, profile["origin"]["id_planet"],
+                row = find_return_leg(client,
+                                      leg.get("id_planet_origin")
+                                      or profile["origin"]["id_planet"],
                                       budget, leg["id_planet_destination"])
                 back = make_return_leg(row, budget, profile) if row else None
                 legs_pair = [leg] + ([back] if back else [])
@@ -421,11 +417,13 @@ def main() -> int:
         ctx = common.build_ctx()
     except Exception:
         pass
-    have_pairs = {(l["id_commodity"], l["buy_terminal"]["id"]) for l in legs}
-    extra = partial_load_legs(client, ctx, watchlist, budget, profile, have_pairs)
-    if extra:
-        print(f"[partial] 跟踪商品补充 {len(extra)} 条部分装载航腿", file=sys.stderr)
-        legs = sorted(legs + extra, key=lambda x: x["leg_profit"], reverse=True)
+    have_triples = {(l["id_commodity"], l["buy_terminal"]["id"], l["sell_terminal"]["id"])
+                    for l in legs}
+    computed = computed_legs_from_prices(client, ctx, budget, profile, have_triples)
+    if computed:
+        print(f"[computed] 本地算路补充 {len(computed)} 条航腿（sc-trade.tools 同方法，价格源 UEX）",
+              file=sys.stderr)
+        legs = sorted(legs + computed, key=lambda x: x["leg_profit"], reverse=True)
     if not legs:
         print("ERROR: 过滤后无可用航腿", file=sys.stderr)
         return 1

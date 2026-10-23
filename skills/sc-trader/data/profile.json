@@ -22,8 +22,10 @@
   "budget_default": 100000,
   "origin": {
     "star_system": "Stanton",
+    "id_star_system": 68,
     "id_planet": 190,
-    "planet_name": "MicroTech"
+    "planet_name": "MicroTech",
+    "scope": "system"
   },
   "include_pyro": false,
   "max_container_box": 2

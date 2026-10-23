@@ -13,6 +13,14 @@ description: Star Citizen 跑商助手。按飞船/预算推荐并记录跑商�
 - **数据文件**：`skills/sc-trader/data/profile.json`（船型表/预算/出发地）；`skills/sc-trader/data/watchlist.json`（路线 + 价格快照，git 跟踪）。
 - **限速**：UEX 匿名 10 次/分钟。脚本内置 6.5s 调用间隔；**单任务 API 总调用 ≤5 次**。遇 `UEXError`/HTTP 400/429：等 60s 重试一次，再失败就如实报告并停止，不要连续重试。
 
+## 价格源权威序（调研结论 2026-10-23）
+
+**用户实际提供（截图/口述，一切用户亲报数据）★ > UEX API > sc-trade.tools。** 依据：
+1. sc-trade.tools 的路线数字实测与 UEX 逐位一致（Taranite 18,792/27,000），说明它本身以 UEX 为价格底座、只是计算方法不同；
+2. uexinfo 作者（同时集成两源）的权威序同为 scan > UEX > sc-trade；
+3. sc-trade 众包库覆盖稀疏（Taranite 0 条提交）。
+两边数字不一致时：以 UEX 为基线继续计算，差异项向用户标注"进游戏核实"；用户提供的任何实测价（截图或口述）即最终裁决，record 入库后 ★ 优先于一切外部源。
+
 ## 四个命令
 
 ### 1. check — 环境自检（缺失自动补装）
@@ -36,6 +44,7 @@ tools/uexinfo/venv/bin/python skills/sc-trader/scripts/recommend.py \
 - **验收**：stdout 出现以 `| ID | 类型` 开头的表格；`watchlist.json` 是合法 JSON、routes 非空、每条 loop_profit>0；qty 不超过所选船 `scu_total`。
 - **重复推荐**：先清空 `routes`（保留 `next_id` 字段）再跑，得到干净候选集；重建后 `ranking_prev` 基线自动重置。
 - **部分装载与跟踪商品**：数量按实际库存取，**不必凑满货舱**（3 SCU 库存就装 3 SCU，利润线性缩放）。被推荐过/录入过的商品登记在 `tracked_commodities`；即使被 routes 配对接口下架（低库存/卖端饱和），recommend 也会用价格行重建航腿（输出标注 `[partial]`），库存未知时 qty 按满载口径展示、进游戏以实际为准。
+- **本地算路引擎**：routes 配对接口之外，脚本会一次拉取全市场价格（`commodities_prices_all`）本地配对（每商品最便宜买点 ×2 × 最贵卖点 ×3，输出标注 `[computed]`）——精炼矿物（Taranite/Compboard 等）、卖端饱和下架、跨行星货源靠它覆盖。买点数量按 `min(货舱, 预算, 库存)` 取，不满载也成立；computed 航腿无库存数时按满载口径展示，进游戏以实际为准。
 - **组合语义**：推荐的是一组路线而非单条——利润最高者为**首选**，其余为**备选**；同一供货源（同商品+同买点）最多 2 条（同源价格完全联动，没有对冲价值）。用户问"跑哪条"按首选回答，首选因价格波动劣化时按收益榜改推新首选。
 - **预算与库存的关系**：数量 = min(货舱, 预算可买, 买点库存)。**预算加大不一定增产**——货源库存卡死时 500k 和 300k 结果一致是正常现象，如实说明即可，不要当作故障。
 
@@ -52,7 +61,7 @@ tools/uexinfo/venv/bin/python skills/sc-trader/scripts/update_prices.py
 
 ### 4. record — 截图读数入库
 
-会话流程：用户发游戏截图 → 你（Claude）视觉读出 商品名 / 终端名 / 买入价 / 卖出价 / 库存 → 逐条调用：
+会话流程：用户实际提供价格时（发游戏截图 → 你视觉读数，或直接口述价格）→ 整理出 商品名 / 终端名 / 买入价 / 卖出价 / 库存 → 逐条调用：
 
 ```bash
 tools/uexinfo/venv/bin/python skills/sc-trader/scripts/record.py \
