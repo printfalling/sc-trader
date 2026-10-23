@@ -120,6 +120,9 @@ tools/uexinfo/venv/bin/python skills/sc-trader/scripts/update_prices.py
 # 截图读数入库（会话内 Claude 视觉读图后调用，写入 uexinfo scan_prices.json）
 tools/uexinfo/venv/bin/python skills/sc-trader/scripts/record.py \
   --commodity "Medical Supplies" --terminal "Rayari Kaltag Research Outpost" --price-buy 3343
+
+# skill 自更新：检查/快进上游组件（uexinfo 等）+ 依赖刷新 + 重新部署 + 自检
+tools/uexinfo/venv/bin/python skills/sc-trader/scripts/update_skill.py [--apply]
 ```
 
 数据文件：`skills/sc-trader/data/profile.json`（船型：aurora_ts 8 SCU / c1_spirit 64 SCU）、

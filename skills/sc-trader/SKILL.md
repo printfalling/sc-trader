@@ -9,7 +9,11 @@ description: Star Citizen 跑商助手。按飞船/预算推荐并记录跑商�
 
 ## 硬性前提
 
-- **解释器**：所有脚本必须用仓库自带 venv 跑：`tools/uexinfo/venv/bin/python`（依赖 uexinfo 包，普通 python3 没有该依赖）。
+- **解释器**：所有脚本必须用仓库自带 venv 跑（依赖 uexinfo 包，普通 python3 没有该依赖）：
+  - macOS / Linux：`tools/uexinfo/venv/bin/python`
+  - Windows：`tools\uexinfo\venv\Scripts\python.exe`（venv 由 check 自动创建，Windows 用 `py -3.12`）
+- **Windows 注意**：控制台乱码时设置 `PYTHONUTF8=1`（脚本已内置 UTF-8 输出兜底）；部署 symlink 需开发者模式，无权限时 check 自动回退 junction；tesseract 通过 winget/choco 自动安装。
+- 所有脚本调用处按平台替换解释器路径，其余命令参数不变。
 - **数据文件**：`skills/sc-trader/data/profile.json`（船型表/预算/出发地）；`skills/sc-trader/data/watchlist.json`（路线 + 价格快照，git 跟踪）。
 - **限速**：UEX 匿名 10 次/分钟。脚本内置 6.5s 调用间隔；**单任务 API 总调用 ≤5 次**。遇 `UEXError`/HTTP 400/429：等 60s 重试一次，再失败就如实报告并停止，不要连续重试。
 

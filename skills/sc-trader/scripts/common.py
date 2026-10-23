@@ -6,6 +6,9 @@
 from __future__ import annotations
 
 import json
+import os
+import platform
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -17,6 +20,60 @@ UEXINFO_DIR = REPO_ROOT / "tools" / "uexinfo"
 
 PROFILE_PATH = SKILL_DIR / "data" / "profile.json"
 WATCHLIST_PATH = SKILL_DIR / "data" / "watchlist.json"
+
+
+# ── Windows 兼容 ─────────────────────────────────────────────────────────────
+
+def ensure_utf8_console() -> None:
+    """Windows 控制台默认 GBK/cp936，✅/⚠️/→ 等字符会 UnicodeEncodeError。
+
+    强制 UTF-8 输出（无法重配置时静默降级）。
+    """
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            if hasattr(stream, "reconfigure"):
+                stream.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+
+
+def venv_python() -> Path:
+    """平台正确的 uexinfo venv 解释器：Windows 是 Scripts\\python.exe。"""
+    if platform.system() == "Windows":
+        return UEXINFO_DIR / "venv" / "Scripts" / "python.exe"
+    return UEXINFO_DIR / "venv" / "bin" / "python"
+
+
+def make_dir_link(target: Path, source: Path) -> None:
+    """跨平台目录链接：优先 symlink，Windows 无特权时回退 junction（mklink /J）。"""
+    if target.is_symlink() or target.exists():
+        if _dir_link_ok(target, source):
+            return
+        raise FileExistsError(f"{target} 已存在且不指向 {source}")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        target.symlink_to(source)
+    except OSError:
+        if platform.system() == "Windows":
+            subprocess.run(["cmd", "/c", "mklink", "/J", str(target), str(source)],
+                           check=True, capture_output=True)
+        else:
+            raise
+
+
+def dir_link_ok(target: Path, source: Path) -> bool:
+    """链接有效性（junction 在 Windows 上 is_symlink() 为 False，用 realpath 判定）。"""
+    try:
+        return os.path.realpath(target) == str(source)
+    except OSError:
+        return False
+
+
+# 旧名兼容
+_dir_link_ok = dir_link_ok
+
+
+ensure_utf8_console()
 
 # ── uexinfo 导入 ─────────────────────────────────────────────────────────────
 

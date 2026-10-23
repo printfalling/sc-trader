@@ -9,7 +9,8 @@ playwright extra → UEX API 连通性。缺什么补什么；--no-fix 只报告
 from __future__ import annotations
 
 import argparse
-import importlib
+import os
+import platform
 import shutil
 import subprocess
 import sys
@@ -19,7 +20,16 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 SKILL_DIR = SCRIPT_DIR.parent
 REPO_ROOT = SKILL_DIR.parent.parent
 UEXINFO_DIR = REPO_ROOT / "tools" / "uexinfo"
-VENV_PY = UEXINFO_DIR / "venv" / "bin" / "python"
+
+sys.path.insert(0, str(SCRIPT_DIR))
+
+import common  # noqa: E402
+
+VENV_PY = common.venv_python()
+DEPLOY_TARGETS = [
+    Path.home() / ".claude" / "skills" / "sc-trader",
+    Path.home() / ".openclaw" / "skills" / "sc-trader",
+]
 
 sys.path.insert(0, str(SCRIPT_DIR))
 
@@ -60,11 +70,22 @@ def check_venv(fix: bool) -> bool:
     if not fix:
         record(False, "uexinfo venv", f"{VENV_PY} 不存在")
         return False
-    py312 = shutil.which("python3.12") or shutil.which("python3")
-    if not py312:
-        record(False, "uexinfo venv", "找不到 python3.12，无法创建 venv")
+    # 跨平台解释器候选：macOS/Linux 用 python3.x，Windows 用 py 启动器
+    candidates = []
+    for name in ("python3.12", "python3", "python"):
+        which = shutil.which(name)
+        if which:
+            candidates.append([which])
+    if shutil.which("py"):  # Windows 官方启动器
+        candidates.append(["py", "-3.12"])
+    if not candidates:
+        record(False, "uexinfo venv", "找不到任何 Python 解释器，无法创建 venv")
         return False
-    code, out = run([py312, "-m", "venv", "venv"], cwd=UEXINFO_DIR, timeout=300)
+    code, out = 1, ""
+    for cmd in candidates:
+        code, out = run(cmd + ["-m", "venv", "venv"], cwd=UEXINFO_DIR, timeout=300)
+        if code == 0:
+            break
     if code != 0:
         record(False, "uexinfo venv", out[-200:])
         return False
@@ -90,14 +111,22 @@ def check_tesseract(fix: bool) -> bool:
     if not fix:
         record(False, "tesseract OCR", "未安装（uexinfo 终端扫描 OCR 需要）")
         return False
-    brew = shutil.which("brew")
-    if not brew:
-        record(False, "tesseract OCR", "brew 不可用，请手动安装")
+    system = platform.system()
+    if system == "Darwin" and shutil.which("brew"):
+        code, out = run(["brew", "install", "tesseract"], timeout=1200)
+    elif system == "Windows" and shutil.which("winget"):
+        code, out = run(["winget", "install", "--id", "UB-Mannheim.TesseractOCR",
+                         "--accept-source-agreements", "--accept-package-agreements"],
+                        timeout=1800)
+    elif system == "Windows" and shutil.which("choco"):
+        code, out = run(["choco", "install", "tesseract", "-y"], timeout=1800)
+    else:
+        record(False, "tesseract OCR",
+               f"{system} 无自动安装渠道（macOS=brew / Windows=winget|choco），请手动安装")
         return False
-    code, out = run([brew, "install", "tesseract"], timeout=1200)
-    record(shutil.which("tesseract") is not None, "tesseract OCR",
-           "brew 已自动安装" if shutil.which("tesseract") else out[-200:])
-    return shutil.which("tesseract") is not None
+    ok = shutil.which("tesseract") is not None
+    record(ok, "tesseract OCR", "已自动安装" if ok else out[-200:])
+    return ok
 
 
 def check_playwright(fix: bool) -> bool:
@@ -112,6 +141,40 @@ def check_playwright(fix: bool) -> bool:
                     cwd=UEXINFO_DIR, timeout=900)
     record(code == 0, "playwright extra", "已自动安装" if code == 0 else out[-200:])
     return code == 0
+
+
+def check_deploy(fix: bool) -> bool:
+    """skill 部署：agent skills 目录链接指向仓库（缺失/错位自动修复）。
+
+    跨平台：macOS/Linux 用 symlink；Windows 无特权时回退 junction（mklink /J）。
+    """
+    ok = True
+    notes = []
+    for target in DEPLOY_TARGETS:
+        if common.dir_link_ok(target, SKILL_DIR):
+            notes.append(f"{target.parent.name} ✓")
+            continue
+        if target.exists():
+            notes.append(f"{target.parent.name} 是真实目录，拒绝覆盖")
+            ok = False
+            continue
+        if fix:
+            try:
+                if target.is_symlink():
+                    target.unlink()
+                common.make_dir_link(target, SKILL_DIR)
+                notes.append(f"{target.parent.name} 已自动部署"
+                             if common.dir_link_ok(target, SKILL_DIR)
+                             else f"{target.parent.name} 部署失败")
+                ok = ok and common.dir_link_ok(target, SKILL_DIR)
+            except OSError as e:
+                notes.append(f"{target.parent.name} 部署失败({e})")
+                ok = False
+        else:
+            notes.append(f"{target.parent.name} 未部署")
+            ok = False
+    record(ok, "skill 部署", "；".join(notes))
+    return ok
 
 
 def check_uex_api() -> bool:
@@ -133,6 +196,7 @@ def main() -> int:
 
     check_submodules(fix)
     venv_ok = check_venv(fix)
+    check_deploy(fix)
     if venv_ok:
         check_uexinfo_import()
         check_tesseract(fix)
