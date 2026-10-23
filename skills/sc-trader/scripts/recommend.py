@@ -301,6 +301,9 @@ def build_routes(legs: list[dict], budget: int, profile: dict,
                 x["qt_sec"] = common.qt_seconds(
                     ctx, x["buy_terminal"]["name"], x["sell_terminal"]["name"])
         route["qt_sec_total"] = sum(x["qt_sec"] or 0 for x in legs_pair) or None
+        route["loop_time_min"] = common.route_time_min(profile, legs_pair)
+        route["profit_per_hour"] = (int(route["loop_profit"] / route["loop_time_min"] * 60)
+                                    if route["loop_time_min"] else None)
         route["snapshots"] = [snapshot_of(leg, "uex") for leg in legs_pair]
         routes.append(route)
         if len(routes) >= 6:
@@ -309,20 +312,28 @@ def build_routes(legs: list[dict], budget: int, profile: dict,
 
 
 def merge_watchlist(watchlist: dict, new_routes: list[dict]) -> tuple[dict, int]:
-    """按 (买端id, 卖端id, 商品id) 去重合并；已存在的不动状态只刷新报价。"""
+    """推荐即重建组合：本次刷新过的路线保留更新，未刷新的活跃旧路线标记 retired。
+
+    （跨船/跨预算的旧路线不得滞留活跃组合——不同船的利润不可比。）
+    """
     def key_of(route):
         l0 = route["legs"][0]
         return (l0["buy_terminal"]["id"], l0["sell_terminal"]["id"], l0["id_commodity"])
 
-    existing = {key_of(r): r for r in watchlist["routes"]}
+    existing = {key_of(r): r for r in watchlist["routes"] if r["status"] != "retired"}
+    seen_keys = set()
     added = 0
     for route in new_routes:
         k = key_of(route)
+        seen_keys.add(k)
         if k in existing:
             old = existing[k]
             old["legs"] = route["legs"]
             old["loop_profit"] = route["loop_profit"]
             old["qt_sec_total"] = route.get("qt_sec_total")
+            old["loop_time_min"] = route.get("loop_time_min")
+            old["profit_per_hour"] = route.get("profit_per_hour")
+            old["ship"] = route.get("ship", old.get("ship"))
             continue
         watchlist["next_id"] = watchlist.get("next_id", 1)
         route["id"] = f"r{watchlist['next_id']}"
@@ -330,6 +341,10 @@ def merge_watchlist(watchlist: dict, new_routes: list[dict]) -> tuple[dict, int]
         watchlist["routes"].append(route)
         existing[k] = route
         added += 1
+    # 未被本次刷新的活跃路线 → retired（历史快照保留在文件里）
+    for k, old in existing.items():
+        if k not in seen_keys:
+            old["status"] = "retired"
     return watchlist, added
 
 
@@ -341,11 +356,15 @@ def render_watchlist_md(watchlist: dict, budget: int) -> str:
         "",
         f"首选：**{best_id}**（其余为备选——价格波动使其反超首选时，update_prices 会提示调仓）",
         "",
-        "| ID | 角色 | 类型 | 航段 | 商品 | 买→卖 | 数量 | 本段利润 | 圈利润 | 风险 |",
-        "|----|------|------|------|------|-------|------|---------|--------|------|",
+        "| ID | 角色 | 类型 | 航段 | 商品 | 买→卖 | 数量 | 本段利润 | 圈利润 | 圈时间 | 时薪 | 风险 |",
+        "|----|------|------|------|------|-------|------|---------|--------|--------|------|------|",
     ]
     for r in active:
         role = "**首选**" if r["id"] == best_id else "备选"
+        time_txt = (f"{r['loop_time_min']:.0f}min"
+                    if i_time_ok(r) else "")
+        hour_txt = (f"{r['profit_per_hour']:,}/h"
+                    if i_time_ok(r) and r.get("profit_per_hour") else "")
         for i, l in enumerate(r["legs"]):
             lines.append(
                 f"| {r['id'] if i == 0 else ''} "
@@ -357,8 +376,14 @@ def render_watchlist_md(watchlist: dict, budget: int) -> str:
                 f"| {l['qty']} SCU "
                 f"| +{l['leg_profit']:,} "
                 f"| {'+' + format(r['loop_profit'], ',') if i == 0 else ''} "
+                f"| {time_txt if i == 0 else ''} "
+                f"| {hour_txt if i == 0 else ''} "
                 f"| {r['risk'] if i == 0 else ''} |")
     return "\n".join(lines)
+
+
+def i_time_ok(r) -> bool:
+    return bool(r.get("loop_time_min"))
 
 
 AUTO_BEGIN = "<!-- sc-trader:auto-begin -->"

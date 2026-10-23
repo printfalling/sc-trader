@@ -66,20 +66,20 @@ curl -s "https://api.uexcorp.space/2.0/commodities_prices?commodity_name=Medical
 <!-- sc-trader:auto-begin -->
 ### 监控中的路线
 
-**预算 500,000 aUEC · 生成于 2026-10-23T08:41:58+00:00**
+**预算 500,000 aUEC · 生成于 2026-10-23T09:04:00+00:00**
 
-首选：**r31**（其余为备选——价格波动使其反超首选时，update_prices 会提示调仓）
+首选：**r51**（其余为备选——价格波动使其反超首选时，update_prices 会提示调仓）
 
-| ID | 角色 | 类型 | 航段 | 商品 | 买→卖 | 数量 | 本段利润 | 圈利润 | 风险 |
-|----|------|------|------|------|-------|------|---------|--------|------|
-| r31 | **首选** | there-back | Samson & Son's Salvage Center → TDD - Trade and Development Division - Cloudview Center - Orison | Taranite | 18,792 → 29,000 | 26 SCU | +265,408 | +289,268 | normal |
-|  |  |  | Terra Mills Hydrofarm → TDD - Trade and Development Division - Area 18 | Fresh Food | 21,614 → 24,000 | 10 SCU | +23,860 |  |  |
-| r32 | 备选 | there-back | Samson & Son's Salvage Center → TDD - Trade and Development Division - Commons - New Babbage | Taranite | 18,792 → 28,000 | 26 SCU | +239,408 | +256,664 | normal |
-|  |  |  | Rayari Kaltag Research Outpost → Admin - ARC-L4 | Medical Supplies | 3,343 → 5,500 | 8 SCU | +17,256 |  |  |
-| r33 | 备选 | intra | Rayari Kaltag Research Outpost → Shubin Mining Facility SM0-10 | Compboard | 26,460 → 37,000 | 18 SCU | +189,720 | +189,720 | normal |
-| r34 | 备选 | intra | Rayari Kaltag Research Outpost → Shubin Mining Facility SM0-13 | Compboard | 26,460 → 37,000 | 18 SCU | +189,720 | +189,720 | normal |
-| r35 | 备选 | there-back | Rayari Anvik Research Outpost → HDMS-Stanhope | Fresh Food | 21,614 → 29,000 | 23 SCU | +169,878 | +228,642 | normal |
-|  |  |  | HDMS-Norgaard → Rayari Deltana Research Outpost | Ranta Dung | 33,206 → 43,000 | 6 SCU | +58,764 |  |  |
-| r36 | 备选 | there-back | Rayari Kaltag Research Outpost → HDMS-Stanhope | Fresh Food | 21,614 → 29,000 | 23 SCU | +169,878 | +228,642 | normal |
-|  |  |  | HDMS-Norgaard → Rayari Deltana Research Outpost | Ranta Dung | 33,206 → 43,000 | 6 SCU | +58,764 |  |  |
+| ID | 角色 | 类型 | 航段 | 商品 | 买→卖 | 数量 | 本段利润 | 圈利润 | 圈时间 | 时薪 | 风险 |
+|----|------|------|------|------|-------|------|---------|--------|--------|------|------|
+| r51 | **首选** | there-back | Samson & Son's Salvage Center → TDD - Trade and Development Division - Cloudview Center - Orison | Taranite | 18,792 → 29,000 | 26 SCU | +265,408 | +289,268 | 111min | 155,939/h | normal |
+|  |  |  | Terra Mills Hydrofarm → TDD - Trade and Development Division - Area 18 | Fresh Food | 21,614 → 24,000 | 10 SCU | +23,860 |  |  |  |  |
+| r52 | 备选 | there-back | Samson & Son's Salvage Center → TDD - Trade and Development Division - Commons - New Babbage | Taranite | 18,792 → 28,000 | 26 SCU | +239,408 | +256,664 | 110min | 140,509/h | normal |
+|  |  |  | Rayari Kaltag Research Outpost → Admin - ARC-L4 | Medical Supplies | 3,343 → 5,500 | 8 SCU | +17,256 |  |  |  |  |
+| r53 | 备选 | intra | Rayari Kaltag Research Outpost → Shubin Mining Facility SM0-10 | Compboard | 26,460 → 37,000 | 18 SCU | +189,720 | +189,720 | 65min | 174,857/h | normal |
+| r54 | 备选 | intra | Rayari Kaltag Research Outpost → Shubin Mining Facility SM0-13 | Compboard | 26,460 → 37,000 | 18 SCU | +189,720 | +189,720 | 65min | 174,857/h | normal |
+| r55 | 备选 | there-back | Rayari Anvik Research Outpost → HDMS-Stanhope | Fresh Food | 21,614 → 29,000 | 23 SCU | +169,878 | +228,642 | 97min | 140,991/h | normal |
+|  |  |  | HDMS-Norgaard → Rayari Deltana Research Outpost | Ranta Dung | 33,206 → 43,000 | 6 SCU | +58,764 |  |  |  |  |
+| r56 | 备选 | there-back | Rayari Kaltag Research Outpost → HDMS-Stanhope | Fresh Food | 21,614 → 29,000 | 23 SCU | +169,878 | +228,642 | 97min | 140,991/h | normal |
+|  |  |  | HDMS-Norgaard → Rayari Deltana Research Outpost | Ranta Dung | 33,206 → 43,000 | 6 SCU | +58,764 |  |  |  |  |
 <!-- sc-trader:auto-end -->

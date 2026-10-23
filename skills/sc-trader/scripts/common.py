@@ -176,6 +176,28 @@ def packable_scu(sizes: list[int], profile: dict) -> int:
     return best
 
 
+# ── 时间模型（航行 + 地面作业 + 装卸）────────────────────────────────────────
+
+def route_time_min(profile: dict, legs: list[dict]) -> float:
+    """单圈时间（分钟）= Σ量子航行 + 每航段两次地面作业。
+
+    地面作业 = 起降/电梯/终端交易（base_stop_min）+ 装卸：
+      手动装箱 1 min/SCU（profile.time_model.manual_load_min_per_scu）
+      自动装载固定 0.5 min/次（auto_load_extra_min）
+    估算口径，实测后可回填校准。
+    """
+    tm = profile.get("time_model", {})
+    base = tm.get("base_stop_min", 4)
+    auto = tm.get("auto_loading", False)
+    total = 0.0
+    for leg in legs:
+        total += (leg.get("qt_sec") or 0) / 60
+        handling = tm.get("auto_load_extra_min", 0.5) if auto \
+            else tm.get("manual_load_min_per_scu", 1.0) * (leg.get("qty") or 0)
+        total += 2 * (base + handling)
+    return round(total, 1)
+
+
 def parse_box_sizes(raw) -> list[int]:
     """container_sizes_origin 字段容错解析（"1,2,4" / [1,2,4] / None）。"""
     if raw is None:

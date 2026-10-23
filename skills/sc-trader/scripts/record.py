@@ -54,9 +54,33 @@ def fuzzy_pick(candidates: list, query: str, label: str):
     return matched[0]
 
 
+def parse_observed_at(raw: str | None) -> float:
+    """解析观察时间：缺省=现在；支持 unix 秒 / 'YYYY-MM-DD HH:MM' / 'HH:MM'（今天）。"""
+    if not raw:
+        return time.time()
+    raw = raw.strip()
+    if raw.isdigit():
+        return float(raw)
+    for fmt in ("%Y-%m-%d %H:%M", "%m-%d %H:%M", "%H:%M"):
+        try:
+            dt = datetime.strptime(raw, fmt)
+            if fmt == "%H:%M":
+                dt = dt.replace(year=datetime.now().year, month=datetime.now().month,
+                                day=datetime.now().day)
+            return dt.timestamp()
+        except ValueError:
+            continue
+    print(f"ERROR: 无法解析观察时间 '{raw}'", file=sys.stderr)
+    raise SystemExit(1)
+
+
 def write_scan(terminal_id: int, terminal_name: str, commodity_id: int,
-               commodity_name: str, price_buy, price_sell, qty, source: str) -> None:
-    """按 ScanPriceStore.save_result 的 JSON 格式写入玩家扫描价。"""
+               commodity_name: str, price_buy, price_sell, qty, source: str,
+               observed_at: float) -> None:
+    """按 ScanPriceStore.save_result 的 JSON 格式写入玩家扫描价。
+
+    timestamp = 观察时间（非录入时间）——新鲜度仲裁依赖它。
+    """
     from uexinfo.cache.scan_prices import ScanPriceStore
     store = ScanPriceStore()
     data = store._load()
@@ -67,7 +91,9 @@ def write_scan(terminal_id: int, terminal_name: str, commodity_id: int,
     entry.update({
         "commodity_name": commodity_name,
         "commodity_id": commodity_id,
-        "timestamp": time.time(),
+        "timestamp": observed_at,
+        "observed_at": observed_at,
+        "recorded_at": time.time(),
         "validated": True,
         "_source": source,
         "_terminal_name": terminal_name,
@@ -131,6 +157,8 @@ def main() -> int:
     parser.add_argument("--price-sell", type=int, default=None)
     parser.add_argument("--qty", type=int, default=None, help="观察到的可买库存 SCU")
     parser.add_argument("--source", default="screenshot")
+    parser.add_argument("--observed-at", default=None,
+                        help="观察时间：unix 秒 / 'YYYY-MM-DD HH:MM' / 'HH:MM'（默认现在）")
     args = parser.parse_args()
 
     if not (args.price_buy or args.price_sell):
@@ -146,14 +174,17 @@ def main() -> int:
     wl.setdefault("tracked_commodities", {})[str(commodity.id)] = commodity.name
     common.save_watchlist(wl)
 
+    observed_at = parse_observed_at(args.observed_at)
+    obs_str = datetime.fromtimestamp(observed_at).strftime("%m-%d %H:%M")
+
     write_scan(terminal.id, terminal.name, commodity.id, commodity.name,
-               args.price_buy, args.price_sell, args.qty, args.source)
+               args.price_buy, args.price_sell, args.qty, args.source, observed_at)
     touched = update_watchlist(terminal.id, terminal.name, commodity.id,
                                args.price_buy, args.price_sell, args.source)
 
     print(f"已记录: {commodity.name} @ {terminal.name} "
           f"(buy={args.price_buy}, sell={args.price_sell}, qty={args.qty}, "
-          f"source={args.source})")
+          f"source={args.source}, 观察时间={obs_str})")
     print(f"scan_prices.json 已写入；watchlist 匹配航腿 {touched} 条已刷新")
     return 0
 

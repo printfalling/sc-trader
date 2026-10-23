@@ -28,5 +28,11 @@
     "scope": "system"
   },
   "include_pyro": false,
-  "max_container_box": 2
+  "max_container_box": 2,
+  "time_model": {
+    "auto_loading": false,
+    "base_stop_min": 4,
+    "manual_load_min_per_scu": 1.0,
+    "auto_load_extra_min": 0.5
+  }
 }

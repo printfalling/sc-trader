@@ -13,7 +13,21 @@ description: Star Citizen 跑商助手。按飞船/预算推荐并记录跑商�
 - **数据文件**：`skills/sc-trader/data/profile.json`（船型表/预算/出发地）；`skills/sc-trader/data/watchlist.json`（路线 + 价格快照，git 跟踪）。
 - **限速**：UEX 匿名 10 次/分钟。脚本内置 6.5s 调用间隔；**单任务 API 总调用 ≤5 次**。遇 `UEXError`/HTTP 400/429：等 60s 重试一次，再失败就如实报告并停止，不要连续重试。
 
-## 价格源权威序（调研结论 2026-10-23）
+## 工作流（两步闭环）
+
+1. **检索候选路径**：recommend 产出路线组合（去重：同货源≤2、配对三元组唯一）
+2. **实价更新收益**：update_prices 拉最新价 + record 录入用户实测 → 收益榜/调仓建议
+   两者循环：推荐 → 跑商 → 实测入库 → 更新 → 调仓
+
+## 价格权威 = 新鲜度仲裁（2026-10-23 定案）
+
+**同一数据点（商品@终端），观察时间更新者胜**；静态来源不天然权威：
+
+- 用户提供的价格必须带**观察时间**（record `--observed-at`，默认现在）——录的是"何时看到的"，不是"何时录入的"
+- 玩家观察比 UEX 新 → `player★ 时间戳` 生效；比 UEX 旧 → 诚实采用 UEX 并输出 `[时滞]` 提示
+- 基线调研：sc-trade.tools 的路线数字与 UEX 逐位一致（其价格底座即 UEX），两边差异项向用户标注"进游戏核实"，用户实测即最终裁决
+
+
 
 **用户实际提供（截图/口述，一切用户亲报数据）★ > UEX API > sc-trade.tools。** 依据：
 1. sc-trade.tools 的路线数字实测与 UEX 逐位一致（Taranite 18,792/27,000），说明它本身以 UEX 为价格底座、只是计算方法不同；
@@ -45,6 +59,7 @@ tools/uexinfo/venv/bin/python skills/sc-trader/scripts/recommend.py \
 - **重复推荐**：先清空 `routes`（保留 `next_id` 字段）再跑，得到干净候选集；重建后 `ranking_prev` 基线自动重置。
 - **部分装载与跟踪商品**：数量按实际库存取，**不必凑满货舱**（3 SCU 库存就装 3 SCU，利润线性缩放）。被推荐过/录入过的商品登记在 `tracked_commodities`；即使被 routes 配对接口下架（低库存/卖端饱和），recommend 也会用价格行重建航腿（输出标注 `[partial]`），库存未知时 qty 按满载口径展示、进游戏以实际为准。
 - **本地算路引擎**：routes 配对接口之外，脚本会一次拉取全市场价格（`commodities_prices_all`）本地配对（每商品最便宜买点 ×2 × 最贵卖点 ×3，输出标注 `[computed]`）——精炼矿物（Taranite/Compboard 等）、卖端饱和下架、跨行星货源靠它覆盖。买点数量按 `min(货舱, 预算, 库存)` 取，不满载也成立；computed 航腿无库存数时按满载口径展示，进游戏以实际为准。
+- **时间模型与效率**：每条路线输出**圈时间**（量子航行 + 起降/终端操作 + 装卸）与**时薪**（圈利润÷圈时间）。装卸分档：手动 1 min/SCU、自动 0.5 min/次（profile.time_model 可调）。首选按圈利润排，但时薪是等量时间下的真实回报——两者冲突时把两个口径都呈给用户。
 - **组合语义**：推荐的是一组路线而非单条——利润最高者为**首选**，其余为**备选**；同一供货源（同商品+同买点）最多 2 条（同源价格完全联动，没有对冲价值）。用户问"跑哪条"按首选回答，首选因价格波动劣化时按收益榜改推新首选。
 - **预算与库存的关系**：数量 = min(货舱, 预算可买, 买点库存)。**预算加大不一定增产**——货源库存卡死时 500k 和 300k 结果一致是正常现象，如实说明即可，不要当作故障。
 
@@ -66,8 +81,9 @@ tools/uexinfo/venv/bin/python skills/sc-trader/scripts/update_prices.py
 ```bash
 tools/uexinfo/venv/bin/python skills/sc-trader/scripts/record.py \
   --commodity "Medical Supplies" --terminal "Rayari Kaltag Research Outpost" \
-  --price-buy 3343 [--price-sell 5500] [--qty 8]
+  --price-buy 3343 [--price-sell 5500] [--qty 8] [--observed-at "14:30"]
 ```
+**必问观察时间**：用户报 价 时确认是多久前看到的（`--observed-at` 支持 HH:MM / 月-日 时:分）——它决定新鲜度仲裁的胜负，不是可选项。
 
 输出先逐条列出 `商品 @ 终端: price_buy/price_sell 旧→新` 的变化行，再给 `已记录: ...` 确认。终端匹配按**买端或卖端**双向：在买点扫到的价刷新买入价，在卖点扫到的价刷新卖出价。
 **验收**：输出 `已记录: ...` 且 `watchlist 匹配航腿 N 条已刷新`（N>0）。名称模糊匹配报 ERROR 时，改用截图里出现的**完整终端名**重试。
