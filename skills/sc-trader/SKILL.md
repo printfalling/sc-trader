@@ -93,6 +93,19 @@ tools/uexinfo/venv/bin/python skills/sc-trader/scripts/record.py \
 **验收**：输出 `已记录: ...` 且 `watchlist 匹配航腿 N 条已刷新`（N>0）。名称模糊匹配报 ERROR 时，改用截图里出现的**完整终端名**重试。
 record 写入 uexinfo 的 scan_prices.json，此后 update_prices 和 uexinfo overlay 都会以该价优先（★）。
 
+### 6. stock — 库存检查
+
+```bash
+tools/uexinfo/venv/bin/python skills/sc-trader/scripts/stock.py \
+  --commodity <商品> [--only buy|sell|all] [--terminals "Kaltag,Anvik"] [--scu 8]
+```
+
+输出买点（买价升序）/卖点（卖价降序）两张表：价格、**现货/囤货**、库存状态、
+**可买/可卖 SCU**（船舱×状态系数：买端越满越能买、卖端越空越能吸收）、滞销风险、
+数据龄（>24h 标 ⚠️）、玩家实测★。
+**用户问"某商品库存/某站能收多少"时用这个**，不要靠推算或旧数据口头回答；
+`--terminals` 支持逗号分隔子串过滤，可只查关心的站点。
+
 ## 展示规范（用户定案：路径全名，禁止缩写）
 
 1. **终端/地点一律用 UEX terminal_name 原文全名**——禁止自造缩写。
