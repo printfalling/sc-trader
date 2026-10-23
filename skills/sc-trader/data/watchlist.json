@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-10-23T19:36:04+00:00",
+  "updated_at": "2026-10-23T19:42:08+00:00",
   "routes": [
     {
       "id": "r395",
@@ -34,29 +34,45 @@
           "id_planet_destination": 190,
           "destination_planet": "MicroTech",
           "destination_system": "Stanton",
-          "price_buy": 26460,
-          "price_sell": 37000,
+          "price_buy": 27000,
+          "price_sell": 31000,
           "scu_stock": 72,
           "qty": 64,
           "box_sizes": [
             1,
             2
           ],
-          "leg_profit": 674560,
+          "leg_profit": 256000,
           "roi": 39.8,
           "intra": true,
           "pyro": false,
-          "qt_sec": 380.0
+          "qt_sec": 380.0,
+          "snapshots": [
+            {
+              "ts": "2026-10-23T19:41:05+00:00",
+              "price_buy": 27000,
+              "price_sell": 31000,
+              "scu_stock": 72,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-23T19:41:48+00:00",
+              "price_buy": 27000,
+              "price_sell": 31000,
+              "scu_stock": 72,
+              "source": "uex"
+            }
+          ]
         }
       ],
-      "loop_profit": 674560,
+      "loop_profit": 256000,
       "qt_sec_total": 380.0,
       "transit_sec": null,
       "closed": false,
       "reposition_sec": 380.0,
       "reposition_kind": "empty-return",
       "loop_time_min": 148.7,
-      "profit_per_hour": 272182,
+      "profit_per_hour": 103295,
       "snapshots": [
         {
           "ts": "2026-10-23T19:35:38+00:00",
@@ -99,7 +115,7 @@
           "id_planet_destination": 190,
           "destination_planet": "MicroTech",
           "destination_system": "Stanton",
-          "price_buy": 26460,
+          "price_buy": 27000,
           "price_sell": 37000,
           "scu_stock": 72,
           "qty": 64,
@@ -107,21 +123,37 @@
             1,
             2
           ],
-          "leg_profit": 674560,
+          "leg_profit": 640000,
           "roi": 39.8,
           "intra": true,
           "pyro": false,
-          "qt_sec": 380.0
+          "qt_sec": 380.0,
+          "snapshots": [
+            {
+              "ts": "2026-10-23T19:41:05+00:00",
+              "price_buy": 27000,
+              "price_sell": 37000,
+              "scu_stock": 72,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-23T19:41:48+00:00",
+              "price_buy": 27000,
+              "price_sell": 37000,
+              "scu_stock": 72,
+              "source": "uex"
+            }
+          ]
         }
       ],
-      "loop_profit": 674560,
+      "loop_profit": 640000,
       "qt_sec_total": 380.0,
       "transit_sec": null,
       "closed": false,
       "reposition_sec": 380.0,
       "reposition_kind": "empty-return",
       "loop_time_min": 148.7,
-      "profit_per_hour": 272182,
+      "profit_per_hour": 258238,
       "snapshots": [
         {
           "ts": "2026-10-23T19:35:38+00:00",
@@ -165,29 +197,45 @@
           "destination_planet": "MicroTech",
           "destination_system": "Stanton",
           "price_buy": 26460,
-          "price_sell": 37000,
-          "scu_stock": 0,
+          "price_sell": 31000,
+          "scu_stock": 10,
           "qty": 64,
           "box_sizes": [
             1,
             2
           ],
-          "leg_profit": 674560,
+          "leg_profit": 290560,
           "roi": 39.8,
           "intra": true,
           "pyro": false,
           "source": "computed",
-          "qt_sec": 380.0
+          "qt_sec": 380.0,
+          "snapshots": [
+            {
+              "ts": "2026-10-23T19:41:05+00:00",
+              "price_buy": 26460,
+              "price_sell": 31000,
+              "scu_stock": 10,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-23T19:41:48+00:00",
+              "price_buy": 26460,
+              "price_sell": 31000,
+              "scu_stock": 10,
+              "source": "uex"
+            }
+          ]
         }
       ],
-      "loop_profit": 674560,
+      "loop_profit": 290560,
       "qt_sec_total": 380.0,
       "transit_sec": null,
       "closed": false,
       "reposition_sec": 380.0,
       "reposition_kind": "empty-return",
       "loop_time_min": 148.7,
-      "profit_per_hour": 272182,
+      "profit_per_hour": 117240,
       "snapshots": [
         {
           "ts": "2026-10-23T19:35:38+00:00",
@@ -232,7 +280,7 @@
           "destination_system": "Stanton",
           "price_buy": 26460,
           "price_sell": 37000,
-          "scu_stock": 0,
+          "scu_stock": 10,
           "qty": 64,
           "box_sizes": [
             1,
@@ -243,7 +291,23 @@
           "intra": true,
           "pyro": false,
           "source": "computed",
-          "qt_sec": 380.0
+          "qt_sec": 380.0,
+          "snapshots": [
+            {
+              "ts": "2026-10-23T19:41:05+00:00",
+              "price_buy": 26460,
+              "price_sell": 37000,
+              "scu_stock": 10,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-23T19:41:48+00:00",
+              "price_buy": 26460,
+              "price_sell": 37000,
+              "scu_stock": 10,
+              "source": "uex"
+            }
+          ]
         }
       ],
       "loop_profit": 674560,
@@ -298,7 +362,7 @@
           "destination_system": "Stanton",
           "price_buy": 18792,
           "price_sell": 29000,
-          "scu_stock": 0,
+          "scu_stock": 30,
           "qty": 64,
           "box_sizes": [
             1,
@@ -311,7 +375,23 @@
           "intra": false,
           "pyro": false,
           "source": "computed",
-          "qt_sec": 210.0
+          "qt_sec": 210.0,
+          "snapshots": [
+            {
+              "ts": "2026-10-23T19:41:05+00:00",
+              "price_buy": 18792,
+              "price_sell": 29000,
+              "scu_stock": 30,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-23T19:41:48+00:00",
+              "price_buy": 18792,
+              "price_sell": 29000,
+              "scu_stock": 30,
+              "source": "uex"
+            }
+          ]
         },
         {
           "commodity": "Gold",
@@ -345,7 +425,23 @@
           "intra": true,
           "pyro": false,
           "closed_terminal": false,
-          "qt_sec": 240.0
+          "qt_sec": 240.0,
+          "snapshots": [
+            {
+              "ts": "2026-10-23T19:41:05+00:00",
+              "price_buy": 26492,
+              "price_sell": 31000,
+              "scu_stock": 50,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-23T19:41:48+00:00",
+              "price_buy": 26492,
+              "price_sell": 31000,
+              "scu_stock": 50,
+              "source": "uex"
+            }
+          ]
         }
       ],
       "loop_profit": 878712,
@@ -407,7 +503,7 @@
           "destination_system": "Stanton",
           "price_buy": 18792,
           "price_sell": 28000,
-          "scu_stock": 0,
+          "scu_stock": 30,
           "qty": 64,
           "box_sizes": [
             1,
@@ -420,7 +516,23 @@
           "intra": false,
           "pyro": false,
           "source": "computed",
-          "qt_sec": 295.0
+          "qt_sec": 295.0,
+          "snapshots": [
+            {
+              "ts": "2026-10-23T19:41:05+00:00",
+              "price_buy": 18792,
+              "price_sell": 28000,
+              "scu_stock": 30,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-23T19:41:48+00:00",
+              "price_buy": 18792,
+              "price_sell": 28000,
+              "scu_stock": 30,
+              "source": "uex"
+            }
+          ]
         },
         {
           "commodity": "Fresh Food",
@@ -453,7 +565,23 @@
           "intra": true,
           "pyro": false,
           "closed_terminal": false,
-          "qt_sec": 295.0
+          "qt_sec": 295.0,
+          "snapshots": [
+            {
+              "ts": "2026-10-23T19:41:05+00:00",
+              "price_buy": 21614,
+              "price_sell": 24000,
+              "scu_stock": 40,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-23T19:41:48+00:00",
+              "price_buy": 21614,
+              "price_sell": 24000,
+              "scu_stock": 40,
+              "source": "uex"
+            }
+          ]
         }
       ],
       "loop_profit": 684752,
@@ -527,7 +655,23 @@
           "roi": 34.2,
           "intra": false,
           "pyro": false,
-          "qt_sec": 190.0
+          "qt_sec": 190.0,
+          "snapshots": [
+            {
+              "ts": "2026-10-23T19:41:05+00:00",
+              "price_buy": 21614,
+              "price_sell": 29000,
+              "scu_stock": 81,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-23T19:41:48+00:00",
+              "price_buy": 21614,
+              "price_sell": 29000,
+              "scu_stock": 81,
+              "source": "uex"
+            }
+          ]
         },
         {
           "commodity": "Taranite",
@@ -560,7 +704,23 @@
           "intra": true,
           "pyro": false,
           "closed_terminal": false,
-          "qt_sec": 190.0
+          "qt_sec": 190.0,
+          "snapshots": [
+            {
+              "ts": "2026-10-23T19:41:05+00:00",
+              "price_buy": 21924,
+              "price_sell": 28000,
+              "scu_stock": 11,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-23T19:41:48+00:00",
+              "price_buy": 21924,
+              "price_sell": 28000,
+              "scu_stock": 11,
+              "source": "uex"
+            }
+          ]
         }
       ],
       "loop_profit": 539540,
@@ -634,7 +794,23 @@
           "roi": 34.2,
           "intra": false,
           "pyro": false,
-          "qt_sec": 190.0
+          "qt_sec": 190.0,
+          "snapshots": [
+            {
+              "ts": "2026-10-23T19:41:05+00:00",
+              "price_buy": 21614,
+              "price_sell": 29000,
+              "scu_stock": 81,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-23T19:41:48+00:00",
+              "price_buy": 21614,
+              "price_sell": 29000,
+              "scu_stock": 81,
+              "source": "uex"
+            }
+          ]
         },
         {
           "commodity": "Taranite",
@@ -667,7 +843,23 @@
           "intra": true,
           "pyro": false,
           "closed_terminal": false,
-          "qt_sec": 190.0
+          "qt_sec": 190.0,
+          "snapshots": [
+            {
+              "ts": "2026-10-23T19:41:05+00:00",
+              "price_buy": 21924,
+              "price_sell": 28000,
+              "scu_stock": 11,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-23T19:41:48+00:00",
+              "price_buy": 21924,
+              "price_sell": 28000,
+              "scu_stock": 11,
+              "source": "uex"
+            }
+          ]
         }
       ],
       "loop_profit": 539540,
@@ -700,12 +892,12 @@
   "ranking_prev": [
     "r399",
     "r400",
-    "r395",
-    "r396",
-    "r397",
     "r398",
+    "r396",
     "r401",
-    "r402"
+    "r402",
+    "r397",
+    "r395"
   ],
   "tracked_commodities": {
     "51": "Medical Supplies",

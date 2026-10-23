@@ -162,8 +162,14 @@ def main() -> int:
                                      f"{leg['buy_terminal']['name']}→{leg['sell_terminal']['name']}: {c}")
             # 重算圈利润与时间模型
             r["loop_profit"] = sum(x["leg_profit"] for x in r["legs"])
-            r["loop_time_min"] = common.route_time_min(
-                common.load_profile(), r["legs"])
+            # 按路线所属船型重算时间，并保留转场/摆渡附加时间
+            prof = common.load_profile()
+            ship_key = r.get("ship")
+            if ship_key and ship_key in (prof.get("ships") or {}):
+                prof["ship"] = prof["ships"][ship_key]
+            extra = ((r.get("transit_sec") or 0) + (r.get("reposition_sec") or 0)) / 60
+            r["loop_time_min"] = common.route_time_min(prof, r["legs"],
+                                                       extra_min=extra)
             r["profit_per_hour"] = (int(r["loop_profit"] / r["loop_time_min"] * 60)
                                     if r["loop_time_min"] else None)
         for line in route_changed:
