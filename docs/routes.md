@@ -66,34 +66,34 @@ curl -s "https://api.uexcorp.space/2.0/commodities_prices?commodity_name=Medical
 <!-- sc-trader:auto-begin -->
 ### 监控中的路线
 
-**预算 2,000,000 aUEC · 生成于 2026-10-23T17:47:49+00:00**
+**预算 2,000,000 aUEC · 生成于 2026-10-23T17:56:35+00:00**
 
-### r293 备选 · intra · 风险 normal
-圈利润 **+674,560** · 圈时间 157min · 时薪 257,629/h
+### r325 备选 · intra · 风险 normal
+圈利润 **+674,560** · 圈时间 178min · 时薪 226,997/h
 - 航段1：买 Compboard 26,460/SCU × 64 SCU @ Rayari Kaltag Research Outpost [Stanton > MicroTech > Calliope]
   → 卖 37,000/SCU @ Shubin Mining Facility SM0-10 [Stanton > MicroTech]
   本段利润 +674,560（库存 72，量子 21min）
 
-### r294 备选 · intra · 风险 normal
-圈利润 **+674,560** · 圈时间 157min · 时薪 257,629/h
+### r326 备选 · intra · 风险 normal
+圈利润 **+674,560** · 圈时间 178min · 时薪 226,997/h
 - 航段1：买 Compboard 26,460/SCU × 64 SCU @ Rayari Kaltag Research Outpost [Stanton > MicroTech > Calliope]
   → 卖 37,000/SCU @ Shubin Mining Facility SM0-13 [Stanton > MicroTech]
   本段利润 +674,560（库存 72，量子 21min）
 
-### r295 备选 · intra · 风险 normal
-圈利润 **+674,560** · 圈时间 157min · 时薪 257,629/h
+### r327 备选 · intra · 风险 normal
+圈利润 **+674,560** · 圈时间 178min · 时薪 226,997/h
 - 航段1：买 Compboard 26,460/SCU × 64 SCU @ Rayari Anvik Research Outpost [Stanton > MicroTech > Calliope]
   → 卖 37,000/SCU @ Shubin Mining Facility SM0-10 [Stanton > MicroTech]
   本段利润 +674,560（量子 21min）
 
-### r296 备选 · intra · 风险 normal
-圈利润 **+674,560** · 圈时间 157min · 时薪 257,629/h
+### r328 备选 · intra · 风险 normal
+圈利润 **+674,560** · 圈时间 178min · 时薪 226,997/h
 - 航段1：买 Compboard 26,460/SCU × 64 SCU @ Rayari Anvik Research Outpost [Stanton > MicroTech > Calliope]
   → 卖 37,000/SCU @ Shubin Mining Facility SM0-13 [Stanton > MicroTech]
   本段利润 +674,560（量子 21min）
 
-### r297 ★首选 · there-back · 风险 normal
-圈利润 **+878,712** · 圈时间 130min · 时薪 405,559/h
+### r329 ★首选 · there-back · 风险 normal
+圈利润 **+878,712** · 圈时间 139min · 时薪 379,573/h
 - 航段1：买 Taranite 18,792/SCU × 64 SCU @ Samson & Son's Salvage Center [Stanton > ArcCorp > Wala]
   → 卖 29,000/SCU @ TDD - Trade and Development Division - Cloudview Center - Orison [Stanton > Crusader]
   本段利润 +653,312（量子 12min）
@@ -101,8 +101,8 @@ curl -s "https://api.uexcorp.space/2.0/commodities_prices?commodity_name=Medical
   → 卖 31,000/SCU @ TDD - Trade and Development Division - Area 18 [Stanton > ArcCorp]
   本段利润 +225,400（库存 50，量子 13min）
 
-### r298 备选 · there-back · 风险 normal
-圈利润 **+684,752** · 圈时间 172min · 时薪 239,145/h
+### r330 备选 · there-back · 风险 normal
+圈利润 **+684,752** · 圈时间 181min · 时薪 227,366/h
 - 航段1：买 Taranite 18,792/SCU × 64 SCU @ Samson & Son's Salvage Center [Stanton > ArcCorp > Wala]
   → 卖 28,000/SCU @ TDD - Trade and Development Division - Commons - New Babbage [Stanton > MicroTech]
   本段利润 +589,312（量子 16min）
@@ -110,8 +110,8 @@ curl -s "https://api.uexcorp.space/2.0/commodities_prices?commodity_name=Medical
   → 卖 24,000/SCU @ TDD - Trade and Development Division - Area 18 [Stanton > ArcCorp]
   本段利润 +95,440（库存 40，量子 16min）
 
-### r299 备选 · there-back · 风险 normal
-圈利润 **+539,540** · 圈时间 181min · 时薪 178,754/h
+### r331 备选 · there-back · 风险 normal
+圈利润 **+539,540** · 圈时间 183min · 时薪 176,608/h
 - 航段1：买 Fresh Food 21,614/SCU × 64 SCU @ Rayari Kaltag Research Outpost [Stanton > MicroTech > Calliope]
   → 卖 29,000/SCU @ HDMS-Stanhope [Stanton > Hurston]
   本段利润 +472,704（库存 81，量子 11min）
@@ -119,13 +119,28 @@ curl -s "https://api.uexcorp.space/2.0/commodities_prices?commodity_name=Medical
   → 卖 28,000/SCU @ TDD - Trade and Development Division - Commons - New Babbage [Stanton > MicroTech]
   本段利润 +66,836（库存 11，量子 11min）
 
-### r300 备选 · there-back · 风险 normal
-圈利润 **+539,540** · 圈时间 181min · 时薪 178,754/h
+### r332 备选 · there-back · 风险 normal
+圈利润 **+539,540** · 圈时间 183min · 时薪 176,608/h
 - 航段1：买 Fresh Food 21,614/SCU × 64 SCU @ Rayari Kaltag Research Outpost [Stanton > MicroTech > Calliope]
   → 卖 29,000/SCU @ HDMS-Thedus [Stanton > Hurston]
   本段利润 +472,704（库存 81，量子 11min）
 - 航段2：买 Taranite 21,924/SCU × 11 SCU @ HDMS-Woodruff [Stanton > Hurston > Ita]
   → 卖 28,000/SCU @ TDD - Trade and Development Division - Commons - New Babbage [Stanton > MicroTech]
   本段利润 +66,836（库存 11，量子 11min）
+
+### r333 备选 · there-back · 风险 normal
+圈利润 **+511,877** · 圈时间 209min · 时薪 146,669/h
+- 航段1：买 Fresh Food 21,614/SCU × 64 SCU @ Terra Mills Hydrofarm [Stanton > Crusader > Cellin]
+  → 卖 29,000/SCU @ HDMS-Stanhope [Stanton > Hurston]
+  本段利润 +472,704（量子 9min）
+- 航段2：买 Methane 2,789/SCU × 43 SCU @ Admin - HUR-L5 [Stanton > Hurston > Hurston Lagrange Point 5]
+  → 卖 3,700/SCU @ Terra Mills Hydrofarm [Stanton > Crusader > Cellin]
+  本段利润 +39,173（库存 43，量子 8min）
+
+### r334 备选 · one-way · 风险 normal
+圈利润 **+472,704** · 圈时间 154min · 时薪 184,409/h
+- 航段1：买 Fresh Food 21,614/SCU × 64 SCU @ Terra Mills Hydrofarm [Stanton > Crusader > Cellin]
+  → 卖 29,000/SCU @ HDMS-Thedus [Stanton > Hurston]
+  本段利润 +472,704（量子 9min）
 
 <!-- sc-trader:auto-end -->

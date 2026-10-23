@@ -139,7 +139,7 @@ def computed_legs_from_prices(client, ctx, budget: int, profile: dict,
                 ps = float(r.get("price_sell") or 0)
             except (TypeError, ValueError):
                 continue
-            if pb > 0:
+            if pb > 0:      # 起点不绑定：全星系找最优货源
                 buys.append((pb, r, t))
             if ps > 0:
                 sells.append((ps, r, t))
@@ -184,10 +184,15 @@ def computed_legs_from_prices(client, ctx, budget: int, profile: dict,
 
 
 def find_return_leg(client, origin_planet: int, budget: int,
-                    dest_planet: int) -> dict | None:
-    """从目的地行星找回出发行星的盈利腿（多一次 API 调用）。"""
+                    dest_planet: int,
+                    prefer_terminal_id: int | None = None) -> tuple[dict | None, bool]:
+    """从目的地行星找回出发行星的盈利腿。
+
+    优先选「卖点 == 头段买点」的腿（真闭环）；没有则取同行星内利润最高的
+    （需摆渡）。返回 (行, 是否同终端闭合)。
+    """
     rows = fetch_routes(client, dest_planet, budget)
-    best = None
+    exact, fallback = None, None
     for r in rows:
         if r.get("id_planet_destination") != origin_planet:
             continue
@@ -198,10 +203,16 @@ def find_return_leg(client, origin_planet: int, budget: int,
             continue
         if buy <= 0 or sell <= buy:
             continue
-        if best is None or (sell - buy) > (float(best["price_destination"])
-                                           - float(best["price_origin"])):
-            best = r
-    return best
+        better = lambda cand: cand is None or (sell - buy) > (
+            float(cand["price_destination"]) - float(cand["price_origin"]))
+        if prefer_terminal_id and r.get("id_terminal_destination") == prefer_terminal_id:
+            if better(exact):
+                exact = r
+        elif better(fallback):
+            fallback = r
+    if exact is not None:
+        return exact, True
+    return fallback, False
 
 
 def make_return_leg(row: dict, budget: int, profile: dict) -> dict | None:
@@ -282,11 +293,14 @@ def build_routes(legs: list[dict], budget: int, profile: dict,
                 loop_type = "one-way"
             else:
                 calls_left -= 1
-                row = find_return_leg(client,
-                                      leg.get("id_planet_origin")
-                                      or profile["origin"]["id_planet"],
-                                      budget, leg["id_planet_destination"])
+                row, closed_terminal = find_return_leg(
+                    client,
+                    leg.get("id_planet_origin") or profile["origin"]["id_planet"],
+                    budget, leg["id_planet_destination"],
+                    prefer_terminal_id=leg["buy_terminal"]["id"])
                 back = make_return_leg(row, budget, profile) if row else None
+                if back is not None:
+                    back["closed_terminal"] = closed_terminal
                 legs_pair = [leg] + ([back] if back else [])
                 loop_type = "there-back" if back else "one-way"
 
@@ -327,7 +341,21 @@ def build_routes(legs: list[dict], budget: int, profile: dict,
                 for side in ("buy_terminal", "sell_terminal"):
                     x[side]["path"] = common.terminal_path(ctx, x[side].get("id"))
         route["qt_sec_total"] = sum(x["qt_sec"] or 0 for x in legs_pair) or None
-        route["loop_time_min"] = common.route_time_min(profile, legs_pair)
+        # 闭环校验：尾段卖点应回到头段买点，否则补一段摆渡（量子时间）
+        first_buy = legs_pair[0]["buy_terminal"]
+        last_sell = legs_pair[-1]["sell_terminal"]
+        repo_sec = None
+        if last_sell["id"] != first_buy["id"]:
+            # 未回到起点终端：补一段回起点的时间（有货=摆渡，单程=空载返回）
+            repo_sec = (common.qt_seconds(ctx, last_sell["name"], first_buy["name"])
+                        if ctx is not None else None)
+        route["closed"] = last_sell["id"] == first_buy["id"]
+        route["reposition_sec"] = repo_sec
+        route["reposition_kind"] = (None if route["closed"]
+                                    else ("empty-return" if len(legs_pair) == 1
+                                          else "ferry"))
+        route["loop_time_min"] = common.route_time_min(
+            profile, legs_pair, extra_min=(repo_sec or 0) / 60)
         route["profit_per_hour"] = (int(route["loop_profit"] / route["loop_time_min"] * 60)
                                     if route["loop_time_min"] else None)
         route["snapshots"] = [snapshot_of(leg, "uex") for leg in legs_pair]

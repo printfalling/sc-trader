@@ -323,7 +323,7 @@ def terminal_loading_mode(terminal_name: str, profile: dict) -> bool:
     return bool(profile.get("time_model", {}).get("auto_loading"))
 
 
-def route_time_min(profile: dict, legs: list[dict]) -> float:
+def route_time_min(profile: dict, legs: list[dict], extra_min: float = 0.0) -> float:
     """单圈时间（分钟）= Σ量子航行 + 每航段两次地面作业。
 
     地面作业 = 起降/电梯/终端交易（base_stop_min）+ 搬运：
@@ -357,7 +357,7 @@ def route_time_min(profile: dict, legs: list[dict]) -> float:
         qty = leg.get("qty") or qty_default
         total += stop_minutes(leg["buy_terminal"]["name"], qty, leg.get("box_sizes"))
         total += stop_minutes(leg["sell_terminal"]["name"], qty, leg.get("box_sizes"))
-    return round(total, 1)
+    return round(total + extra_min, 1)
 
 
 def parse_box_sizes(raw) -> list[int]:
