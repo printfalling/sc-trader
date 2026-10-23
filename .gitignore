@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Claude Code / 工具运行时状态
+.tsmart/
+.claude/settings.local.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node
+node_modules/
+
+# 环境与密钥（发布到 GitHub 前务必确认）
+.env
+*.token
