@@ -3,6 +3,7 @@
 
 # Claude Code / 工具运行时状态
 .tsmart/
+.claude/
 .claude/settings.local.json
 
 # Python

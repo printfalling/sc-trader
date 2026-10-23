@@ -1,0 +1,6 @@
+[submodule "mcp/scdb-mcp"]
+	path = mcp/scdb-mcp
+	url = https://github.com/scfools/scdb-mcp.git
+[submodule "tools/kioskprobe"]
+	path = tools/kioskprobe
+	url = https://github.com/dolejska-daniel/starcitizen-kioskprobe.git

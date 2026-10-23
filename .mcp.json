@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "scdb": {
+      "command": "npx",
+      "args": [
+        "@scfools/scdb-mcp"
+      ]
+    }
+  }
+}
