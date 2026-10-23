@@ -1,142 +1,119 @@
-# uexcorp
+# uexcorp · Star Citizen 工具集
 
-Star Citizen 工具集整合仓库：交易 skill、共享数据库 MCP、游戏内终端价格采集工具。
+![License](https://img.shields.io/badge/license-MIT-green)
+![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-blue)
+![Python](https://img.shields.io/badge/python-3.11%2B-informational)
 
-> **克隆提示**：本仓库包含 git 子模块，请使用
-> `git clone --recurse-submodules <url>` 克隆；已有仓库执行
-> `git submodule update --init --recursive`。
+整合 Star Citizen 跑商与数据工具的仓库：**自研交易 skill（sc-trader）** + 三个上游
+工具组件（git 子模块引用）+ 一个上游交易顾问 skill（vendor）。核心能力：
 
-## 仓库结构
+- **跑商路线推荐**：船型感知（舱位/槽位/箱体适配）、预算约束、部分装载、组合去重
+- **价格监控闭环**：UEX API 轮询 + 用户实测入库（★ 最高权威）→ 收益榜 → 调仓警告
+- **本地算路引擎**：一次全量价格本地配对（与 sc-trade.tools 同方法），覆盖精炼矿物、
+  饱和下架、跨行星货源
 
-```
-uexcorp/
-├── skills/
-│   ├── uexcorp-sc/          # UEXcorp 交易顾问 skill（vendor，MIT）
-│   └── sc-trader/           # 跑商推荐 + 价格更新 skill（自研，含脚本资产）
-├── mcp/
-│   └── scdb-mcp/            # SC 共享数据库 MCP server（子模块，GPL-3.0）
-├── tools/
-│   ├── kioskprobe/          # 游戏终端截图价格采集工具（子模块）
-│   └── uexinfo/             # 游戏内 overlay：UEX 价格 + 路线规划（子模块，MIT）
-├── docs/
-│   └── routes.md            # 跑商路线手册（含 sc-trader 自动渲染的监控区块）
-├── .mcp.json                # Claude Code 项目级 MCP 配置（scdb）
-└── README.md
-```
+> 数据说明：所有价格为社区来源（UEXcorp），与游戏内实价存在延迟；本仓库的价格权威序为
+> **用户实测 ★ > UEX > sc-trade.tools**，同一数据点按观察时间新鲜度仲裁。
 
-## 组件说明
-
-### 1. `skills/uexcorp-sc` — UEXcorp 交易顾问 Skill
-
-来源：[RikyZ90/openclaw-skill-uexcorp-sc](https://github.com/RikyZ90/openclaw-skill-uexcorp-sc)（MIT）
-
-纯文档型 skill，让 agent 成为星际公民交易顾问：实时商品价格查询、贸易路线优化、
-采矿数据、市场挂牌（含图像识别上架）。数据源为 [UEXcorp API 2.0](https://uexcorp.space/api/documentation/)。
-
-**安装**（本机已通过符号链接装好，仓库更新即自动生效）：
+## 快速开始
 
 ```bash
-ln -sfn "$(pwd)/skills/uexcorp-sc" ~/.claude/skills/uexcorp-sc    # Claude Code
-ln -sfn "$(pwd)/skills/uexcorp-sc" ~/.openclaw/skills/uexcorp-sc  # OpenClaw
-```
+# 1. 克隆（含子模块）
+git clone --recurse-submodules https://github.com/printfalling/sc-trader.git
+cd sc-trader
 
-**配置**：需 UEXcorp API token，在 [uexcorp.space/api/apps](https://uexcorp.space/api/apps) 申请，
-OpenClaw 侧写入 `uexcorp.apiToken` 配置项。限速 10 请求/分钟、14,400/天。
-
-### 2. `mcp/scdb-mcp` — SC 共享数据库 MCP Server
-
-来源：[scfools/scdb-mcp](https://github.com/scfools/scdb-mcp)（GPL-3.0）
-
-连接 Star Citizen 社区共享的 SpacetimeDB 实例，提供数据查询、公式查找、
-库存报告、本地/远程比对、协作消息等 10 个工具。要求 Node.js >= 20。
-
-**安装**（`.mcp.json` 已配置，进入本仓库目录即自动生效）：
-
-```bash
-# 配套 skills 安装到 ./.claude/skills/（首次使用需执行）
-npx @scfools/scdb-mcp install-skills
-```
-
-**首次使用**：Claude 会运行 `scdb-onboarding` skill 完成身份生成与鉴权，
-推送类工具（import_to_scdb / post_message）需要现有协作者授权。
-
-环境变量均有默认值，无需配置；详见 [scdb-mcp README](mcp/scdb-mcp/README.md)。
-
-### 3. `tools/kioskprobe` — 游戏终端价格采集工具
-
-来源：[dolejska-daniel/starcitizen-kioskprobe](https://github.com/dolejska-daniel/starcitizen-kioskprobe)
-
-从游戏内交易终端截图提取商品价格（OpenAI 视觉模型），校验后上传 UEX Corp。
-要求 Python 3.10+。
-
-**安装**（本机已装好 venv）：
-
-```bash
-cd tools/kioskprobe
-python3.12 -m venv venv
-venv/bin/pip install -r requirements.txt
-venv/bin/python main.py
-```
-
-**配置**：复制 `config/openai.sample.json` → `openai.json` 填入 OpenAI API key，
-复制 `config/uex.sample.json` → `uex.json` 填入 UEX Corp 应用 token 与用户 token。
-单张截图约 $0.0039 OpenAI 费用。
-
-### 4. `tools/uexinfo` — 游戏内 Overlay 与路线规划
-
-来源：[ZolOnTheNet/uexinfo](https://github.com/ZolOnTheNet/uexinfo)（MIT）
-
-Star Citizen 游戏内半透明 overlay：实时查询 UEX 价格、路线规划、终端扫描（OCR）、
-货物分割优化。数据源为 UEX API，可配置 sc-trade.tools 交叉验证价格。
-要求 Python 3.11+。
-
-**安装**（本机已装好 venv，开发模式）：
-
-```bash
-cd tools/uexinfo
-python3.12 -m venv venv
-venv/bin/pip install -e .
-venv/bin/uexinfo            # overlay 热键 alt+shift+u，WebSocket 端口 8090
-```
-
-可选增强：安装 Tesseract OCR 启用终端扫描；`pip install -e .[playwright]` 启用
-sc-trade.tools 交叉验证。
-
-### 5. `skills/sc-trader` — 跑商推荐与价格更新（自研 skill）
-
-复用 `tools/uexinfo` 库（UEX 客户端/缓存/航段时间图），在其上做船型感知增强：
-
-```bash
-# 环境自检（缺失自动补装 tesseract / playwright / venv / 子模块）
+# 2. 环境自检（自动创建 venv、装依赖、装 tesseract、部署 skill 链接）
 tools/uexinfo/venv/bin/python skills/sc-trader/scripts/check.py
+#   Windows: tools\uexinfo\venv\Scripts\python.exe（venv 尚未创建时先跑
+#            py -3.12 -m venv tools/uexinfo/venv 并 pip install -e tools/uexinfo，
+#            或直接用 check 的 --fix 全自动流程）
 
-# 路线推荐：--ship 选船（profile.json ships），--budget 选预算
-tools/uexinfo/venv/bin/python skills/sc-trader/scripts/recommend.py \
-  --ship c1_spirit --budget 300000
+# 3. 推荐路线
+tools/uexinfo/venv/bin/python skills/sc-trader/scripts/recommend.py --budget 100000
 
-# 单次价格更新（UEX API + 玩家扫描价优先 ★）
+# 4. 跑商回来更新价格（收益榜 + 调仓建议）
 tools/uexinfo/venv/bin/python skills/sc-trader/scripts/update_prices.py
-
-# 截图读数入库（会话内 Claude 视觉读图后调用，写入 uexinfo scan_prices.json）
-tools/uexinfo/venv/bin/python skills/sc-trader/scripts/record.py \
-  --commodity "Medical Supplies" --terminal "Rayari Kaltag Research Outpost" --price-buy 3343
-
-# skill 自更新：检查/快进上游组件（uexinfo 等）+ 依赖刷新 + 重新部署 + 自检
-tools/uexinfo/venv/bin/python skills/sc-trader/scripts/update_skill.py [--apply]
 ```
 
-数据文件：`skills/sc-trader/data/profile.json`（船型：aurora_ts 8 SCU / c1_spirit 64 SCU）、
-`watchlist.json`（路线 + 价格快照）。推荐结果自动渲染到 `docs/routes.md`。
-经 SkillOpt 流程迭代（run 记录在 `~/.tclaude/skills/skillopt_runs/sc-trader/`）。
+首次使用建议在 Claude Code 会话中进行——skill 部署后可直接对话完成全流程。
 
-## 许可证说明
+## 组件总览
 
-| 组件 | 许可证 | 整合方式 |
-|------|--------|----------|
-| uexcorp-sc | MIT（上游 README 声明） | vendor 拷贝 |
-| scdb-mcp | GPL-3.0 | git 子模块引用 |
-| kioskprobe | 未声明 | git 子模块引用（不复制源码） |
-| uexinfo | MIT | git 子模块引用 |
-| sc-trader | 本仓库自研 | vendor（复用 uexinfo 库） |
+| 组件 | 位置 | 许可证 | 整合方式 | 说明 |
+|------|------|--------|----------|------|
+| **sc-trader** | `skills/sc-trader/` | MIT（本仓库） | 自研 | 跑商推荐/价格更新/实测入库/自检/自更新 |
+| uexcorp-sc | `skills/uexcorp-sc/` | MIT | vendor | 上游 UEXcorp 交易顾问 skill（[RikyZ90](https://github.com/RikyZ90/openclaw-skill-uexcorp-sc)） |
+| scdb-mcp | `mcp/scdb-mcp/` | GPL-3.0 | 子模块 | SC 共享数据库 MCP（[scfools](https://github.com/scfools/scdb-mcp)） |
+| kioskprobe | `tools/kioskprobe/` | 未声明 | 子模块 | 游戏终端截图价格采集（[dolejska-daniel](https://github.com/dolejska-daniel/starcitizen-kioskprobe)） |
+| uexinfo | `tools/uexinfo/` | MIT | 子模块 | 游戏内 overlay（[ZolOnTheNet](https://github.com/ZolOnTheNet/uexinfo)），同时作为 sc-trader 的依赖库 |
 
-子模块仅引用上游仓库，不含源码拷贝；各组件遵循其原始许可证。
+**子模块仅引用上游、不复制源码**；各组件遵循其原始许可证。`sc-trader` 运行时复用
+`uexinfo` 的 UEX 客户端、静态缓存、航路图与玩家扫描价存储。
+
+## sc-trader 详解
+
+### 两步工作流
+
+```
+① recommend 检索候选（组合 + 去重 + 时间模型）
+     ↓ 你跑商
+② update_prices 实价更新 + record 实测入库（★）
+     ↓ 收益榜 / 调仓警告
+     └→ 回到 ① 或按榜继续跑
+```
+
+### 五个命令
+
+| 命令 | 脚本 | 用途 |
+|------|------|------|
+| `recommend` | `scripts/recommend.py` | 路线推荐：`--ship` 选船、`--budget` 选预算；输出首选/备选组合 |
+| `update_prices` | `scripts/update_prices.py` | 单次价格更新：变化报告 + 收益榜（圈利润/时薪）+ 首选易主警告 |
+| `record` | `scripts/record.py` | 用户实测入库（截图读数或口述，**必须带观察时间** `--observed-at`） |
+| `check` | `scripts/check.py` | 7 项环境自检：子模块/venv/部署/库/OCR/依赖/连通，缺失自动补装 |
+| `update` | `scripts/update_skill.py` | skill 自更新：上游组件检查与快进（`--apply`）、依赖刷新、重新部署 |
+
+### 核心设计
+
+- **船型参数化**（`data/profile.json` → `ships`）：舱位、槽位、箱体上限逐船建模；
+  推荐数量 = `min(货舱, 预算可买, 买点库存)`，**不满载也成立**
+- **手动装箱模型**：箱体规格必须 ≤ 槽位规格（如 Aurora TS 槽位 4×1+2×2 → 整箱 >2 SCU 不可用）；
+  自动装箱场景注意终端可能选大箱导致装不下
+- **新鲜度仲裁**：同一商品@终端，观察时间新者胜。用户实测带时间入库，比 UEX 旧时诚实
+  采用 UEX 并输出 `[时滞]` 提示
+- **时间模型**（`profile.time_model`）：圈时间 = 量子航行（航路图计算）+ 起降/终端操作
+  + 装卸（手动 1 min/SCU / 自动 0.5 min/次）；表格与收益榜均带**时薪**
+- **SkillOpt 迭代**：skill 文本经 7 轮 train/val 门禁迭代（零回退），方法论与运行记录
+  见 `~/.tclaude/skills/skillopt_runs/sc-trader/report.md`
+
+### 平台支持
+
+| | macOS | Windows |
+|---|-------|---------|
+| 解释器 | `venv/bin/python` | `venv\Scripts\python.exe` |
+| venv 创建 | `python3.12` | `py -3.12` 启动器 |
+| OCR 安装 | brew | winget / choco |
+| skill 部署 | symlink | symlink（开发者模式）/ junction 回退 |
+| 控制台编码 | UTF-8 原生 | 内置 UTF-8 兜底，乱码时设 `PYTHONUTF8=1` |
+
+## 文档
+
+- [`docs/routes.md`](docs/routes.md) — 跑商路线手册：已验证循环、非自动装箱要点、
+  时间估算公式、sc-trader 自动渲染的监控区块
+- [`skills/sc-trader/SKILL.md`](skills/sc-trader/SKILL.md) — skill 完整工作流定义（agent 消费）
+- 各子模块文档见其上游仓库
+
+## 维护
+
+```bash
+# 上游组件有新版本时
+tools/uexinfo/venv/bin/python skills/sc-trader/scripts/update_skill.py --apply
+# 回归验证后提交子模块指针变更
+git add . && git commit -m "chore: bump submodules" && git push
+```
+
+## 许可证
+
+本仓库自身代码以 [MIT](LICENSE) 发布；各组件遵循其原始许可证（见组件总览表）。
+
+**免责声明**：本项目为非官方粉丝作品，与 Cloud Imperium Games 无关联；
+社区价格数据存在延迟，实际交易以游戏内为准。
