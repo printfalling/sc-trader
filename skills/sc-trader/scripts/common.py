@@ -260,6 +260,13 @@ def packable_scu(sizes: list[int], profile: dict) -> int:
 
 # ── 时间模型（航行 + 地面作业 + 装卸）────────────────────────────────────────
 
+# UEX 库存状态字典（commodities_status 端点，1=空仓 … 7=满仓）
+UEX_STATUS_NAMES = {
+    1: "Out", 2: "Very Low", 3: "Low", 4: "Medium",
+    5: "High", 6: "Very High", 7: "Max",
+}
+
+
 # ── 展示规范：终端全名 + 位置路径（禁止缩写）────────────────────────────────
 
 def terminal_path(ctx, terminal_id: int) -> str:
