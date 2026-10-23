@@ -1,14 +1,14 @@
 {
   "version": 1,
-  "updated_at": "2026-10-23T17:45:34+00:00",
+  "updated_at": "2026-10-23T17:47:49+00:00",
   "routes": [
     {
-      "id": "r283",
+      "id": "r293",
       "type": "intra",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-23T17:45:02+00:00",
+      "created_at": "2026-10-23T17:47:23+00:00",
       "legs": [
         {
           "commodity": "Compboard",
@@ -49,7 +49,7 @@
       "profit_per_hour": 257629,
       "snapshots": [
         {
-          "ts": "2026-10-23T17:45:02+00:00",
+          "ts": "2026-10-23T17:47:23+00:00",
           "price_buy": 26460,
           "price_sell": 37000,
           "scu_stock": 72,
@@ -58,12 +58,12 @@
       ]
     },
     {
-      "id": "r284",
+      "id": "r294",
       "type": "intra",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-23T17:45:02+00:00",
+      "created_at": "2026-10-23T17:47:23+00:00",
       "legs": [
         {
           "commodity": "Compboard",
@@ -104,7 +104,7 @@
       "profit_per_hour": 257629,
       "snapshots": [
         {
-          "ts": "2026-10-23T17:45:02+00:00",
+          "ts": "2026-10-23T17:47:23+00:00",
           "price_buy": 26460,
           "price_sell": 37000,
           "scu_stock": 72,
@@ -113,12 +113,12 @@
       ]
     },
     {
-      "id": "r285",
+      "id": "r295",
       "type": "intra",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-23T17:45:02+00:00",
+      "created_at": "2026-10-23T17:47:23+00:00",
       "legs": [
         {
           "commodity": "Compboard",
@@ -160,7 +160,7 @@
       "profit_per_hour": 257629,
       "snapshots": [
         {
-          "ts": "2026-10-23T17:45:02+00:00",
+          "ts": "2026-10-23T17:47:23+00:00",
           "price_buy": 26460,
           "price_sell": 37000,
           "scu_stock": 0,
@@ -169,12 +169,12 @@
       ]
     },
     {
-      "id": "r286",
+      "id": "r296",
       "type": "intra",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-23T17:45:02+00:00",
+      "created_at": "2026-10-23T17:47:23+00:00",
       "legs": [
         {
           "commodity": "Compboard",
@@ -216,7 +216,7 @@
       "profit_per_hour": 257629,
       "snapshots": [
         {
-          "ts": "2026-10-23T17:45:02+00:00",
+          "ts": "2026-10-23T17:47:23+00:00",
           "price_buy": 26460,
           "price_sell": 37000,
           "scu_stock": 0,
@@ -225,12 +225,12 @@
       ]
     },
     {
-      "id": "r287",
+      "id": "r297",
       "type": "there-back",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-23T17:45:08+00:00",
+      "created_at": "2026-10-23T17:47:31+00:00",
       "legs": [
         {
           "commodity": "Taranite",
@@ -307,14 +307,14 @@
       "profit_per_hour": 405559,
       "snapshots": [
         {
-          "ts": "2026-10-23T17:45:08+00:00",
+          "ts": "2026-10-23T17:47:31+00:00",
           "price_buy": 18792,
           "price_sell": 29000,
           "scu_stock": 0,
           "source": "uex"
         },
         {
-          "ts": "2026-10-23T17:45:08+00:00",
+          "ts": "2026-10-23T17:47:31+00:00",
           "price_buy": 26492,
           "price_sell": 31000,
           "scu_stock": 50,
@@ -323,12 +323,12 @@
       ]
     },
     {
-      "id": "r288",
+      "id": "r298",
       "type": "there-back",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-23T17:45:15+00:00",
+      "created_at": "2026-10-23T17:47:36+00:00",
       "legs": [
         {
           "commodity": "Taranite",
@@ -404,14 +404,14 @@
       "profit_per_hour": 239145,
       "snapshots": [
         {
-          "ts": "2026-10-23T17:45:15+00:00",
+          "ts": "2026-10-23T17:47:36+00:00",
           "price_buy": 18792,
           "price_sell": 28000,
           "scu_stock": 0,
           "source": "uex"
         },
         {
-          "ts": "2026-10-23T17:45:15+00:00",
+          "ts": "2026-10-23T17:47:36+00:00",
           "price_buy": 21614,
           "price_sell": 24000,
           "scu_stock": 40,
@@ -420,12 +420,12 @@
       ]
     },
     {
-      "id": "r289",
+      "id": "r299",
       "type": "there-back",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-23T17:45:21+00:00",
+      "created_at": "2026-10-23T17:47:43+00:00",
       "legs": [
         {
           "commodity": "Fresh Food",
@@ -500,14 +500,14 @@
       "profit_per_hour": 178754,
       "snapshots": [
         {
-          "ts": "2026-10-23T17:45:21+00:00",
+          "ts": "2026-10-23T17:47:43+00:00",
           "price_buy": 21614,
           "price_sell": 29000,
           "scu_stock": 81,
           "source": "uex"
         },
         {
-          "ts": "2026-10-23T17:45:21+00:00",
+          "ts": "2026-10-23T17:47:43+00:00",
           "price_buy": 21924,
           "price_sell": 28000,
           "scu_stock": 11,
@@ -516,12 +516,12 @@
       ]
     },
     {
-      "id": "r290",
+      "id": "r300",
       "type": "there-back",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-23T17:45:28+00:00",
+      "created_at": "2026-10-23T17:47:49+00:00",
       "legs": [
         {
           "commodity": "Fresh Food",
@@ -596,189 +596,32 @@
       "profit_per_hour": 178754,
       "snapshots": [
         {
-          "ts": "2026-10-23T17:45:28+00:00",
+          "ts": "2026-10-23T17:47:49+00:00",
           "price_buy": 21614,
           "price_sell": 29000,
           "scu_stock": 81,
           "source": "uex"
         },
         {
-          "ts": "2026-10-23T17:45:28+00:00",
+          "ts": "2026-10-23T17:47:49+00:00",
           "price_buy": 21924,
           "price_sell": 28000,
           "scu_stock": 11,
-          "source": "uex"
-        }
-      ]
-    },
-    {
-      "id": "r291",
-      "type": "there-back",
-      "status": "candidate",
-      "risk": "normal",
-      "ship": "c1_spirit",
-      "created_at": "2026-10-23T17:45:34+00:00",
-      "legs": [
-        {
-          "commodity": "Fresh Food",
-          "id_commodity": 120,
-          "buy_terminal": {
-            "id": 86,
-            "name": "Terra Mills Hydrofarm",
-            "path": "Stanton > Crusader > Cellin"
-          },
-          "sell_terminal": {
-            "id": 39,
-            "name": "HDMS-Stanhope",
-            "path": "Stanton > Hurston"
-          },
-          "id_planet_origin": 59,
-          "origin_planet": "Crusader",
-          "id_planet_destination": 116,
-          "destination_planet": "Hurston",
-          "destination_system": "Stanton",
-          "price_buy": 21614,
-          "price_sell": 29000,
-          "scu_stock": 0,
-          "qty": 64,
-          "box_sizes": [
-            1,
-            2,
-            4,
-            8
-          ],
-          "leg_profit": 472704,
-          "roi": 34.2,
-          "intra": false,
-          "pyro": false,
-          "source": "computed",
-          "qt_sec": 533.7025523170432
-        },
-        {
-          "commodity": "Taranite",
-          "id_commodity": 73,
-          "buy_terminal": {
-            "id": 41,
-            "name": "HDMS-Woodruff",
-            "path": "Stanton > Hurston > Ita"
-          },
-          "sell_terminal": {
-            "id": 90,
-            "name": "TDD - Trade and Development Division - Cloudview Center - Orison",
-            "path": "Stanton > Crusader"
-          },
-          "id_planet_destination": 59,
-          "destination_planet": "Crusader",
-          "destination_system": "Stanton",
-          "price_buy": 21924,
-          "price_sell": 29000,
-          "scu_stock": 11,
-          "qty": 11,
-          "box_sizes": [
-            1,
-            2,
-            4,
-            8
-          ],
-          "leg_profit": 77836,
-          "roi": 32.3,
-          "intra": true,
-          "pyro": false,
-          "qt_sec": 533.7025523170432
-        }
-      ],
-      "loop_profit": 550540,
-      "qt_sec_total": 1067.4051046340865,
-      "loop_time_min": 177.8,
-      "profit_per_hour": 185784,
-      "snapshots": [
-        {
-          "ts": "2026-10-23T17:45:34+00:00",
-          "price_buy": 21614,
-          "price_sell": 29000,
-          "scu_stock": 0,
-          "source": "uex"
-        },
-        {
-          "ts": "2026-10-23T17:45:34+00:00",
-          "price_buy": 21924,
-          "price_sell": 29000,
-          "scu_stock": 11,
-          "source": "uex"
-        }
-      ]
-    },
-    {
-      "id": "r292",
-      "type": "one-way",
-      "status": "candidate",
-      "risk": "normal",
-      "ship": "c1_spirit",
-      "created_at": "2026-10-23T17:45:34+00:00",
-      "legs": [
-        {
-          "commodity": "Fresh Food",
-          "id_commodity": 120,
-          "buy_terminal": {
-            "id": 86,
-            "name": "Terra Mills Hydrofarm",
-            "path": "Stanton > Crusader > Cellin"
-          },
-          "sell_terminal": {
-            "id": 40,
-            "name": "HDMS-Thedus",
-            "path": "Stanton > Hurston"
-          },
-          "id_planet_origin": 59,
-          "origin_planet": "Crusader",
-          "id_planet_destination": 116,
-          "destination_planet": "Hurston",
-          "destination_system": "Stanton",
-          "price_buy": 21614,
-          "price_sell": 29000,
-          "scu_stock": 0,
-          "qty": 64,
-          "box_sizes": [
-            1,
-            2,
-            4,
-            8
-          ],
-          "leg_profit": 472704,
-          "roi": 34.2,
-          "intra": false,
-          "pyro": false,
-          "source": "computed",
-          "qt_sec": 533.7025523170432
-        }
-      ],
-      "loop_profit": 472704,
-      "qt_sec_total": 533.7025523170432,
-      "loop_time_min": 144.9,
-      "profit_per_hour": 195736,
-      "snapshots": [
-        {
-          "ts": "2026-10-23T17:45:34+00:00",
-          "price_buy": 21614,
-          "price_sell": 29000,
-          "scu_stock": 0,
           "source": "uex"
         }
       ]
     }
   ],
-  "next_id": 293,
+  "next_id": 301,
   "ranking_prev": [
-    "r287",
-    "r288",
-    "r283",
-    "r284",
-    "r285",
-    "r286",
-    "r291",
-    "r289",
-    "r290",
-    "r292"
+    "r297",
+    "r298",
+    "r293",
+    "r294",
+    "r295",
+    "r296",
+    "r299",
+    "r300"
   ],
   "tracked_commodities": {
     "51": "Medical Supplies",

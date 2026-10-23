@@ -292,13 +292,17 @@ def build_routes(legs: list[dict], budget: int, profile: dict,
 
         # 资金流模拟：每段买入花掉手中的钱，卖出回款后才能买下一段
         cash = budget
+        scu_cap = (profile.get("ship") or {}).get("scu_total", 8)
         for x in legs_pair:
             buy = int(x["price_buy"] or 0)
             if buy > 0:
                 affordable = cash // buy
                 if affordable < x["qty"]:
                     x["qty"] = max(0, int(affordable))
-                    x["leg_profit"] = x["qty"] * (int(x["price_sell"] or 0) - buy)
+                elif not x.get("scu_stock") and affordable > x["qty"]:
+                    # 回程用回款全款买：库存未知时最多补到船舱上限
+                    x["qty"] = min(int(scu_cap), int(affordable))
+                x["leg_profit"] = x["qty"] * (int(x["price_sell"] or 0) - buy)
             cash += x["leg_profit"]
         legs_pair = [x for x in legs_pair if x.get("qty", 0) > 0]
         if not legs_pair:
