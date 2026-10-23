@@ -4,3 +4,4 @@
 [submodule "tools/kioskprobe"]
 	path = tools/kioskprobe
 	url = https://github.com/dolejska-daniel/starcitizen-kioskprobe.git
+	ignore = untracked
