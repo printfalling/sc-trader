@@ -104,6 +104,11 @@ def dedup_planets(legs: list[dict], limit: int) -> list[dict]:
     return out
 
 
+COMPUTED_CAP = 32  # 本地配对候选上限（纯本地计算，不增加 API 调用）
+TOP_BUYS = 5   # 候选买点数（本地计算，不增加 API 调用）
+TOP_SELLS = 5  # 候选卖点数
+
+
 def computed_legs_from_prices(client, ctx, budget: int, profile: dict,
                               have_triples: set) -> list[dict]:
     """本地算路引擎（与 sc-trade.tools 同方法）：一次拉全市场价格，本地配对。
@@ -142,8 +147,8 @@ def computed_legs_from_prices(client, ctx, budget: int, profile: dict,
             continue
         buys.sort(key=lambda x: x[0])
         sells.sort(key=lambda x: -x[0])
-        for pb, br, bt in buys[:2]:
-            for ps, sr, st in sells[:3]:
+        for pb, br, bt in buys[:TOP_BUYS]:
+            for ps, sr, st in sells[:TOP_SELLS]:
                 if st.id == bt.id or ps <= pb:
                     continue
                 if (cid, bt.id, st.id) in have_triples:
@@ -175,7 +180,7 @@ def computed_legs_from_prices(client, ctx, budget: int, profile: dict,
                     "source": "computed",
                 })
     legs.sort(key=lambda x: x["leg_profit"], reverse=True)
-    return legs[:12]
+    return legs[:COMPUTED_CAP]
 
 
 def find_return_leg(client, origin_planet: int, budget: int,
@@ -242,7 +247,8 @@ def snapshot_of(leg: dict, source: str) -> dict:
 
 
 def build_routes(legs: list[dict], budget: int, profile: dict,
-                 client, max_calls: int, ship_key: str = "") -> list[dict]:
+                 client, max_calls: int, ship_key: str = "",
+                 max_routes: int = 6) -> list[dict]:
     """组装简单循环并生成 watchlist route 结构。
 
     组合多样性：同一供货源（同商品+同买点）最多 2 条路线——同源价格完全联动，
@@ -259,7 +265,7 @@ def build_routes(legs: list[dict], budget: int, profile: dict,
     intra_seen = set()
     source_count: dict = {}
 
-    for leg in legs[:12]:
+    for leg in legs[:COMPUTED_CAP]:
         source = (leg["id_commodity"], leg["buy_terminal"]["id"])
         if source_count.get(source, 0) >= 2:
             continue
@@ -284,6 +290,19 @@ def build_routes(legs: list[dict], budget: int, profile: dict,
                 legs_pair = [leg] + ([back] if back else [])
                 loop_type = "there-back" if back else "one-way"
 
+        # 资金流模拟：每段买入花掉手中的钱，卖出回款后才能买下一段
+        cash = budget
+        for x in legs_pair:
+            buy = int(x["price_buy"] or 0)
+            if buy > 0:
+                affordable = cash // buy
+                if affordable < x["qty"]:
+                    x["qty"] = max(0, int(affordable))
+                    x["leg_profit"] = x["qty"] * (int(x["price_sell"] or 0) - buy)
+            cash += x["leg_profit"]
+        legs_pair = [x for x in legs_pair if x.get("qty", 0) > 0]
+        if not legs_pair:
+            continue
         route = {
             "id": None,  # 由调用方分配
             "type": loop_type,
@@ -309,7 +328,7 @@ def build_routes(legs: list[dict], budget: int, profile: dict,
                                     if route["loop_time_min"] else None)
         route["snapshots"] = [snapshot_of(leg, "uex") for leg in legs_pair]
         routes.append(route)
-        if len(routes) >= 6:
+        if len(routes) >= max_routes:
             break
     return routes
 
@@ -409,6 +428,9 @@ def main() -> int:
                         help="船型 key（profile.json ships 里的键，默认 default_ship）")
     parser.add_argument("--top", type=int, default=5)
     parser.add_argument("--include-pyro", action="store_true")
+    parser.add_argument("--auto-loading", action="store_true",
+                        help="按自动装载估算时间（0.5min/次固定开销）；"
+                             "不给则按 profile.time_model.auto_loading（默认手动 1min/SCU）")
     parser.add_argument("--max-calls", type=int, default=6,
                         help="本次最多 UEX API 调用数（限速保护）")
     args = parser.parse_args()
@@ -425,6 +447,8 @@ def main() -> int:
     budget = args.budget or profile["budget_default"]
     if args.include_pyro:
         profile["include_pyro"] = True
+    if args.auto_loading:
+        profile.setdefault("time_model", {})["auto_loading"] = True
 
     client = common.get_client()
     watchlist = common.load_watchlist()
@@ -463,7 +487,7 @@ def main() -> int:
         return 1
 
     new_routes = build_routes(legs, budget, profile, client, args.max_calls,
-                              ship_key=ship_key)
+                              ship_key=ship_key, max_routes=max(1, args.top))
     watchlist, added = merge_watchlist(watchlist, new_routes)
     # 登记跟踪商品：下次即使被 routes 接口下架，也能走部分装载补充路径
     tracked = watchlist.setdefault("tracked_commodities", {})

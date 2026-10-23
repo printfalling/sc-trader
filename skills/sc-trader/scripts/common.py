@@ -292,23 +292,71 @@ def terminal_path(ctx, terminal_id: int) -> str:
     return " > ".join(p for p in dedup if p)
 
 
+def crate_size_for(leg: dict, profile: dict) -> int:
+    """该航段的实际箱规格：取终端可售箱型（leg.box_sizes）中不超过船槽上限的最大值。
+
+    商品只卖 1-SCU 箱时就是 1（搬运箱数暴涨）——与游戏内真实装载一致。
+    """
+    max_box = ((profile.get("ship") or {}).get("max_box")
+               or profile.get("max_container_box", 2))
+    sizes = [s for s in (leg.get("box_sizes") or []) if isinstance(s, int) and s > 0]
+    usable = [s for s in sizes if s <= max_box]
+    return max(usable) if usable else (min(sizes) if sizes else max_box)
+
+
+def terminal_loading_mode(terminal_name: str, profile: dict) -> bool:
+    """该终端是否支持自动装载（有货运电梯）。
+
+    判定顺序：profile.loading_overrides 显式覆盖 → 名称启发式
+    （Admin-/TDD-/CBD- 等空间站/城市终端=自动；Research Outpost 等前哨=手动）
+    → 兜底 profile.time_model.auto_loading。
+    """
+    name = (terminal_name or "").lower()
+    for key, mode in (profile.get("loading_overrides") or {}).items():
+        if key.lower() in name:
+            return str(mode).lower() == "auto"
+    if any(k in name for k in ("admin -", "tdd -", "cbd -", "long forest",
+                               "gateway", "station")):
+        return True
+    if "research outpost" in name or "outpost" in name:
+        return False
+    return bool(profile.get("time_model", {}).get("auto_loading"))
+
+
 def route_time_min(profile: dict, legs: list[dict]) -> float:
     """单圈时间（分钟）= Σ量子航行 + 每航段两次地面作业。
 
-    地面作业 = 起降/电梯/终端交易（base_stop_min）+ 装卸：
-      手动装箱 1 min/SCU（profile.time_model.manual_load_min_per_scu）
-      自动装载固定 0.5 min/次（auto_load_extra_min）
-    估算口径，实测后可回填校准。
+    地面作业 = 起降/电梯/终端交易（base_stop_min）+ 搬运：
+      手动：manual_load_min_per_scu × SCU
+      自动：ceil(数量 / 实际箱规格) × auto_crate_min + auto_load_extra_min
+    箱规格取自终端可售箱型（container_sizes），不是固定值。
     """
     tm = profile.get("time_model", {})
     base = tm.get("base_stop_min", 4)
-    auto = tm.get("auto_loading", False)
+    crate_min = tm.get("auto_crate_min", 1.0)
+    extra = tm.get("auto_load_extra_min", 3.0)
+    manual_per_scu = tm.get("manual_load_min_per_scu", 1.0)
+    # 船是否具备自动装载条件（大船货舱网格 + 显式开启）
+    ship_auto = bool((profile.get("ship") or {}).get("auto_loading_capable")
+                     or tm.get("auto_loading"))
+    qty_default = (profile.get("ship") or {}).get("scu_total", 8)
+
+    def stop_minutes(terminal_name: str, qty: int, box_sizes) -> float:
+        auto = ship_auto and terminal_loading_mode(terminal_name, profile)
+        if auto:
+            size = max([s for s in (box_sizes or []) if 0 < s <= 32] or [32])
+            crates = -(-(qty or 0) // max(1, size))
+            handling = crates * crate_min + extra
+        else:
+            handling = manual_per_scu * (qty or 0)
+        return base + handling
+
     total = 0.0
     for leg in legs:
         total += (leg.get("qt_sec") or 0) / 60
-        handling = tm.get("auto_load_extra_min", 0.5) if auto \
-            else tm.get("manual_load_min_per_scu", 1.0) * (leg.get("qty") or 0)
-        total += 2 * (base + handling)
+        qty = leg.get("qty") or qty_default
+        total += stop_minutes(leg["buy_terminal"]["name"], qty, leg.get("box_sizes"))
+        total += stop_minutes(leg["sell_terminal"]["name"], qty, leg.get("box_sizes"))
     return round(total, 1)
 
 

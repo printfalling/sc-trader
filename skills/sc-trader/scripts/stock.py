@@ -90,6 +90,13 @@ def main() -> int:
                         help="按终端名子串过滤，逗号分隔，如 \"Kaltag,Anvik\"")
     parser.add_argument("--scu", type=int, default=None,
                         help="按指定船舱 SCU 推算可交易量（默认取 profile 当前船型）")
+    parser.add_argument("--fresh-only", action="store_true",
+                        help="只显示可信条目：数据龄 ≤ --max-age，或带玩家实测★的")
+    parser.add_argument("--max-age", type=float, default=STALE_H,
+                        help=f"可信数据龄上限（小时，默认 {STALE_H:.0f}）")
+    parser.add_argument("--system", default=None,
+                        help="只显示指定星系的终端（默认取 profile 出发星系；"
+                             "传 all 不限）")
     args = parser.parse_args()
 
     profile = common.load_profile()
@@ -116,13 +123,29 @@ def main() -> int:
     mine = player_prices(commodity.id)
     now = time.time()
 
+    # 终端 → 星系映射：默认只保留出发星系，自动排除 Pyro/Nyx 等越界项
+    sys_by_tid = {t.id: getattr(t, "star_system_name", "") for t in ctx.cache.terminals}
+    want_sys = args.system or profile.get("origin", {}).get("star_system")
+    if (args.system or "").lower() == "all":
+        want_sys = None
+    scope_txt = want_sys or "全部星系"
+
     buys, sells = [], []
+    skipped = 0
     for r in rows or []:
         tn = r.get("terminal_name") or ""
         if filters and not any(f in tn.lower() for f in filters):
             continue
+        if want_sys and sys_by_tid.get(r.get("id_terminal"), "") != want_sys:
+            skipped += 1
+            continue
         age_h = ((now - int(r["date_modified"])) / 3600) if r.get("date_modified") else None
         obs = mine.get(str(r.get("id_terminal")), {})
+        if args.fresh_only and not (
+                obs.get("buy") or obs.get("sell")
+                or (age_h is not None and age_h <= args.max_age)):
+            skipped += 1
+            continue
         try:
             pb = float(r.get("price_buy") or 0)
             ps = float(r.get("price_sell") or 0)
@@ -133,7 +156,8 @@ def main() -> int:
         if ps > 0 and args.only in ("sell", "all"):
             sells.append((ps, tn, r, age_h, obs))
 
-    print(f"=== {commodity.name} 库存检查（按 {scu} SCU 船舱推算）===")
+    print(f"=== {commodity.name} 库存检查（按 {scu} SCU 船舱推算 · 范围 {scope_txt}"
+          f"{' · 仅可信' if args.fresh_only else ''}）===")
 
     if args.only in ("buy", "all"):
         print("\n【购买站点】买价升序")
@@ -156,8 +180,41 @@ def main() -> int:
                   f"{sell_quantity(scu, r.get('status_sell') or 0):>6} "
                   f"{sell_risk(r.get('status_sell') or 0, age_h):>6} {fmt_age(age_h):>9}  {ob}")
 
+    # ── 可信最优买卖对（按可交易量封顶后的实际利润排序）──────────────────────
+    if buys and sells:
+        pairs = []
+        for pb, btn, br, bage, bobs in buys:
+            for ps, stn, sr, sage, sobs in sells:
+                if br.get("id_terminal") == sr.get("id_terminal"):
+                    continue
+                eff_buy = bobs.get("buy") or pb          # ★ 优先
+                eff_sell = sobs.get("sell") or ps
+                margin = eff_sell - eff_buy
+                if margin <= 0:
+                    continue
+                qty = min(buy_quantity(scu, br.get("status_buy") or 0),
+                          sell_quantity(scu, sr.get("status_sell") or 0))
+                if qty <= 0:
+                    continue
+                pairs.append((margin * qty, qty, margin, btn, stn, eff_buy, eff_sell,
+                              bool(bobs.get("buy")), bool(sobs.get("sell")), bage, sage))
+        pairs.sort(reverse=True)
+        title = ("【可信最优买卖对】仅新鲜/★数据" if args.fresh_only
+                 else "【最优买卖对】含陈旧数据，加 --fresh-only 只看可信项")
+        print(f"\n{title} —— 按 可交易量×价差 排序（★=你的实测价）")
+        if not pairs:
+            print("  （无可盈利组合——说明该商品当前不值得跑）")
+        for profit, qty, margin, btn, stn, eb, es, fb, fs, bage, sage in pairs[:5]:
+            star = ("★买" if fb else "") + (" ★卖" if fs else "")
+            print(f"  {btn[:34]:<34} → {stn[:34]:<34} "
+                  f"{int(eb):,}>{int(es):,} × {qty}SCU = +{int(profit):,} "
+                  f"(买{fmt_age(bage)}/卖{fmt_age(sage)}) {star}")
+    if skipped:
+        print(f"\n（已过滤 {skipped} 条：越界星系或数据过旧；--system all / 去掉 "
+              f"--fresh-only 可查看）")
+
     print("\n口径：可买/可卖=船舱×库存状态系数（买端越满越能买、卖端越空越能吸收）；"
-          f"数据龄>{STALE_H:.0f}h 标 ⚠️；★=你的实测价，权威最高")
+          f"数据龄>{args.max_age:.0f}h 标 ⚠️；★=你的实测价，权威最高")
     return 0
 
 

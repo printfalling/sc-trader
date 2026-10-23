@@ -6,17 +6,28 @@
       "scu_total": 8,
       "max_box": 2,
       "slots": [
-        {"size": 1, "count": 4},
-        {"size": 2, "count": 2}
-      ]
+        {
+          "size": 1,
+          "count": 4
+        },
+        {
+          "size": 2,
+          "count": 2
+        }
+      ],
+      "auto_loading_capable": false
     },
     "c1_spirit": {
       "name": "C1 Spirit",
       "scu_total": 64,
       "max_box": 32,
       "slots": [
-        {"size": 32, "count": 2}
-      ]
+        {
+          "size": 32,
+          "count": 2
+        }
+      ],
+      "auto_loading_capable": true
     }
   },
   "budget_default": 100000,
@@ -33,6 +44,12 @@
     "auto_loading": false,
     "base_stop_min": 4,
     "manual_load_min_per_scu": 1.0,
-    "auto_load_extra_min": 0.5
+    "auto_crate_scu": 32,
+    "auto_crate_min": 1.0,
+    "auto_load_extra_min": 3.0
+  },
+  "loading_overrides": {
+    "Long Forest": "auto",
+    "Research Outpost": "manual"
   }
 }
