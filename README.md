@@ -15,7 +15,8 @@ uexcorp/
 ├── mcp/
 │   └── scdb-mcp/            # SC 共享数据库 MCP server（子模块，GPL-3.0）
 ├── tools/
-│   └── kioskprobe/          # 游戏终端截图价格采集工具（子模块）
+│   ├── kioskprobe/          # 游戏终端截图价格采集工具（子模块）
+│   └── uexinfo/             # 游戏内 overlay：UEX 价格 + 路线规划（子模块，MIT）
 ├── .mcp.json                # Claude Code 项目级 MCP 配置（scdb）
 └── README.md
 ```
@@ -78,6 +79,26 @@ venv/bin/python main.py
 复制 `config/uex.sample.json` → `uex.json` 填入 UEX Corp 应用 token 与用户 token。
 单张截图约 $0.0039 OpenAI 费用。
 
+### 4. `tools/uexinfo` — 游戏内 Overlay 与路线规划
+
+来源：[ZolOnTheNet/uexinfo](https://github.com/ZolOnTheNet/uexinfo)（MIT）
+
+Star Citizen 游戏内半透明 overlay：实时查询 UEX 价格、路线规划、终端扫描（OCR）、
+货物分割优化。数据源为 UEX API，可配置 sc-trade.tools 交叉验证价格。
+要求 Python 3.11+。
+
+**安装**（本机已装好 venv，开发模式）：
+
+```bash
+cd tools/uexinfo
+python3.12 -m venv venv
+venv/bin/pip install -e .
+venv/bin/uexinfo            # overlay 热键 alt+shift+u，WebSocket 端口 8090
+```
+
+可选增强：安装 Tesseract OCR 启用终端扫描；`pip install -e .[playwright]` 启用
+sc-trade.tools 交叉验证。
+
 ## 许可证说明
 
 | 组件 | 许可证 | 整合方式 |
@@ -85,5 +106,6 @@ venv/bin/python main.py
 | uexcorp-sc | MIT（上游 README 声明） | vendor 拷贝 |
 | scdb-mcp | GPL-3.0 | git 子模块引用 |
 | kioskprobe | 未声明 | git 子模块引用（不复制源码） |
+| uexinfo | MIT | git 子模块引用 |
 
 子模块仅引用上游仓库，不含源码拷贝；各组件遵循其原始许可证。

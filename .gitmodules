@@ -5,3 +5,7 @@
 	path = tools/kioskprobe
 	url = https://github.com/dolejska-daniel/starcitizen-kioskprobe.git
 	ignore = untracked
+[submodule "tools/uexinfo"]
+	path = tools/uexinfo
+	url = https://github.com/ZolOnTheNet/uexinfo.git
+	ignore = untracked
