@@ -1,0 +1,361 @@
+"""sc-trader 路线推荐：按飞船/预算从 UEX 拉路线，过滤+组装简单循环，写入 watchlist。
+
+用法：
+    tools/uexinfo/venv/bin/python skills/sc-trader/scripts/recommend.py \
+        [--budget 100000] [--top 5] [--include-pyro] [--max-calls 4]
+
+过滤规则：
+  - 价差 = price_destination - price_origin > 0
+  - 数量 = min(货舱 SCU, 预算//买入价, 卖点库存)，且 ≤ 箱体适配可装量
+  - 箱体适配：container_sizes_origin 里 1-SCU 箱可满载（8），2-SCU 箱 4，>2 不可用
+  - 风险：默认排除 Pyro 目的地（--include-pyro 放开，只标注不排除）
+循环组装（本期范围）：
+  - intra：买卖两端同在出发行星，空载返程即成环
+  - there-back：对 top 目的地行星补查返程腿，盈利则双向环，否则空载返程
+"""
+from __future__ import annotations
+
+import argparse
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPT_DIR))
+
+import common  # noqa: E402
+
+
+def fetch_routes(client, id_planet: int, budget: int) -> list[dict]:
+    rows = common.throttled_get(client, "commodities_routes", {
+        "id_planet_origin": id_planet,
+        "investment": budget,
+    })
+    return rows or []
+
+
+def filter_legs(rows: list[dict], budget: int, profile: dict,
+                include_pyro: bool) -> list[dict]:
+    """原始路线行 → 合法航腿（带数量/利润/箱体/风险注记）。"""
+    scu_total = profile["ship"]["scu_total"]
+    origin_planet = profile["origin"]["id_planet"]
+    legs = []
+    for r in rows:
+        try:
+            buy = float(r["price_origin"])
+            sell = float(r["price_destination"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if buy <= 0 or sell <= buy:
+            continue
+        if not r.get("id_planet_destination"):
+            # 目的地不挂行星（id=0）的行无法组装循环，跳过
+            continue
+        box_sizes = common.parse_box_sizes(r.get("container_sizes_origin"))
+        capacity = common.packable_scu(box_sizes, profile)
+        if capacity <= 0:
+            continue
+        stock = int(r.get("scu_origin") or 0)
+        qty = min(scu_total, capacity, budget // int(buy), stock or capacity)
+        if qty <= 0:
+            continue
+        is_pyro = str(r.get("destination_star_system_name", "")).lower() == "pyro"
+        if is_pyro and not include_pyro:
+            continue
+        intra = r.get("id_planet_destination") == origin_planet
+        legs.append({
+            "commodity": r.get("commodity_name", ""),
+            "id_commodity": r.get("id_commodity"),
+            "buy_terminal": {"id": r.get("id_terminal_origin"),
+                             "name": r.get("origin_terminal_name", "")},
+            "sell_terminal": {"id": r.get("id_terminal_destination"),
+                              "name": r.get("destination_terminal_name", "")},
+            "id_planet_destination": r.get("id_planet_destination"),
+            "destination_planet": r.get("destination_planet_name", ""),
+            "destination_system": r.get("destination_star_system_name", ""),
+            "price_buy": int(buy),
+            "price_sell": int(sell),
+            "scu_stock": stock,
+            "qty": qty,
+            "box_sizes": box_sizes,
+            "leg_profit": qty * (int(sell) - int(buy)),
+            "roi": round((sell - buy) / buy * 100, 1),
+            "intra": intra,
+            "pyro": is_pyro,
+        })
+    legs.sort(key=lambda x: x["leg_profit"], reverse=True)
+    return legs
+
+
+def dedup_planets(legs: list[dict], limit: int) -> list[dict]:
+    """按目的地行星去重取前 limit 个（保留每行星利润最高腿）。"""
+    seen: set = set()
+    out = []
+    for leg in legs:
+        pid = leg["id_planet_destination"]
+        if pid in seen:
+            continue
+        seen.add(pid)
+        out.append(leg)
+        if len(out) >= limit:
+            break
+    return out
+
+
+def find_return_leg(client, origin_planet: int, budget: int,
+                    dest_planet: int) -> dict | None:
+    """从目的地行星找回出发行星的盈利腿（多一次 API 调用）。"""
+    rows = fetch_routes(client, dest_planet, budget)
+    best = None
+    for r in rows:
+        if r.get("id_planet_destination") != origin_planet:
+            continue
+        try:
+            buy = float(r["price_origin"])
+            sell = float(r["price_destination"])
+        except (TypeError, ValueError):
+            continue
+        if buy <= 0 or sell <= buy:
+            continue
+        if best is None or (sell - buy) > (float(best["price_destination"])
+                                           - float(best["price_origin"])):
+            best = r
+    return best
+
+
+def make_return_leg(row: dict, budget: int, profile: dict) -> dict | None:
+    """把返程原始行整理成 leg 结构（不做箱体强校验，宽松处理）。"""
+    buy = int(float(row["price_origin"]))
+    sell = int(float(row["price_destination"]))
+    if buy <= 0 or sell <= buy:
+        return None
+    stock = int(row.get("scu_origin") or 0)
+    qty = min(profile["ship"]["scu_total"], budget // buy, stock or profile["ship"]["scu_total"])
+    if qty <= 0:
+        return None
+    return {
+        "commodity": row.get("commodity_name", ""),
+        "id_commodity": row.get("id_commodity"),
+        "buy_terminal": {"id": row.get("id_terminal_origin"),
+                         "name": row.get("origin_terminal_name", "")},
+        "sell_terminal": {"id": row.get("id_terminal_destination"),
+                          "name": row.get("destination_terminal_name", "")},
+        "id_planet_destination": row.get("id_planet_destination"),
+        "destination_planet": row.get("destination_planet_name", ""),
+        "destination_system": row.get("destination_star_system_name", ""),
+        "price_buy": buy,
+        "price_sell": sell,
+        "scu_stock": stock,
+        "qty": qty,
+        "box_sizes": common.parse_box_sizes(row.get("container_sizes_origin")),
+        "leg_profit": qty * (sell - buy),
+        "roi": round((sell - buy) / buy * 100, 1),
+        "intra": True,
+        "pyro": False,
+    }
+
+
+def snapshot_of(leg: dict, source: str) -> dict:
+    return {
+        "ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "price_buy": leg["price_buy"],
+        "price_sell": leg["price_sell"],
+        "scu_stock": leg["scu_stock"],
+        "source": source,
+    }
+
+
+def build_routes(legs: list[dict], budget: int, profile: dict,
+                 client, max_calls: int, ship_key: str = "") -> list[dict]:
+    """组装简单循环并生成 watchlist route 结构。
+
+    组合多样性：同一供货源（同商品+同买点）最多 2 条路线——同源价格完全联动，
+    超量收录没有备选对冲价值。
+    """
+    ctx = None
+    try:
+        ctx = common.build_ctx()
+    except Exception:
+        pass
+
+    routes = []
+    calls_left = max_calls - 1  # 第一次路线查询已用掉 1
+    intra_seen = set()
+    source_count: dict = {}
+
+    for leg in legs[:12]:
+        source = (leg["id_commodity"], leg["buy_terminal"]["id"])
+        if source_count.get(source, 0) >= 2:
+            continue
+        if leg["intra"]:
+            key = (leg["buy_terminal"]["id"], leg["sell_terminal"]["id"])
+            if key in intra_seen:
+                continue
+            intra_seen.add(key)
+            legs_pair = [leg]
+            loop_type = "intra"
+        else:
+            if calls_left <= 0:
+                legs_pair = [leg]
+                loop_type = "one-way"
+            else:
+                calls_left -= 1
+                row = find_return_leg(client, profile["origin"]["id_planet"],
+                                      budget, leg["id_planet_destination"])
+                back = make_return_leg(row, budget, profile) if row else None
+                legs_pair = [leg] + ([back] if back else [])
+                loop_type = "there-back" if back else "one-way"
+
+        route = {
+            "id": None,  # 由调用方分配
+            "type": loop_type,
+            "status": "candidate",
+            "risk": "pyro" if leg["pyro"] else "normal",
+            "ship": ship_key,
+            "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "legs": legs_pair,
+            "loop_profit": sum(x["leg_profit"] for x in legs_pair),
+        }
+        source_count[source] = source_count.get(source, 0) + 1
+        for x in legs_pair:
+            x["qt_sec"] = None
+            if ctx is not None:
+                x["qt_sec"] = common.qt_seconds(
+                    ctx, x["buy_terminal"]["name"], x["sell_terminal"]["name"])
+        route["qt_sec_total"] = sum(x["qt_sec"] or 0 for x in legs_pair) or None
+        route["snapshots"] = [snapshot_of(leg, "uex") for leg in legs_pair]
+        routes.append(route)
+        if len(routes) >= 6:
+            break
+    return routes
+
+
+def merge_watchlist(watchlist: dict, new_routes: list[dict]) -> tuple[dict, int]:
+    """按 (买端id, 卖端id, 商品id) 去重合并；已存在的不动状态只刷新报价。"""
+    def key_of(route):
+        l0 = route["legs"][0]
+        return (l0["buy_terminal"]["id"], l0["sell_terminal"]["id"], l0["id_commodity"])
+
+    existing = {key_of(r): r for r in watchlist["routes"]}
+    added = 0
+    for route in new_routes:
+        k = key_of(route)
+        if k in existing:
+            old = existing[k]
+            old["legs"] = route["legs"]
+            old["loop_profit"] = route["loop_profit"]
+            old["qt_sec_total"] = route.get("qt_sec_total")
+            continue
+        watchlist["next_id"] = watchlist.get("next_id", 1)
+        route["id"] = f"r{watchlist['next_id']}"
+        watchlist["next_id"] += 1
+        watchlist["routes"].append(route)
+        existing[k] = route
+        added += 1
+    return watchlist, added
+
+
+def render_watchlist_md(watchlist: dict, budget: int) -> str:
+    active = [r for r in watchlist["routes"] if r["status"] != "retired"]
+    best_id = max(active, key=lambda r: r["loop_profit"])["id"] if active else None
+    lines = [
+        f"**预算 {budget:,} aUEC · 生成于 {watchlist['updated_at']}**",
+        "",
+        f"首选：**{best_id}**（其余为备选——价格波动使其反超首选时，update_prices 会提示调仓）",
+        "",
+        "| ID | 角色 | 类型 | 航段 | 商品 | 买→卖 | 数量 | 本段利润 | 圈利润 | 风险 |",
+        "|----|------|------|------|------|-------|------|---------|--------|------|",
+    ]
+    for r in active:
+        role = "**首选**" if r["id"] == best_id else "备选"
+        for i, l in enumerate(r["legs"]):
+            lines.append(
+                f"| {r['id'] if i == 0 else ''} "
+                f"| {role if i == 0 else ''} "
+                f"| {r['type'] if i == 0 else ''} "
+                f"| {l['buy_terminal']['name']} → {l['sell_terminal']['name']} "
+                f"| {l['commodity']} "
+                f"| {l['price_buy']:,} → {l['price_sell']:,} "
+                f"| {l['qty']} SCU "
+                f"| +{l['leg_profit']:,} "
+                f"| {'+' + format(r['loop_profit'], ',') if i == 0 else ''} "
+                f"| {r['risk'] if i == 0 else ''} |")
+    return "\n".join(lines)
+
+
+AUTO_BEGIN = "<!-- sc-trader:auto-begin -->"
+AUTO_END = "<!-- sc-trader:auto-end -->"
+
+
+def update_docs(routes_md: str) -> None:
+    docs = common.REPO_ROOT / "docs" / "routes.md"
+    text = docs.read_text(encoding="utf-8") if docs.exists() else ""
+    block = f"{AUTO_BEGIN}\n### 监控中的路线\n\n{routes_md}\n{AUTO_END}"
+    if AUTO_BEGIN in text and AUTO_END in text:
+        pre = text.split(AUTO_BEGIN)[0]
+        post = text.split(AUTO_END)[1]
+        text = pre + block + post
+    else:
+        text = text.rstrip() + "\n\n" + block + "\n"
+    docs.write_text(text, encoding="utf-8")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--budget", type=int, default=None)
+    parser.add_argument("--ship", default=None,
+                        help="船型 key（profile.json ships 里的键，默认 default_ship）")
+    parser.add_argument("--top", type=int, default=5)
+    parser.add_argument("--include-pyro", action="store_true")
+    parser.add_argument("--max-calls", type=int, default=4,
+                        help="本次最多 UEX API 调用数（限速保护）")
+    args = parser.parse_args()
+
+    profile = common.load_profile()
+    ship_key = args.ship or profile.get("default_ship")
+    ships = profile.get("ships") or {}
+    if ship_key not in ships:
+        print(f"ERROR: 未知船型 '{ship_key}'，可选：{', '.join(ships) or '(profile 未定义 ships)'}",
+              file=sys.stderr)
+        return 1
+    profile["ship"] = ships[ship_key]
+    ship_name = ships[ship_key].get("name", ship_key)
+    budget = args.budget or profile["budget_default"]
+    if args.include_pyro:
+        profile["include_pyro"] = True
+
+    client = common.get_client()
+    origin_planet = profile["origin"]["id_planet"]
+    rows = fetch_routes(client, origin_planet, budget)
+    if not rows:
+        print("ERROR: 未取到路线数据（API 限速或网络）", file=sys.stderr)
+        return 1
+
+    legs = filter_legs(rows, budget, profile, profile["include_pyro"])
+    if not legs:
+        print("ERROR: 过滤后无可用航腿", file=sys.stderr)
+        return 1
+
+    new_routes = build_routes(legs, budget, profile, client, args.max_calls,
+                              ship_key=ship_key)
+    watchlist = common.load_watchlist()
+    watchlist, added = merge_watchlist(watchlist, new_routes)
+    # 组合重建后重置调仓基线：当前最优即起始首选
+    active = [r for r in watchlist["routes"] if r["status"] != "retired"]
+    if active:
+        watchlist["ranking_prev"] = [r["id"] for r in
+                                     sorted(active, key=lambda x: x["loop_profit"],
+                                            reverse=True)]
+    common.save_watchlist(watchlist)
+    update_docs(render_watchlist_md(watchlist, budget))
+
+    print(f"[ship: {ship_name}] 新增 {added} 条路线，watchlist 共 "
+          f"{sum(1 for r in watchlist['routes'] if r['status'] != 'retired')} 条有效")
+    print()
+    print(render_watchlist_md(watchlist, budget))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,30 @@
+{
+  "default_ship": "aurora_ts",
+  "ships": {
+    "aurora_ts": {
+      "name": "Aurora Mk II + TS module",
+      "scu_total": 8,
+      "max_box": 2,
+      "slots": [
+        {"size": 1, "count": 4},
+        {"size": 2, "count": 2}
+      ]
+    },
+    "c1_spirit": {
+      "name": "C1 Spirit",
+      "scu_total": 64,
+      "max_box": 32,
+      "slots": [
+        {"size": 32, "count": 2}
+      ]
+    }
+  },
+  "budget_default": 100000,
+  "origin": {
+    "star_system": "Stanton",
+    "id_planet": 190,
+    "planet_name": "MicroTech"
+  },
+  "include_pyro": false,
+  "max_container_box": 2
+}

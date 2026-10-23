@@ -11,12 +11,15 @@ Star Citizen 工具集整合仓库：交易 skill、共享数据库 MCP、游戏
 ```
 uexcorp/
 ├── skills/
-│   └── uexcorp-sc/          # UEXcorp 交易顾问 skill（vendor，MIT）
+│   ├── uexcorp-sc/          # UEXcorp 交易顾问 skill（vendor，MIT）
+│   └── sc-trader/           # 跑商推荐 + 价格更新 skill（自研，含脚本资产）
 ├── mcp/
 │   └── scdb-mcp/            # SC 共享数据库 MCP server（子模块，GPL-3.0）
 ├── tools/
 │   ├── kioskprobe/          # 游戏终端截图价格采集工具（子模块）
 │   └── uexinfo/             # 游戏内 overlay：UEX 价格 + 路线规划（子模块，MIT）
+├── docs/
+│   └── routes.md            # 跑商路线手册（含 sc-trader 自动渲染的监控区块）
 ├── .mcp.json                # Claude Code 项目级 MCP 配置（scdb）
 └── README.md
 ```
@@ -99,6 +102,30 @@ venv/bin/uexinfo            # overlay 热键 alt+shift+u，WebSocket 端口 8090
 可选增强：安装 Tesseract OCR 启用终端扫描；`pip install -e .[playwright]` 启用
 sc-trade.tools 交叉验证。
 
+### 5. `skills/sc-trader` — 跑商推荐与价格更新（自研 skill）
+
+复用 `tools/uexinfo` 库（UEX 客户端/缓存/航段时间图），在其上做船型感知增强：
+
+```bash
+# 环境自检（缺失自动补装 tesseract / playwright / venv / 子模块）
+tools/uexinfo/venv/bin/python skills/sc-trader/scripts/check.py
+
+# 路线推荐：--ship 选船（profile.json ships），--budget 选预算
+tools/uexinfo/venv/bin/python skills/sc-trader/scripts/recommend.py \
+  --ship c1_spirit --budget 300000
+
+# 单次价格更新（UEX API + 玩家扫描价优先 ★）
+tools/uexinfo/venv/bin/python skills/sc-trader/scripts/update_prices.py
+
+# 截图读数入库（会话内 Claude 视觉读图后调用，写入 uexinfo scan_prices.json）
+tools/uexinfo/venv/bin/python skills/sc-trader/scripts/record.py \
+  --commodity "Medical Supplies" --terminal "Rayari Kaltag Research Outpost" --price-buy 3343
+```
+
+数据文件：`skills/sc-trader/data/profile.json`（船型：aurora_ts 8 SCU / c1_spirit 64 SCU）、
+`watchlist.json`（路线 + 价格快照）。推荐结果自动渲染到 `docs/routes.md`。
+经 SkillOpt 流程迭代（run 记录在 `~/.tclaude/skills/skillopt_runs/sc-trader/`）。
+
 ## 许可证说明
 
 | 组件 | 许可证 | 整合方式 |
@@ -107,5 +134,6 @@ sc-trade.tools 交叉验证。
 | scdb-mcp | GPL-3.0 | git 子模块引用 |
 | kioskprobe | 未声明 | git 子模块引用（不复制源码） |
 | uexinfo | MIT | git 子模块引用 |
+| sc-trader | 本仓库自研 | vendor（复用 uexinfo 库） |
 
 子模块仅引用上游仓库，不含源码拷贝；各组件遵循其原始许可证。

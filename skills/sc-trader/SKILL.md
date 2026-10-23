@@ -1,0 +1,74 @@
+---
+name: sc-trader
+description: Star Citizen 跑商助手。按飞船/预算推荐并记录跑商路线（recommend）、单次价格更新与变化报告（update_prices）、游戏截图读数入库（record）、环境自检补装（check）。触发词：跑商、路线推荐、价格更新、录入价格、环境自检。
+---
+
+# sc-trader — SC 跑商推荐与价格更新
+
+为 Star Citizen 玩家提供：路线推荐 → 记录到 watchlist → 价格变化感知（UEX API + 玩家截图读数）。
+
+## 硬性前提
+
+- **解释器**：所有脚本必须用仓库自带 venv 跑：`tools/uexinfo/venv/bin/python`（依赖 uexinfo 包，普通 python3 没有该依赖）。
+- **数据文件**：`skills/sc-trader/data/profile.json`（船型表/预算/出发地）；`skills/sc-trader/data/watchlist.json`（路线 + 价格快照，git 跟踪）。
+- **限速**：UEX 匿名 10 次/分钟。脚本内置 6.5s 调用间隔；**单任务 API 总调用 ≤5 次**。遇 `UEXError`/HTTP 400/429：等 60s 重试一次，再失败就如实报告并停止，不要连续重试。
+
+## 四个命令
+
+### 1. check — 环境自检（缺失自动补装）
+
+```bash
+tools/uexinfo/venv/bin/python skills/sc-trader/scripts/check.py [--no-fix]
+```
+
+检查 6 项：git 子模块 / uexinfo venv / uexinfo 库导入 / tesseract（brew）/ playwright extra / UEX API 连通。
+**验收**：输出 `N/N 项通过`。FAIL 项在非 `--no-fix` 模式下会自动补装；补装后重跑一次确认全绿，仍 FAIL 才报告用户。
+
+### 2. recommend — 路线推荐（支持多船型）
+
+```bash
+tools/uexinfo/venv/bin/python skills/sc-trader/scripts/recommend.py \
+  --budget <aUEC> [--ship <ship_key>] [--top 5] [--include-pyro]
+```
+
+- `--ship` 取 `profile.json` 里 `ships` 的键（如 `aurora_ts`、`c1_spirit`）；缺省用 `default_ship`。输出首行会标注 `[ship: <船名>]`。
+- 行为：按出发行星拉 UEX 路线 → 数量/箱体/风险过滤（按所选船的槽位算可装量）→ 组装简单循环（同行星对折或双向往返）→ 写 `watchlist.json` + 渲染 `docs/routes.md`。
+- **验收**：stdout 出现以 `| ID | 类型` 开头的表格；`watchlist.json` 是合法 JSON、routes 非空、每条 loop_profit>0；qty 不超过所选船 `scu_total`。
+- **重复推荐**：先清空 `routes`（保留 `next_id` 字段）再跑，得到干净候选集；重建后 `ranking_prev` 基线自动重置。
+- **组合语义**：推荐的是一组路线而非单条——利润最高者为**首选**，其余为**备选**；同一供货源（同商品+同买点）最多 2 条（同源价格完全联动，没有对冲价值）。用户问"跑哪条"按首选回答，首选因价格波动劣化时按收益榜改推新首选。
+- **预算与库存的关系**：数量 = min(货舱, 预算可买, 买点库存)。**预算加大不一定增产**——货源库存卡死时 500k 和 300k 结果一致是正常现象，如实说明即可，不要当作故障。
+
+### 3. update_prices — 单次价格更新
+
+```bash
+tools/uexinfo/venv/bin/python skills/sc-trader/scripts/update_prices.py
+```
+
+输出：每条价格变化一行，格式 `商品 @ 买端→卖端: 买入 旧→新 (±%) [来源]`；无变化时也要报告"检查了 N 条路线、0 项变化"。
+`[player★]` = 截图/扫描价（record.py 写入的），**优先于 UEX 数据**；`[uex]` = 拉回的真实价会自动覆盖本地任何被篡改/过期的值——这是预期纠偏行为，不是异常。
+更新完输出**组合收益榜**（全部路线按最新圈利润排序，标注首选）；与上次排名对比，**首选易主时输出** `⚠️ 最优路线变更: <旧>（现 +X） → <新>（+Y），建议切换跑商路线`——这是用户调整路线的信号，必须原样转述给用户。
+执行后 watchlist 已更新（快照保留最近 10 条/腿，`ranking_prev` 记录最新排名），无需再手动改。
+
+### 4. record — 截图读数入库
+
+会话流程：用户发游戏截图 → 你（Claude）视觉读出 商品名 / 终端名 / 买入价 / 卖出价 / 库存 → 逐条调用：
+
+```bash
+tools/uexinfo/venv/bin/python skills/sc-trader/scripts/record.py \
+  --commodity "Medical Supplies" --terminal "Rayari Kaltag Research Outpost" \
+  --price-buy 3343 [--price-sell 5500] [--qty 8]
+```
+
+输出先逐条列出 `商品 @ 终端: price_buy/price_sell 旧→新` 的变化行，再给 `已记录: ...` 确认。终端匹配按**买端或卖端**双向：在买点扫到的价刷新买入价，在卖点扫到的价刷新卖出价。
+**验收**：输出 `已记录: ...` 且 `watchlist 匹配航腿 N 条已刷新`（N>0）。名称模糊匹配报 ERROR 时，改用截图里出现的**完整终端名**重试。
+record 写入 uexinfo 的 scan_prices.json，此后 update_prices 和 uexinfo overlay 都会以该价优先（★）。
+
+## 数据一致性
+
+- 脚本写完 watchlist 后如果 JSON 解析失败：不要手工修补，重跑对应命令重建。
+- 大数字核对：8 SCU 满载 Medical Supplies（3,343→5,500）单段利润应为 ≈17,256 aUEC；C1 64 SCU 满载同商品应 ≈137,648。量级不符先查船型/箱体配置。
+
+## 验收口径
+
+- **Aurora 100k**：recommend 产出 ≥1 条循环；与 docs/routes.md 循环 A 量级一致。
+- **Aurora 200k / 300k、C1 300k / 500k**：不改 skill，换 `--budget` / `--ship` 重跑，应同样通过全部验收项。

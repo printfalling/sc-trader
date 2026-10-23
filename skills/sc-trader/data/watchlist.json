@@ -1,0 +1,178 @@
+{
+  "version": 1,
+  "updated_at": "2026-10-23T08:01:01+00:00",
+  "routes": [
+    {
+      "id": "r1",
+      "type": "there-back",
+      "status": "candidate",
+      "risk": "normal",
+      "ship": "aurora_ts",
+      "created_at": "2026-10-23T08:00:54+00:00",
+      "legs": [
+        {
+          "commodity": "Medical Supplies",
+          "id_commodity": 51,
+          "buy_terminal": {
+            "id": 72,
+            "name": "Rayari Kaltag Research Outpost"
+          },
+          "sell_terminal": {
+            "id": 45,
+            "name": "Admin - HUR-L2"
+          },
+          "id_planet_destination": 116,
+          "destination_planet": "Hurston",
+          "destination_system": "Stanton",
+          "price_buy": 3343,
+          "price_sell": 5600,
+          "scu_stock": 8,
+          "qty": 8,
+          "box_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16
+          ],
+          "leg_profit": 18056,
+          "roi": 67.5,
+          "intra": false,
+          "pyro": false,
+          "qt_sec": 633.7717808764888,
+          "snapshots": [
+            {
+              "ts": "2026-10-23T08:00:54+00:00",
+              "price_buy": 3343,
+              "price_sell": 5600,
+              "scu_stock": 8,
+              "source": "uex"
+            }
+          ]
+        },
+        {
+          "commodity": "Iron",
+          "id_commodity": 44,
+          "buy_terminal": {
+            "id": 30,
+            "name": "HDMS-Edmond"
+          },
+          "sell_terminal": {
+            "id": 89,
+            "name": "TDD - Trade and Development Division - Commons - New Babbage"
+          },
+          "id_planet_destination": 190,
+          "destination_planet": "MicroTech",
+          "destination_system": "Stanton",
+          "price_buy": 2708,
+          "price_sell": 3400,
+          "scu_stock": 1,
+          "qty": 1,
+          "box_sizes": [
+            4,
+            8,
+            16
+          ],
+          "leg_profit": 692,
+          "roi": 25.6,
+          "intra": true,
+          "pyro": false,
+          "qt_sec": 633.7717808764888,
+          "snapshots": [
+            {
+              "ts": "2026-10-23T08:00:54+00:00",
+              "price_buy": 2708,
+              "price_sell": 3400,
+              "scu_stock": 1,
+              "source": "uex"
+            }
+          ]
+        }
+      ],
+      "loop_profit": 18748,
+      "qt_sec_total": 1267.5435617529777,
+      "snapshots": [
+        {
+          "ts": "2026-10-23T08:00:54+00:00",
+          "price_buy": 3343,
+          "price_sell": 5600,
+          "scu_stock": 8,
+          "source": "uex"
+        },
+        {
+          "ts": "2026-10-23T08:00:54+00:00",
+          "price_buy": 2708,
+          "price_sell": 3400,
+          "scu_stock": 1,
+          "source": "uex"
+        }
+      ]
+    },
+    {
+      "id": "r2",
+      "type": "intra",
+      "status": "candidate",
+      "risk": "normal",
+      "ship": "aurora_ts",
+      "created_at": "2026-10-23T08:00:54+00:00",
+      "legs": [
+        {
+          "commodity": "Medical Supplies",
+          "id_commodity": 51,
+          "buy_terminal": {
+            "id": 72,
+            "name": "Rayari Kaltag Research Outpost"
+          },
+          "sell_terminal": {
+            "id": 89,
+            "name": "TDD - Trade and Development Division - Commons - New Babbage"
+          },
+          "id_planet_destination": 190,
+          "destination_planet": "MicroTech",
+          "destination_system": "Stanton",
+          "price_buy": 3343,
+          "price_sell": 5500,
+          "scu_stock": 8,
+          "qty": 8,
+          "box_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16
+          ],
+          "leg_profit": 17256,
+          "roi": 64.5,
+          "intra": true,
+          "pyro": false,
+          "qt_sec": 133.4256380792608,
+          "snapshots": [
+            {
+              "ts": "2026-10-23T08:00:54+00:00",
+              "price_buy": 3343,
+              "price_sell": 5500,
+              "scu_stock": 8,
+              "source": "uex"
+            }
+          ]
+        }
+      ],
+      "loop_profit": 17256,
+      "qt_sec_total": 133.4256380792608,
+      "snapshots": [
+        {
+          "ts": "2026-10-23T08:00:54+00:00",
+          "price_buy": 3343,
+          "price_sell": 5500,
+          "scu_stock": 8,
+          "source": "uex"
+        }
+      ]
+    }
+  ],
+  "next_id": 3,
+  "ranking_prev": [
+    "r1",
+    "r2"
+  ]
+}

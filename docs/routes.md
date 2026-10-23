@@ -62,3 +62,17 @@ curl -s "https://api.uexcorp.space/2.0/commodities_prices?commodity_name=Medical
 
 注意：匿名调用限速 10 次/分钟；配置 UEXcorp token（[申请入口](https://uexcorp.space/api/apps)）后
 限额提升且可提交价格。路线规划也可用 [sc-trade.tools](https://sc-trade.tools)（纯前端，无公开 API）。
+
+<!-- sc-trader:auto-begin -->
+### 监控中的路线
+
+**预算 100,000 aUEC · 生成于 2026-10-23T08:00:54+00:00**
+
+首选：**r1**（其余为备选——价格波动使其反超首选时，update_prices 会提示调仓）
+
+| ID | 角色 | 类型 | 航段 | 商品 | 买→卖 | 数量 | 本段利润 | 圈利润 | 风险 |
+|----|------|------|------|------|-------|------|---------|--------|------|
+| r1 | **首选** | there-back | Rayari Kaltag Research Outpost → Admin - HUR-L2 | Medical Supplies | 3,343 → 5,600 | 8 SCU | +18,056 | +18,748 | normal |
+|  |  |  | HDMS-Edmond → TDD - Trade and Development Division - Commons - New Babbage | Iron | 2,708 → 3,400 | 1 SCU | +692 |  |  |
+| r2 | 备选 | intra | Rayari Kaltag Research Outpost → TDD - Trade and Development Division - Commons - New Babbage | Medical Supplies | 3,343 → 5,500 | 8 SCU | +17,256 | +17,256 | normal |
+<!-- sc-trader:auto-end -->
