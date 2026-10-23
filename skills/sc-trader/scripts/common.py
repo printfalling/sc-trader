@@ -90,15 +90,26 @@ _ensure_uexinfo_on_path()
 def get_client():
     """UEXClient（cloudscraper 会话）。
 
-    若 profile.json 配置了 uexcorp_api_token（或环境变量 UEXCORP_API_TOKEN），
-    自动附加 Bearer 头——token 用户限额远高于匿名（匿名 10/min，大流量会被 403 临时封禁）。
-    申请：https://uexcorp.space/api/apps
+    关键修正：BASE_URL 切到官方 API 子域 api.uexcorp.space——主域 uexcorp.space/api
+    走主站 Cloudflare 防护，大流量会被 403；API 子域不受影响（实测 200）。
+
+    token 优先级：环境变量 UEXCORP_API_TOKEN > data/secrets.json（gitignored）>
+    profile.json uexcorp_api_token。配置后附加 Bearer 头，额度 172,800/天
+    （匿名 14,400/天）。申请：https://uexcorp.space/api/apps
     """
+    from uexinfo.api import uex_client as _uexmod
     from uexinfo.api.uex_client import UEXClient
+    _uexmod.BASE_URL = "https://api.uexcorp.space/2.0"
     client = UEXClient()
     token = ""
     try:
-        token = load_profile().get("uexcorp_api_token") or ""
+        secrets = SKILL_DIR / "data" / "secrets.json"
+        if secrets.exists():
+            token = json.load(open(secrets, encoding="utf-8")).get("uexcorp_api_token") or ""
+    except Exception:
+        pass
+    try:
+        token = load_profile().get("uexcorp_api_token") or token
     except Exception:
         pass
     token = os.environ.get("UEXCORP_API_TOKEN", token)

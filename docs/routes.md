@@ -66,48 +66,48 @@ curl -s "https://api.uexcorp.space/2.0/commodities_prices?commodity_name=Medical
 <!-- sc-trader:auto-begin -->
 ### 监控中的路线
 
-**预算 200,000 aUEC · 生成于 2026-10-23T09:42:32+00:00**
+**预算 100,000 aUEC · 生成于 2026-10-23T11:12:52+00:00**
 
-### r99 备选 · there-back · 风险 normal
-圈利润 **+83,755** · 圈时间 59min · 时薪 85,174/h
-- 航段1：买 Taranite 18,792/SCU × 8 SCU @ Samson & Son's Salvage Center [Stanton > ArcCorp > Wala]
+### r105 备选 · there-back · 风险 normal
+圈利润 **+53,131** · 圈时间 53min · 时薪 60,148/h
+- 航段1：买 Taranite 18,792/SCU × 5 SCU @ Samson & Son's Salvage Center [Stanton > ArcCorp > Wala]
   → 卖 29,000/SCU @ TDD - Trade and Development Division - Cloudview Center - Orison [Stanton > Crusader]
-  本段利润 +81,664（量子 12min）
+  本段利润 +51,040（量子 12min）
 - 航段2：买 Medical Supplies 3,409/SCU × 1 SCU @ Hickes Research Outpost [Stanton > Crusader > Cellin]
   → 卖 5,500/SCU @ Admin - ARC-L4 [Stanton > ArcCorp > ArcCorp Lagrange Point 4]
   本段利润 +2,091（库存 1，量子 13min）
 
-### r100 备选 · intra · 风险 normal
-圈利润 **+73,780** · 圈时间 43min · 时薪 102,709/h
-- 航段1：买 Compboard 26,460/SCU × 7 SCU @ Rayari Kaltag Research Outpost [Stanton > MicroTech > Calliope]
-  → 卖 37,000/SCU @ Shubin Mining Facility SM0-10 [Stanton > MicroTech]
-  本段利润 +73,780（量子 21min）
-
-### r101 备选 · intra · 风险 normal
-圈利润 **+73,780** · 圈时间 43min · 时薪 102,709/h
-- 航段1：买 Compboard 26,460/SCU × 7 SCU @ Rayari Kaltag Research Outpost [Stanton > MicroTech > Calliope]
-  → 卖 37,000/SCU @ Shubin Mining Facility SM0-13 [Stanton > MicroTech]
-  本段利润 +73,780（量子 21min）
-
-### r102 备选 · intra · 风险 normal
-圈利润 **+73,780** · 圈时间 43min · 时薪 102,709/h
-- 航段1：买 Compboard 26,460/SCU × 7 SCU @ Rayari Anvik Research Outpost [Stanton > MicroTech > Calliope]
-  → 卖 37,000/SCU @ Shubin Mining Facility SM0-10 [Stanton > MicroTech]
-  本段利润 +73,780（量子 21min）
-
-### r103 备选 · intra · 风险 normal
-圈利润 **+73,780** · 圈时间 43min · 时薪 102,709/h
-- 航段1：买 Compboard 26,460/SCU × 7 SCU @ Rayari Anvik Research Outpost [Stanton > MicroTech > Calliope]
-  → 卖 37,000/SCU @ Shubin Mining Facility SM0-13 [Stanton > MicroTech]
-  本段利润 +73,780（量子 21min）
-
-### r104 ★首选 · there-back · 风险 normal
-圈利润 **+90,920** · 圈时间 74min · 时薪 74,119/h
-- 航段1：买 Taranite 18,792/SCU × 8 SCU @ Samson & Son's Salvage Center [Stanton > ArcCorp > Wala]
+### r106 ★首选 · there-back · 风险 normal
+圈利润 **+63,296** · 圈时间 68min · 时薪 56,179/h
+- 航段1：买 Taranite 18,792/SCU × 5 SCU @ Samson & Son's Salvage Center [Stanton > ArcCorp > Wala]
   → 卖 28,000/SCU @ TDD - Trade and Development Division - Commons - New Babbage [Stanton > MicroTech]
-  本段利润 +73,664（量子 16min）
+  本段利润 +46,040（量子 16min）
 - 航段2：买 Medical Supplies 3,343/SCU × 8 SCU @ Rayari Kaltag Research Outpost [Stanton > MicroTech > Calliope]
   → 卖 5,500/SCU @ Admin - ARC-L4 [Stanton > ArcCorp > ArcCorp Lagrange Point 4]
   本段利润 +17,256（库存 8，量子 9min）
+
+### r107 备选 · intra · 风险 normal
+圈利润 **+31,620** · 圈时间 35min · 时薪 54,051/h
+- 航段1：买 Compboard 26,460/SCU × 3 SCU @ Rayari Kaltag Research Outpost [Stanton > MicroTech > Calliope]
+  → 卖 37,000/SCU @ Shubin Mining Facility SM0-10 [Stanton > MicroTech]
+  本段利润 +31,620（量子 21min）
+
+### r108 备选 · intra · 风险 normal
+圈利润 **+31,620** · 圈时间 35min · 时薪 54,051/h
+- 航段1：买 Compboard 26,460/SCU × 3 SCU @ Rayari Kaltag Research Outpost [Stanton > MicroTech > Calliope]
+  → 卖 37,000/SCU @ Shubin Mining Facility SM0-13 [Stanton > MicroTech]
+  本段利润 +31,620（量子 21min）
+
+### r109 备选 · intra · 风险 normal
+圈利润 **+31,620** · 圈时间 35min · 时薪 54,051/h
+- 航段1：买 Compboard 26,460/SCU × 3 SCU @ Rayari Anvik Research Outpost [Stanton > MicroTech > Calliope]
+  → 卖 37,000/SCU @ Shubin Mining Facility SM0-10 [Stanton > MicroTech]
+  本段利润 +31,620（量子 21min）
+
+### r110 备选 · intra · 风险 normal
+圈利润 **+31,620** · 圈时间 35min · 时薪 54,051/h
+- 航段1：买 Compboard 26,460/SCU × 3 SCU @ Rayari Anvik Research Outpost [Stanton > MicroTech > Calliope]
+  → 卖 37,000/SCU @ Shubin Mining Facility SM0-13 [Stanton > MicroTech]
+  本段利润 +31,620（量子 21min）
 
 <!-- sc-trader:auto-end -->

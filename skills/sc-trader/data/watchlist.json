@@ -1,15 +1,436 @@
 {
   "version": 1,
-  "updated_at": "2026-10-23T10:53:54+00:00",
-  "routes": [],
-  "next_id": 105,
+  "updated_at": "2026-10-23T11:12:52+00:00",
+  "routes": [
+    {
+      "id": "r105",
+      "type": "there-back",
+      "status": "candidate",
+      "risk": "normal",
+      "ship": "aurora_ts",
+      "created_at": "2026-10-23T11:12:45+00:00",
+      "legs": [
+        {
+          "commodity": "Taranite",
+          "id_commodity": 73,
+          "buy_terminal": {
+            "id": 75,
+            "name": "Samson & Son's Salvage Center",
+            "path": "Stanton > ArcCorp > Wala"
+          },
+          "sell_terminal": {
+            "id": 90,
+            "name": "TDD - Trade and Development Division - Cloudview Center - Orison",
+            "path": "Stanton > Crusader"
+          },
+          "id_planet_origin": 4,
+          "origin_planet": "ArcCorp",
+          "id_planet_destination": 59,
+          "destination_planet": "Crusader",
+          "destination_system": "Stanton",
+          "price_buy": 18792,
+          "price_sell": 29000,
+          "scu_stock": 0,
+          "qty": 5,
+          "box_sizes": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "leg_profit": 51040,
+          "roi": 54.3,
+          "intra": false,
+          "pyro": false,
+          "source": "computed",
+          "qt_sec": 700.4845999161192
+        },
+        {
+          "commodity": "Medical Supplies",
+          "id_commodity": 51,
+          "buy_terminal": {
+            "id": 42,
+            "name": "Hickes Research Outpost",
+            "path": "Stanton > Crusader > Cellin"
+          },
+          "sell_terminal": {
+            "id": 4,
+            "name": "Admin - ARC-L4",
+            "path": "Stanton > ArcCorp > ArcCorp Lagrange Point 4"
+          },
+          "id_planet_destination": 4,
+          "destination_planet": "ArcCorp",
+          "destination_system": "Stanton",
+          "price_buy": 3409,
+          "price_sell": 5500,
+          "scu_stock": 1,
+          "qty": 1,
+          "box_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16
+          ],
+          "leg_profit": 2091,
+          "roi": 61.3,
+          "intra": true,
+          "pyro": false,
+          "qt_sec": 800.553828475565
+        }
+      ],
+      "loop_profit": 53131,
+      "qt_sec_total": 1501.0384283916842,
+      "loop_time_min": 53.0,
+      "profit_per_hour": 60148,
+      "snapshots": [
+        {
+          "ts": "2026-10-23T11:12:45+00:00",
+          "price_buy": 18792,
+          "price_sell": 29000,
+          "scu_stock": 0,
+          "source": "uex"
+        },
+        {
+          "ts": "2026-10-23T11:12:45+00:00",
+          "price_buy": 3409,
+          "price_sell": 5500,
+          "scu_stock": 1,
+          "source": "uex"
+        }
+      ]
+    },
+    {
+      "id": "r106",
+      "type": "there-back",
+      "status": "candidate",
+      "risk": "normal",
+      "ship": "aurora_ts",
+      "created_at": "2026-10-23T11:12:52+00:00",
+      "legs": [
+        {
+          "commodity": "Taranite",
+          "id_commodity": 73,
+          "buy_terminal": {
+            "id": 75,
+            "name": "Samson & Son's Salvage Center",
+            "path": "Stanton > ArcCorp > Wala"
+          },
+          "sell_terminal": {
+            "id": 89,
+            "name": "TDD - Trade and Development Division - Commons - New Babbage",
+            "path": "Stanton > MicroTech"
+          },
+          "id_planet_origin": 4,
+          "origin_planet": "ArcCorp",
+          "id_planet_destination": 190,
+          "destination_planet": "MicroTech",
+          "destination_system": "Stanton",
+          "price_buy": 18792,
+          "price_sell": 28000,
+          "scu_stock": 0,
+          "qty": 5,
+          "box_sizes": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "leg_profit": 46040,
+          "roi": 49.0,
+          "intra": false,
+          "pyro": false,
+          "source": "computed",
+          "qt_sec": 984.0140808345485
+        },
+        {
+          "commodity": "Medical Supplies",
+          "id_commodity": 51,
+          "buy_terminal": {
+            "id": 72,
+            "name": "Rayari Kaltag Research Outpost",
+            "path": "Stanton > MicroTech > Calliope"
+          },
+          "sell_terminal": {
+            "id": 4,
+            "name": "Admin - ARC-L4",
+            "path": "Stanton > ArcCorp > ArcCorp Lagrange Point 4"
+          },
+          "id_planet_destination": 4,
+          "destination_planet": "ArcCorp",
+          "destination_system": "Stanton",
+          "price_buy": 3343,
+          "price_sell": 5500,
+          "scu_stock": 8,
+          "qty": 8,
+          "box_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16
+          ],
+          "leg_profit": 17256,
+          "roi": 64.5,
+          "intra": true,
+          "pyro": false,
+          "qt_sec": 550.3807570769509
+        }
+      ],
+      "loop_profit": 63296,
+      "qt_sec_total": 1534.3948379114995,
+      "loop_time_min": 67.6,
+      "profit_per_hour": 56179,
+      "snapshots": [
+        {
+          "ts": "2026-10-23T11:12:52+00:00",
+          "price_buy": 18792,
+          "price_sell": 28000,
+          "scu_stock": 0,
+          "source": "uex"
+        },
+        {
+          "ts": "2026-10-23T11:12:52+00:00",
+          "price_buy": 3343,
+          "price_sell": 5500,
+          "scu_stock": 8,
+          "source": "uex"
+        }
+      ]
+    },
+    {
+      "id": "r107",
+      "type": "intra",
+      "status": "candidate",
+      "risk": "normal",
+      "ship": "aurora_ts",
+      "created_at": "2026-10-23T11:12:52+00:00",
+      "legs": [
+        {
+          "commodity": "Compboard",
+          "id_commodity": 18,
+          "buy_terminal": {
+            "id": 72,
+            "name": "Rayari Kaltag Research Outpost",
+            "path": "Stanton > MicroTech > Calliope"
+          },
+          "sell_terminal": {
+            "id": 80,
+            "name": "Shubin Mining Facility SM0-10",
+            "path": "Stanton > MicroTech"
+          },
+          "id_planet_origin": 190,
+          "origin_planet": "MicroTech",
+          "id_planet_destination": 190,
+          "destination_planet": "MicroTech",
+          "destination_system": "Stanton",
+          "price_buy": 26460,
+          "price_sell": 37000,
+          "scu_stock": 0,
+          "qty": 3,
+          "box_sizes": [
+            1,
+            2
+          ],
+          "leg_profit": 31620,
+          "roi": 39.8,
+          "intra": true,
+          "pyro": false,
+          "source": "computed",
+          "qt_sec": 1267.5435617529777
+        }
+      ],
+      "loop_profit": 31620,
+      "qt_sec_total": 1267.5435617529777,
+      "loop_time_min": 35.1,
+      "profit_per_hour": 54051,
+      "snapshots": [
+        {
+          "ts": "2026-10-23T11:12:52+00:00",
+          "price_buy": 26460,
+          "price_sell": 37000,
+          "scu_stock": 0,
+          "source": "uex"
+        }
+      ]
+    },
+    {
+      "id": "r108",
+      "type": "intra",
+      "status": "candidate",
+      "risk": "normal",
+      "ship": "aurora_ts",
+      "created_at": "2026-10-23T11:12:52+00:00",
+      "legs": [
+        {
+          "commodity": "Compboard",
+          "id_commodity": 18,
+          "buy_terminal": {
+            "id": 72,
+            "name": "Rayari Kaltag Research Outpost",
+            "path": "Stanton > MicroTech > Calliope"
+          },
+          "sell_terminal": {
+            "id": 81,
+            "name": "Shubin Mining Facility SM0-13",
+            "path": "Stanton > MicroTech"
+          },
+          "id_planet_origin": 190,
+          "origin_planet": "MicroTech",
+          "id_planet_destination": 190,
+          "destination_planet": "MicroTech",
+          "destination_system": "Stanton",
+          "price_buy": 26460,
+          "price_sell": 37000,
+          "scu_stock": 0,
+          "qty": 3,
+          "box_sizes": [
+            1,
+            2
+          ],
+          "leg_profit": 31620,
+          "roi": 39.8,
+          "intra": true,
+          "pyro": false,
+          "source": "computed",
+          "qt_sec": 1267.5435617529777
+        }
+      ],
+      "loop_profit": 31620,
+      "qt_sec_total": 1267.5435617529777,
+      "loop_time_min": 35.1,
+      "profit_per_hour": 54051,
+      "snapshots": [
+        {
+          "ts": "2026-10-23T11:12:52+00:00",
+          "price_buy": 26460,
+          "price_sell": 37000,
+          "scu_stock": 0,
+          "source": "uex"
+        }
+      ]
+    },
+    {
+      "id": "r109",
+      "type": "intra",
+      "status": "candidate",
+      "risk": "normal",
+      "ship": "aurora_ts",
+      "created_at": "2026-10-23T11:12:52+00:00",
+      "legs": [
+        {
+          "commodity": "Compboard",
+          "id_commodity": 18,
+          "buy_terminal": {
+            "id": 69,
+            "name": "Rayari Anvik Research Outpost",
+            "path": "Stanton > MicroTech > Calliope"
+          },
+          "sell_terminal": {
+            "id": 80,
+            "name": "Shubin Mining Facility SM0-10",
+            "path": "Stanton > MicroTech"
+          },
+          "id_planet_origin": 190,
+          "origin_planet": "MicroTech",
+          "id_planet_destination": 190,
+          "destination_planet": "MicroTech",
+          "destination_system": "Stanton",
+          "price_buy": 26460,
+          "price_sell": 37000,
+          "scu_stock": 0,
+          "qty": 3,
+          "box_sizes": [
+            1,
+            2
+          ],
+          "leg_profit": 31620,
+          "roi": 39.8,
+          "intra": true,
+          "pyro": false,
+          "source": "computed",
+          "qt_sec": 1267.5435617529777
+        }
+      ],
+      "loop_profit": 31620,
+      "qt_sec_total": 1267.5435617529777,
+      "loop_time_min": 35.1,
+      "profit_per_hour": 54051,
+      "snapshots": [
+        {
+          "ts": "2026-10-23T11:12:52+00:00",
+          "price_buy": 26460,
+          "price_sell": 37000,
+          "scu_stock": 0,
+          "source": "uex"
+        }
+      ]
+    },
+    {
+      "id": "r110",
+      "type": "intra",
+      "status": "candidate",
+      "risk": "normal",
+      "ship": "aurora_ts",
+      "created_at": "2026-10-23T11:12:52+00:00",
+      "legs": [
+        {
+          "commodity": "Compboard",
+          "id_commodity": 18,
+          "buy_terminal": {
+            "id": 69,
+            "name": "Rayari Anvik Research Outpost",
+            "path": "Stanton > MicroTech > Calliope"
+          },
+          "sell_terminal": {
+            "id": 81,
+            "name": "Shubin Mining Facility SM0-13",
+            "path": "Stanton > MicroTech"
+          },
+          "id_planet_origin": 190,
+          "origin_planet": "MicroTech",
+          "id_planet_destination": 190,
+          "destination_planet": "MicroTech",
+          "destination_system": "Stanton",
+          "price_buy": 26460,
+          "price_sell": 37000,
+          "scu_stock": 0,
+          "qty": 3,
+          "box_sizes": [
+            1,
+            2
+          ],
+          "leg_profit": 31620,
+          "roi": 39.8,
+          "intra": true,
+          "pyro": false,
+          "source": "computed",
+          "qt_sec": 1267.5435617529777
+        }
+      ],
+      "loop_profit": 31620,
+      "qt_sec_total": 1267.5435617529777,
+      "loop_time_min": 35.1,
+      "profit_per_hour": 54051,
+      "snapshots": [
+        {
+          "ts": "2026-10-23T11:12:52+00:00",
+          "price_buy": 26460,
+          "price_sell": 37000,
+          "scu_stock": 0,
+          "source": "uex"
+        }
+      ]
+    }
+  ],
+  "next_id": 111,
   "ranking_prev": [
-    "r104",
-    "r99",
-    "r100",
-    "r101",
-    "r102",
-    "r103"
+    "r106",
+    "r105",
+    "r107",
+    "r108",
+    "r109",
+    "r110"
   ],
   "tracked_commodities": {
     "51": "Medical Supplies",

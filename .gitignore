@@ -18,3 +18,6 @@ node_modules/
 # 环境与密钥（发布到 GitHub 前务必确认）
 .env
 *.token
+
+# UEXcorp token 等本机密钥（禁止入库）
+skills/sc-trader/data/secrets.json
