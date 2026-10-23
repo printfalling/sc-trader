@@ -180,8 +180,8 @@ def check_deploy(fix: bool) -> bool:
 def check_uex_api() -> bool:
     code, out = run([str(VENV_PY), "-c",
                      "import sys; sys.path.insert(0, r'%s'); "
-                     "from uexinfo.api.uex_client import UEXClient; "
-                     "data = UEXClient()._get('commodities_status'); "
+                     "import common; "
+                     "data = common.get_client()._get('commodities_status'); "
                      "print('ok' if data else 'empty')" % SCRIPT_DIR], timeout=60)
     ok = code == 0 and "ok" in out
     record(ok, "UEX API 连通", out[-150:] if not ok else "commodities_status 正常")
