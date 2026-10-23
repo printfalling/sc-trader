@@ -379,6 +379,15 @@ def build_routes(legs: list[dict], budget: int, profile: dict,
         # 闭环校验：尾段卖点应回到头段买点，否则补一段摆渡（量子时间）
         first_buy = legs_pair[0]["buy_terminal"]
         last_sell = legs_pair[-1]["sell_terminal"]
+        # 段间转场：上一段卖点 → 下一段买点（多段路线必有的空驶/转场）
+        transit_sec = 0.0
+        for prev_, nxt_ in zip(legs_pair, legs_pair[1:]):
+            if prev_["sell_terminal"]["id"] != nxt_["buy_terminal"]["id"]:
+                t = (common.qt_seconds(ctx, prev_["sell_terminal"]["name"],
+                                       nxt_["buy_terminal"]["name"])
+                     if ctx is not None else None)
+                transit_sec += t or 0.0
+        route["transit_sec"] = transit_sec or None
         repo_sec = None
         if last_sell["id"] != first_buy["id"]:
             # 未回到起点终端：补一段回起点的时间（有货=摆渡，单程=空载返回）
@@ -390,7 +399,8 @@ def build_routes(legs: list[dict], budget: int, profile: dict,
                                     else ("empty-return" if len(legs_pair) == 1
                                           else "ferry"))
         route["loop_time_min"] = common.route_time_min(
-            profile, legs_pair, extra_min=(repo_sec or 0) / 60)
+            profile, legs_pair,
+            extra_min=(repo_sec or 0) / 60 + transit_sec / 60)
         route["profit_per_hour"] = (int(route["loop_profit"] / route["loop_time_min"] * 60)
                                     if route["loop_time_min"] else None)
         route["snapshots"] = [snapshot_of(leg, "uex") for leg in legs_pair]
