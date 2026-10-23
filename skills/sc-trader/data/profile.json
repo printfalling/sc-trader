@@ -46,7 +46,8 @@
     "manual_load_min_per_scu": 1.0,
     "auto_crate_scu": 32,
     "auto_crate_min": 1.0,
-    "auto_load_extra_min": 3.0
+    "auto_load_extra_min": 3.0,
+    "seconds_per_gm": 10.0
   },
   "loading_overrides": {
     "Long Forest": "auto",

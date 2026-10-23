@@ -208,12 +208,19 @@ def _resolve_node(ctx, name: str) -> str | None:
     return None
 
 
-def qt_seconds(ctx, from_loc: str, to_loc: str) -> float | None:
+def qt_seconds(ctx, from_loc: str, to_loc: str,
+               seconds_per_gm: float = 0.0) -> float | None:
     """两点量子航行秒数；查不到节点/图缺失时返回 None。
 
     上游图数据 duration 常为 0，故优先用 total_distance(Gm) ÷ 0.2c 估算
     （Aurora 级小船量子巡航近似 0.2c；实测后可校准）。
     """
+    if not seconds_per_gm:
+        try:
+            seconds_per_gm = float((load_profile().get("time_model") or {})
+                                   .get("seconds_per_gm", 10.0))
+        except Exception:
+            seconds_per_gm = 10.0
     try:
         src = _resolve_node(ctx, from_loc)
         dst = _resolve_node(ctx, to_loc)
@@ -225,7 +232,8 @@ def qt_seconds(ctx, from_loc: str, to_loc: str) -> float | None:
             return float(duration)
         distance_gm = float(getattr(result, "total_distance", 0) or 0)
         if distance_gm > 0:
-            return distance_gm * 1e9 / (0.2 * 299_792_458)  # Gm→m，0.2c
+            # 实测口径：1 Gm ≈ 10 秒（时间模型可配 seconds_per_gm）
+            return distance_gm * seconds_per_gm
         return None
     except Exception:
         return None

@@ -1,14 +1,14 @@
 {
   "version": 1,
-  "updated_at": "2026-10-23T17:56:35+00:00",
+  "updated_at": "2026-10-23T18:01:02+00:00",
   "routes": [
     {
-      "id": "r325",
+      "id": "r335",
       "type": "intra",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-23T17:56:02+00:00",
+      "created_at": "2026-10-23T18:00:32+00:00",
       "legs": [
         {
           "commodity": "Compboard",
@@ -40,19 +40,19 @@
           "roi": 39.8,
           "intra": true,
           "pyro": false,
-          "qt_sec": 1267.5435617529777
+          "qt_sec": 760.0
         }
       ],
       "loop_profit": 674560,
-      "qt_sec_total": 1267.5435617529777,
+      "qt_sec_total": 760.0,
       "closed": false,
-      "reposition_sec": 1267.5435617529777,
+      "reposition_sec": 760.0,
       "reposition_kind": "empty-return",
-      "loop_time_min": 178.3,
-      "profit_per_hour": 226997,
+      "loop_time_min": 161.3,
+      "profit_per_hour": 250921,
       "snapshots": [
         {
-          "ts": "2026-10-23T17:56:02+00:00",
+          "ts": "2026-10-23T18:00:32+00:00",
           "price_buy": 26460,
           "price_sell": 37000,
           "scu_stock": 72,
@@ -61,12 +61,12 @@
       ]
     },
     {
-      "id": "r326",
+      "id": "r336",
       "type": "intra",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-23T17:56:02+00:00",
+      "created_at": "2026-10-23T18:00:32+00:00",
       "legs": [
         {
           "commodity": "Compboard",
@@ -98,19 +98,19 @@
           "roi": 39.8,
           "intra": true,
           "pyro": false,
-          "qt_sec": 1267.5435617529777
+          "qt_sec": 760.0
         }
       ],
       "loop_profit": 674560,
-      "qt_sec_total": 1267.5435617529777,
+      "qt_sec_total": 760.0,
       "closed": false,
-      "reposition_sec": 1267.5435617529777,
+      "reposition_sec": 760.0,
       "reposition_kind": "empty-return",
-      "loop_time_min": 178.3,
-      "profit_per_hour": 226997,
+      "loop_time_min": 161.3,
+      "profit_per_hour": 250921,
       "snapshots": [
         {
-          "ts": "2026-10-23T17:56:02+00:00",
+          "ts": "2026-10-23T18:00:32+00:00",
           "price_buy": 26460,
           "price_sell": 37000,
           "scu_stock": 72,
@@ -119,12 +119,12 @@
       ]
     },
     {
-      "id": "r327",
+      "id": "r337",
       "type": "intra",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-23T17:56:02+00:00",
+      "created_at": "2026-10-23T18:00:32+00:00",
       "legs": [
         {
           "commodity": "Compboard",
@@ -157,19 +157,19 @@
           "intra": true,
           "pyro": false,
           "source": "computed",
-          "qt_sec": 1267.5435617529777
+          "qt_sec": 760.0
         }
       ],
       "loop_profit": 674560,
-      "qt_sec_total": 1267.5435617529777,
+      "qt_sec_total": 760.0,
       "closed": false,
-      "reposition_sec": 1267.5435617529777,
+      "reposition_sec": 760.0,
       "reposition_kind": "empty-return",
-      "loop_time_min": 178.3,
-      "profit_per_hour": 226997,
+      "loop_time_min": 161.3,
+      "profit_per_hour": 250921,
       "snapshots": [
         {
-          "ts": "2026-10-23T17:56:02+00:00",
+          "ts": "2026-10-23T18:00:32+00:00",
           "price_buy": 26460,
           "price_sell": 37000,
           "scu_stock": 0,
@@ -178,12 +178,12 @@
       ]
     },
     {
-      "id": "r328",
+      "id": "r338",
       "type": "intra",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-23T17:56:02+00:00",
+      "created_at": "2026-10-23T18:00:32+00:00",
       "legs": [
         {
           "commodity": "Compboard",
@@ -216,19 +216,19 @@
           "intra": true,
           "pyro": false,
           "source": "computed",
-          "qt_sec": 1267.5435617529777
+          "qt_sec": 760.0
         }
       ],
       "loop_profit": 674560,
-      "qt_sec_total": 1267.5435617529777,
+      "qt_sec_total": 760.0,
       "closed": false,
-      "reposition_sec": 1267.5435617529777,
+      "reposition_sec": 760.0,
       "reposition_kind": "empty-return",
-      "loop_time_min": 178.3,
-      "profit_per_hour": 226997,
+      "loop_time_min": 161.3,
+      "profit_per_hour": 250921,
       "snapshots": [
         {
-          "ts": "2026-10-23T17:56:02+00:00",
+          "ts": "2026-10-23T18:00:32+00:00",
           "price_buy": 26460,
           "price_sell": 37000,
           "scu_stock": 0,
@@ -237,12 +237,12 @@
       ]
     },
     {
-      "id": "r329",
+      "id": "r339",
       "type": "there-back",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-23T17:56:09+00:00",
+      "created_at": "2026-10-23T18:00:37+00:00",
       "legs": [
         {
           "commodity": "Taranite",
@@ -277,7 +277,7 @@
           "intra": false,
           "pyro": false,
           "source": "computed",
-          "qt_sec": 700.4845999161192
+          "qt_sec": 420.0
         },
         {
           "commodity": "Gold",
@@ -311,26 +311,26 @@
           "intra": true,
           "pyro": false,
           "closed_terminal": false,
-          "qt_sec": 800.553828475565
+          "qt_sec": 480.0
         }
       ],
       "loop_profit": 878712,
-      "qt_sec_total": 1501.0384283916842,
+      "qt_sec_total": 900.0,
       "closed": false,
-      "reposition_sec": 533.7025523170432,
+      "reposition_sec": 320.0,
       "reposition_kind": "ferry",
-      "loop_time_min": 138.9,
-      "profit_per_hour": 379573,
+      "loop_time_min": 125.3,
+      "profit_per_hour": 420771,
       "snapshots": [
         {
-          "ts": "2026-10-23T17:56:09+00:00",
+          "ts": "2026-10-23T18:00:37+00:00",
           "price_buy": 18792,
           "price_sell": 29000,
           "scu_stock": 0,
           "source": "uex"
         },
         {
-          "ts": "2026-10-23T17:56:09+00:00",
+          "ts": "2026-10-23T18:00:37+00:00",
           "price_buy": 26492,
           "price_sell": 31000,
           "scu_stock": 50,
@@ -339,12 +339,12 @@
       ]
     },
     {
-      "id": "r330",
+      "id": "r340",
       "type": "there-back",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-23T17:56:15+00:00",
+      "created_at": "2026-10-23T18:00:43+00:00",
       "legs": [
         {
           "commodity": "Taranite",
@@ -379,7 +379,7 @@
           "intra": false,
           "pyro": false,
           "source": "computed",
-          "qt_sec": 984.0140808345485
+          "qt_sec": 590.0
         },
         {
           "commodity": "Fresh Food",
@@ -412,26 +412,26 @@
           "intra": true,
           "pyro": false,
           "closed_terminal": false,
-          "qt_sec": 984.0140808345485
+          "qt_sec": 590.0
         }
       ],
       "loop_profit": 684752,
-      "qt_sec_total": 1968.028161669097,
+      "qt_sec_total": 1180.0,
       "closed": false,
-      "reposition_sec": 533.7025523170432,
+      "reposition_sec": 320.0,
       "reposition_kind": "ferry",
-      "loop_time_min": 180.7,
-      "profit_per_hour": 227366,
+      "loop_time_min": 164.0,
+      "profit_per_hour": 250519,
       "snapshots": [
         {
-          "ts": "2026-10-23T17:56:15+00:00",
+          "ts": "2026-10-23T18:00:43+00:00",
           "price_buy": 18792,
           "price_sell": 28000,
           "scu_stock": 0,
           "source": "uex"
         },
         {
-          "ts": "2026-10-23T17:56:15+00:00",
+          "ts": "2026-10-23T18:00:43+00:00",
           "price_buy": 21614,
           "price_sell": 24000,
           "scu_stock": 40,
@@ -440,12 +440,12 @@
       ]
     },
     {
-      "id": "r331",
+      "id": "r341",
       "type": "there-back",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-23T17:56:22+00:00",
+      "created_at": "2026-10-23T18:00:49+00:00",
       "legs": [
         {
           "commodity": "Fresh Food",
@@ -479,7 +479,7 @@
           "roi": 34.2,
           "intra": false,
           "pyro": false,
-          "qt_sec": 633.7717808764888
+          "qt_sec": 380.0
         },
         {
           "commodity": "Taranite",
@@ -512,26 +512,26 @@
           "intra": true,
           "pyro": false,
           "closed_terminal": false,
-          "qt_sec": 633.7717808764888
+          "qt_sec": 380.0
         }
       ],
       "loop_profit": 539540,
-      "qt_sec_total": 1267.5435617529777,
+      "qt_sec_total": 760.0,
       "closed": false,
-      "reposition_sec": 133.4256380792608,
+      "reposition_sec": 80.0,
       "reposition_kind": "ferry",
-      "loop_time_min": 183.3,
-      "profit_per_hour": 176608,
+      "loop_time_min": 174.0,
+      "profit_per_hour": 186048,
       "snapshots": [
         {
-          "ts": "2026-10-23T17:56:22+00:00",
+          "ts": "2026-10-23T18:00:49+00:00",
           "price_buy": 21614,
           "price_sell": 29000,
           "scu_stock": 81,
           "source": "uex"
         },
         {
-          "ts": "2026-10-23T17:56:22+00:00",
+          "ts": "2026-10-23T18:00:49+00:00",
           "price_buy": 21924,
           "price_sell": 28000,
           "scu_stock": 11,
@@ -540,12 +540,12 @@
       ]
     },
     {
-      "id": "r332",
+      "id": "r342",
       "type": "there-back",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-23T17:56:28+00:00",
+      "created_at": "2026-10-23T18:00:56+00:00",
       "legs": [
         {
           "commodity": "Fresh Food",
@@ -579,7 +579,7 @@
           "roi": 34.2,
           "intra": false,
           "pyro": false,
-          "qt_sec": 633.7717808764888
+          "qt_sec": 380.0
         },
         {
           "commodity": "Taranite",
@@ -612,26 +612,26 @@
           "intra": true,
           "pyro": false,
           "closed_terminal": false,
-          "qt_sec": 633.7717808764888
+          "qt_sec": 380.0
         }
       ],
       "loop_profit": 539540,
-      "qt_sec_total": 1267.5435617529777,
+      "qt_sec_total": 760.0,
       "closed": false,
-      "reposition_sec": 133.4256380792608,
+      "reposition_sec": 80.0,
       "reposition_kind": "ferry",
-      "loop_time_min": 183.3,
-      "profit_per_hour": 176608,
+      "loop_time_min": 174.0,
+      "profit_per_hour": 186048,
       "snapshots": [
         {
-          "ts": "2026-10-23T17:56:28+00:00",
+          "ts": "2026-10-23T18:00:56+00:00",
           "price_buy": 21614,
           "price_sell": 29000,
           "scu_stock": 81,
           "source": "uex"
         },
         {
-          "ts": "2026-10-23T17:56:28+00:00",
+          "ts": "2026-10-23T18:00:56+00:00",
           "price_buy": 21924,
           "price_sell": 28000,
           "scu_stock": 11,
@@ -640,12 +640,12 @@
       ]
     },
     {
-      "id": "r333",
+      "id": "r343",
       "type": "there-back",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-23T17:56:35+00:00",
+      "created_at": "2026-10-23T18:01:02+00:00",
       "legs": [
         {
           "commodity": "Fresh Food",
@@ -680,7 +680,7 @@
           "intra": false,
           "pyro": false,
           "source": "computed",
-          "qt_sec": 533.7025523170432
+          "qt_sec": 320.0
         },
         {
           "commodity": "Methane",
@@ -714,26 +714,26 @@
           "intra": true,
           "pyro": false,
           "closed_terminal": true,
-          "qt_sec": 450.3115285175053
+          "qt_sec": 270.0
         }
       ],
       "loop_profit": 511877,
-      "qt_sec_total": 984.0140808345485,
+      "qt_sec_total": 590.0,
       "closed": true,
       "reposition_sec": null,
       "reposition_kind": null,
-      "loop_time_min": 209.4,
-      "profit_per_hour": 146669,
+      "loop_time_min": 202.8,
+      "profit_per_hour": 151442,
       "snapshots": [
         {
-          "ts": "2026-10-23T17:56:35+00:00",
+          "ts": "2026-10-23T18:01:02+00:00",
           "price_buy": 21614,
           "price_sell": 29000,
           "scu_stock": 0,
           "source": "uex"
         },
         {
-          "ts": "2026-10-23T17:56:35+00:00",
+          "ts": "2026-10-23T18:01:02+00:00",
           "price_buy": 2789,
           "price_sell": 3700,
           "scu_stock": 43,
@@ -742,12 +742,12 @@
       ]
     },
     {
-      "id": "r334",
+      "id": "r344",
       "type": "one-way",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-23T17:56:35+00:00",
+      "created_at": "2026-10-23T18:01:02+00:00",
       "legs": [
         {
           "commodity": "Fresh Food",
@@ -782,19 +782,19 @@
           "intra": false,
           "pyro": false,
           "source": "computed",
-          "qt_sec": 533.7025523170432
+          "qt_sec": 320.0
         }
       ],
       "loop_profit": 472704,
-      "qt_sec_total": 533.7025523170432,
+      "qt_sec_total": 320.0,
       "closed": false,
-      "reposition_sec": 533.7025523170432,
+      "reposition_sec": 320.0,
       "reposition_kind": "empty-return",
-      "loop_time_min": 153.8,
-      "profit_per_hour": 184409,
+      "loop_time_min": 146.7,
+      "profit_per_hour": 193334,
       "snapshots": [
         {
-          "ts": "2026-10-23T17:56:35+00:00",
+          "ts": "2026-10-23T18:01:02+00:00",
           "price_buy": 21614,
           "price_sell": 29000,
           "scu_stock": 0,
@@ -803,18 +803,18 @@
       ]
     }
   ],
-  "next_id": 335,
+  "next_id": 345,
   "ranking_prev": [
-    "r329",
-    "r330",
-    "r325",
-    "r326",
-    "r327",
-    "r328",
-    "r331",
-    "r332",
-    "r333",
-    "r334"
+    "r339",
+    "r340",
+    "r335",
+    "r336",
+    "r337",
+    "r338",
+    "r341",
+    "r342",
+    "r343",
+    "r344"
   ],
   "tracked_commodities": {
     "51": "Medical Supplies",
