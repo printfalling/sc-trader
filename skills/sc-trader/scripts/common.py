@@ -88,9 +88,23 @@ _ensure_uexinfo_on_path()
 
 
 def get_client():
-    """UEXClient（cloudscraper 会话，无需 token）。"""
+    """UEXClient（cloudscraper 会话）。
+
+    若 profile.json 配置了 uexcorp_api_token（或环境变量 UEXCORP_API_TOKEN），
+    自动附加 Bearer 头——token 用户限额远高于匿名（匿名 10/min，大流量会被 403 临时封禁）。
+    申请：https://uexcorp.space/api/apps
+    """
     from uexinfo.api.uex_client import UEXClient
-    return UEXClient()
+    client = UEXClient()
+    token = ""
+    try:
+        token = load_profile().get("uexcorp_api_token") or ""
+    except Exception:
+        pass
+    token = os.environ.get("UEXCORP_API_TOKEN", token)
+    if token:
+        client.session.headers.update({"Authorization": f"Bearer {token}"})
+    return client
 
 
 def build_ctx():
@@ -234,6 +248,31 @@ def packable_scu(sizes: list[int], profile: dict) -> int:
 
 
 # ── 时间模型（航行 + 地面作业 + 装卸）────────────────────────────────────────
+
+# ── 展示规范：终端全名 + 位置路径（禁止缩写）────────────────────────────────
+
+def terminal_path(ctx, terminal_id: int) -> str:
+    """终端位置路径 'Stanton > MicroTech > Wala'（系统 > 行星 > 卫星/轨道/站）。"""
+    try:
+        t = next(x for x in ctx.cache.terminals if x.id == int(terminal_id))
+    except (StopIteration, TypeError, ValueError):
+        return ""
+    parts = [getattr(t, "star_system_name", ""), getattr(t, "planet_name", "")]
+    third = ""
+    if getattr(t, "id_moon", 0):
+        try:
+            third = next(m.name for m in ctx.cache.moons if m.id == t.id_moon)
+        except StopIteration:
+            third = ""
+    if not third:
+        third = (getattr(t, "orbit_name", "") or getattr(t, "space_station_name", "")
+                 or getattr(t, "city_name", ""))
+    if third:
+        parts.append(third)
+    # 去重相邻重复段（如行星即终端所在地时出现 "MicroTech > MicroTech"）
+    dedup = [p for i, p in enumerate(parts) if i == 0 or p != parts[i - 1]]
+    return " > ".join(p for p in dedup if p)
+
 
 def route_time_min(profile: dict, legs: list[dict]) -> float:
     """单圈时间（分钟）= Σ量子航行 + 每航段两次地面作业。

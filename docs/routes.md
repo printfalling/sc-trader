@@ -66,20 +66,48 @@ curl -s "https://api.uexcorp.space/2.0/commodities_prices?commodity_name=Medical
 <!-- sc-trader:auto-begin -->
 ### 监控中的路线
 
-**预算 500,000 aUEC · 生成于 2026-10-23T09:25:15+00:00**
+**预算 200,000 aUEC · 生成于 2026-10-23T09:42:32+00:00**
 
-首选：**r87**（其余为备选——价格波动使其反超首选时，update_prices 会提示调仓）
+### r99 备选 · there-back · 风险 normal
+圈利润 **+83,755** · 圈时间 59min · 时薪 85,174/h
+- 航段1：买 Taranite 18,792/SCU × 8 SCU @ Samson & Son's Salvage Center [Stanton > ArcCorp > Wala]
+  → 卖 29,000/SCU @ TDD - Trade and Development Division - Cloudview Center - Orison [Stanton > Crusader]
+  本段利润 +81,664（量子 12min）
+- 航段2：买 Medical Supplies 3,409/SCU × 1 SCU @ Hickes Research Outpost [Stanton > Crusader > Cellin]
+  → 卖 5,500/SCU @ Admin - ARC-L4 [Stanton > ArcCorp > ArcCorp Lagrange Point 4]
+  本段利润 +2,091（库存 1，量子 13min）
 
-| ID | 角色 | 类型 | 航段 | 商品 | 买→卖 | 数量 | 本段利润 | 圈利润 | 圈时间 | 时薪 | 风险 |
-|----|------|------|------|------|-------|------|---------|--------|--------|------|------|
-| r87 | **首选** | there-back | Samson & Son's Salvage Center → TDD - Trade and Development Division - Cloudview Center - Orison | Taranite | 18,792 → 29,000 | 26 SCU | +265,408 | +289,268 | 111min | 155,939/h | normal |
-|  |  |  | Terra Mills Hydrofarm → TDD - Trade and Development Division - Area 18 | Fresh Food | 21,614 → 24,000 | 10 SCU | +23,860 |  |  |  |  |
-| r88 | 备选 | there-back | Samson & Son's Salvage Center → TDD - Trade and Development Division - Commons - New Babbage | Taranite | 18,792 → 28,000 | 26 SCU | +239,408 | +256,664 | 110min | 140,509/h | normal |
-|  |  |  | Rayari Kaltag Research Outpost → Admin - ARC-L4 | Medical Supplies | 3,343 → 5,500 | 8 SCU | +17,256 |  |  |  |  |
-| r89 | 备选 | intra | Rayari Kaltag Research Outpost → Shubin Mining Facility SM0-10 | Compboard | 26,460 → 37,000 | 18 SCU | +189,720 | +189,720 | 65min | 174,857/h | normal |
-| r90 | 备选 | intra | Rayari Kaltag Research Outpost → Shubin Mining Facility SM0-13 | Compboard | 26,460 → 37,000 | 18 SCU | +189,720 | +189,720 | 65min | 174,857/h | normal |
-| r91 | 备选 | there-back | Rayari Anvik Research Outpost → HDMS-Stanhope | Fresh Food | 21,614 → 29,000 | 23 SCU | +169,878 | +228,642 | 97min | 140,991/h | normal |
-|  |  |  | HDMS-Norgaard → Rayari Deltana Research Outpost | Ranta Dung | 33,206 → 43,000 | 6 SCU | +58,764 |  |  |  |  |
-| r92 | 备选 | there-back | Rayari Kaltag Research Outpost → HDMS-Stanhope | Fresh Food | 21,614 → 29,000 | 23 SCU | +169,878 | +228,642 | 97min | 140,991/h | normal |
-|  |  |  | HDMS-Norgaard → Rayari Deltana Research Outpost | Ranta Dung | 33,206 → 43,000 | 6 SCU | +58,764 |  |  |  |  |
+### r100 备选 · intra · 风险 normal
+圈利润 **+73,780** · 圈时间 43min · 时薪 102,709/h
+- 航段1：买 Compboard 26,460/SCU × 7 SCU @ Rayari Kaltag Research Outpost [Stanton > MicroTech > Calliope]
+  → 卖 37,000/SCU @ Shubin Mining Facility SM0-10 [Stanton > MicroTech]
+  本段利润 +73,780（量子 21min）
+
+### r101 备选 · intra · 风险 normal
+圈利润 **+73,780** · 圈时间 43min · 时薪 102,709/h
+- 航段1：买 Compboard 26,460/SCU × 7 SCU @ Rayari Kaltag Research Outpost [Stanton > MicroTech > Calliope]
+  → 卖 37,000/SCU @ Shubin Mining Facility SM0-13 [Stanton > MicroTech]
+  本段利润 +73,780（量子 21min）
+
+### r102 备选 · intra · 风险 normal
+圈利润 **+73,780** · 圈时间 43min · 时薪 102,709/h
+- 航段1：买 Compboard 26,460/SCU × 7 SCU @ Rayari Anvik Research Outpost [Stanton > MicroTech > Calliope]
+  → 卖 37,000/SCU @ Shubin Mining Facility SM0-10 [Stanton > MicroTech]
+  本段利润 +73,780（量子 21min）
+
+### r103 备选 · intra · 风险 normal
+圈利润 **+73,780** · 圈时间 43min · 时薪 102,709/h
+- 航段1：买 Compboard 26,460/SCU × 7 SCU @ Rayari Anvik Research Outpost [Stanton > MicroTech > Calliope]
+  → 卖 37,000/SCU @ Shubin Mining Facility SM0-13 [Stanton > MicroTech]
+  本段利润 +73,780（量子 21min）
+
+### r104 ★首选 · there-back · 风险 normal
+圈利润 **+90,920** · 圈时间 74min · 时薪 74,119/h
+- 航段1：买 Taranite 18,792/SCU × 8 SCU @ Samson & Son's Salvage Center [Stanton > ArcCorp > Wala]
+  → 卖 28,000/SCU @ TDD - Trade and Development Division - Commons - New Babbage [Stanton > MicroTech]
+  本段利润 +73,664（量子 16min）
+- 航段2：买 Medical Supplies 3,343/SCU × 8 SCU @ Rayari Kaltag Research Outpost [Stanton > MicroTech > Calliope]
+  → 卖 5,500/SCU @ Admin - ARC-L4 [Stanton > ArcCorp > ArcCorp Lagrange Point 4]
+  本段利润 +17,256（库存 8，量子 9min）
+
 <!-- sc-trader:auto-end -->

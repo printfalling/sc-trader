@@ -300,6 +300,9 @@ def build_routes(legs: list[dict], budget: int, profile: dict,
             if ctx is not None:
                 x["qt_sec"] = common.qt_seconds(
                     ctx, x["buy_terminal"]["name"], x["sell_terminal"]["name"])
+                # 展示规范：每个终端附位置路径（全名不缩写）
+                for side in ("buy_terminal", "sell_terminal"):
+                    x[side]["path"] = common.terminal_path(ctx, x[side].get("id"))
         route["qt_sec_total"] = sum(x["qt_sec"] or 0 for x in legs_pair) or None
         route["loop_time_min"] = common.route_time_min(profile, legs_pair)
         route["profit_per_hour"] = (int(route["loop_profit"] / route["loop_time_min"] * 60)
@@ -349,41 +352,36 @@ def merge_watchlist(watchlist: dict, new_routes: list[dict]) -> tuple[dict, int]
 
 
 def render_watchlist_md(watchlist: dict, budget: int) -> str:
+    """展示规范（SKILL.md 展示规范节）：结构化块、终端全名、位置路径、不缩写。"""
     active = [r for r in watchlist["routes"] if r["status"] != "retired"]
     best_id = max(active, key=lambda r: r["loop_profit"])["id"] if active else None
-    lines = [
-        f"**预算 {budget:,} aUEC · 生成于 {watchlist['updated_at']}**",
-        "",
-        f"首选：**{best_id}**（其余为备选——价格波动使其反超首选时，update_prices 会提示调仓）",
-        "",
-        "| ID | 角色 | 类型 | 航段 | 商品 | 买→卖 | 数量 | 本段利润 | 圈利润 | 圈时间 | 时薪 | 风险 |",
-        "|----|------|------|------|------|-------|------|---------|--------|--------|------|------|",
-    ]
+    lines = [f"**预算 {budget:,} aUEC · 生成于 {watchlist['updated_at']}**", ""]
     for r in active:
-        role = "**首选**" if r["id"] == best_id else "备选"
-        time_txt = (f"{r['loop_time_min']:.0f}min"
-                    if i_time_ok(r) else "")
-        hour_txt = (f"{r['profit_per_hour']:,}/h"
-                    if i_time_ok(r) and r.get("profit_per_hour") else "")
+        role = "★首选" if r["id"] == best_id else "备选"
+        time_txt = f"{r['loop_time_min']:.0f}min" if r.get("loop_time_min") else "n/a"
+        hour_txt = f"{r['profit_per_hour']:,}/h" if r.get("profit_per_hour") else "n/a"
+        lines.append(f"### {r['id']} {role} · {r['type']} · 风险 {r['risk']}")
+        lines.append(f"圈利润 **+{r['loop_profit']:,}** · 圈时间 {time_txt} · 时薪 {hour_txt}")
         for i, l in enumerate(r["legs"]):
+            bp = l["buy_terminal"].get("path") or ""
+            sp = l["sell_terminal"].get("path") or ""
             lines.append(
-                f"| {r['id'] if i == 0 else ''} "
-                f"| {role if i == 0 else ''} "
-                f"| {r['type'] if i == 0 else ''} "
-                f"| {l['buy_terminal']['name']} → {l['sell_terminal']['name']} "
-                f"| {l['commodity']} "
-                f"| {l['price_buy']:,} → {l['price_sell']:,} "
-                f"| {l['qty']} SCU "
-                f"| +{l['leg_profit']:,} "
-                f"| {'+' + format(r['loop_profit'], ',') if i == 0 else ''} "
-                f"| {time_txt if i == 0 else ''} "
-                f"| {hour_txt if i == 0 else ''} "
-                f"| {r['risk'] if i == 0 else ''} |")
+                f"- 航段{i + 1}：买 {l['commodity']} {l['price_buy']:,}/SCU × {l['qty']} SCU"
+                f" @ {l['buy_terminal']['name']}" + (f" [{bp}]" if bp else ""))
+            lines.append(
+                f"  → 卖 {l['price_sell']:,}/SCU @ {l['sell_terminal']['name']}"
+                + (f" [{sp}]" if sp else ""))
+            extra = []
+            if l.get("scu_stock"):
+                extra.append(f"库存 {l['scu_stock']}")
+            if l.get("partial"):
+                extra.append("部分装载")
+            if l.get("qt_sec"):
+                extra.append(f"量子 {l['qt_sec'] / 60:.0f}min")
+            lines.append(f"  本段利润 +{l['leg_profit']:,}"
+                         + (f"（{'，'.join(extra)}）" if extra else ""))
+        lines.append("")
     return "\n".join(lines)
-
-
-def i_time_ok(r) -> bool:
-    return bool(r.get("loop_time_min"))
 
 
 AUTO_BEGIN = "<!-- sc-trader:auto-begin -->"
@@ -431,10 +429,11 @@ def main() -> int:
     client = common.get_client()
     watchlist = common.load_watchlist()
     origin_planet = profile["origin"]["id_planet"]
-    rows = fetch_routes(client, origin_planet, budget)
-    if not rows:
-        print("WARN: routes 接口未返回数据（限速/网络/全部下架），走跟踪商品补充路径",
-              file=sys.stderr)
+    try:
+        rows = fetch_routes(client, origin_planet, budget)
+    except Exception as e:
+        print(f"WARN: routes 接口失败（{str(e)[:120]}），走本地算路引擎", file=sys.stderr)
+        rows = []
 
     legs = filter_legs(rows or [], budget, profile, profile["include_pyro"])
     ctx = None
@@ -444,13 +443,23 @@ def main() -> int:
         pass
     have_triples = {(l["id_commodity"], l["buy_terminal"]["id"], l["sell_terminal"]["id"])
                     for l in legs}
-    computed = computed_legs_from_prices(client, ctx, budget, profile, have_triples)
+    api_error = False
+    try:
+        computed = computed_legs_from_prices(client, ctx, budget, profile, have_triples)
+    except Exception as e:
+        api_error = True
+        print(f"WARN: 本地算路失败（{str(e)[:120]}）", file=sys.stderr)
+        computed = []
     if computed:
         print(f"[computed] 本地算路补充 {len(computed)} 条航腿（sc-trade.tools 同方法，价格源 UEX）",
               file=sys.stderr)
         legs = sorted(legs + computed, key=lambda x: x["leg_profit"], reverse=True)
     if not legs:
-        print("ERROR: 过滤后无可用航腿", file=sys.stderr)
+        print("ERROR: 过滤后无可用航腿。", file=sys.stderr)
+        if api_error:
+            print("API 访问异常（可能被临时 403 封禁）："
+                  "等待 10-30 分钟冷却，或在 profile.json 配置 uexcorp_api_token"
+                  "（https://uexcorp.space/api/apps 申请，限额更高）后重试。", file=sys.stderr)
         return 1
 
     new_routes = build_routes(legs, budget, profile, client, args.max_calls,

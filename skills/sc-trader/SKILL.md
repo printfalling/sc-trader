@@ -93,6 +93,18 @@ tools/uexinfo/venv/bin/python skills/sc-trader/scripts/record.py \
 **验收**：输出 `已记录: ...` 且 `watchlist 匹配航腿 N 条已刷新`（N>0）。名称模糊匹配报 ERROR 时，改用截图里出现的**完整终端名**重试。
 record 写入 uexinfo 的 scan_prices.json，此后 update_prices 和 uexinfo overlay 都会以该价优先（★）。
 
+## 展示规范（用户定案：路径全名，禁止缩写）
+
+1. **终端/地点一律用 UEX terminal_name 原文全名**——禁止自造缩写。
+   反例：把 `TDD - Trade and Development Division - Commons - New Babbage` 写成 `New Babbage TDD`。
+2. **终端首次出现附位置路径** `[系统 > 行星 > 卫星/轨道/站]`（脚本自动生成，如
+   `Samson & Son's Salvage Center [Stanton > ArcCorp > Wala]`）。
+3. **路线以结构化块展示**（recommend 的 render 格式）：每条路线一个块——
+   头行 `### <ID> <★首选/备选> · 类型 · 风险`，次行 圈利润/圈时间/时薪，
+   再逐航段三行（买入行、卖出行、利润行，含库存/部分装载/量子时间注记）。
+4. **三处同一套格式**：脚本 stdout、docs/routes.md 渲染、聊天转述。聊天里转述路线时
+   同样用全名+位置路径，不要为了简洁改写地名。
+
 ## 数据一致性
 
 - 脚本写完 watchlist 后如果 JSON 解析失败：不要手工修补，重跑对应命令重建。
