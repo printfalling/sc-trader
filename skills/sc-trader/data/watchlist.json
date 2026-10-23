@@ -1,14 +1,14 @@
 {
   "version": 1,
-  "updated_at": "2026-10-23T08:01:01+00:00",
+  "updated_at": "2026-10-23T08:15:50+00:00",
   "routes": [
     {
-      "id": "r1",
+      "id": "r11",
       "type": "there-back",
       "status": "candidate",
       "risk": "normal",
       "ship": "aurora_ts",
-      "created_at": "2026-10-23T08:00:54+00:00",
+      "created_at": "2026-10-23T08:15:50+00:00",
       "legs": [
         {
           "commodity": "Medical Supplies",
@@ -39,16 +39,7 @@
           "roi": 67.5,
           "intra": false,
           "pyro": false,
-          "qt_sec": 633.7717808764888,
-          "snapshots": [
-            {
-              "ts": "2026-10-23T08:00:54+00:00",
-              "price_buy": 3343,
-              "price_sell": 5600,
-              "scu_stock": 8,
-              "source": "uex"
-            }
-          ]
+          "qt_sec": 633.7717808764888
         },
         {
           "commodity": "Iron",
@@ -77,30 +68,21 @@
           "roi": 25.6,
           "intra": true,
           "pyro": false,
-          "qt_sec": 633.7717808764888,
-          "snapshots": [
-            {
-              "ts": "2026-10-23T08:00:54+00:00",
-              "price_buy": 2708,
-              "price_sell": 3400,
-              "scu_stock": 1,
-              "source": "uex"
-            }
-          ]
+          "qt_sec": 633.7717808764888
         }
       ],
       "loop_profit": 18748,
       "qt_sec_total": 1267.5435617529777,
       "snapshots": [
         {
-          "ts": "2026-10-23T08:00:54+00:00",
+          "ts": "2026-10-23T08:15:50+00:00",
           "price_buy": 3343,
           "price_sell": 5600,
           "scu_stock": 8,
           "source": "uex"
         },
         {
-          "ts": "2026-10-23T08:00:54+00:00",
+          "ts": "2026-10-23T08:15:50+00:00",
           "price_buy": 2708,
           "price_sell": 3400,
           "scu_stock": 1,
@@ -109,12 +91,12 @@
       ]
     },
     {
-      "id": "r2",
+      "id": "r12",
       "type": "intra",
       "status": "candidate",
       "risk": "normal",
       "ship": "aurora_ts",
-      "created_at": "2026-10-23T08:00:54+00:00",
+      "created_at": "2026-10-23T08:15:50+00:00",
       "legs": [
         {
           "commodity": "Medical Supplies",
@@ -145,23 +127,14 @@
           "roi": 64.5,
           "intra": true,
           "pyro": false,
-          "qt_sec": 133.4256380792608,
-          "snapshots": [
-            {
-              "ts": "2026-10-23T08:00:54+00:00",
-              "price_buy": 3343,
-              "price_sell": 5500,
-              "scu_stock": 8,
-              "source": "uex"
-            }
-          ]
+          "qt_sec": 133.4256380792608
         }
       ],
       "loop_profit": 17256,
       "qt_sec_total": 133.4256380792608,
       "snapshots": [
         {
-          "ts": "2026-10-23T08:00:54+00:00",
+          "ts": "2026-10-23T08:15:50+00:00",
           "price_buy": 3343,
           "price_sell": 5500,
           "scu_stock": 8,
@@ -170,9 +143,13 @@
       ]
     }
   ],
-  "next_id": 3,
+  "next_id": 13,
   "ranking_prev": [
-    "r1",
-    "r2"
-  ]
+    "r11",
+    "r12"
+  ],
+  "tracked_commodities": {
+    "51": "Medical Supplies",
+    "44": "Iron"
+  }
 }

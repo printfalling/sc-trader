@@ -102,6 +102,88 @@ def dedup_planets(legs: list[dict], limit: int) -> list[dict]:
     return out
 
 
+def partial_load_legs(client, ctx, watchlist, budget: int, profile: dict,
+                      have_pairs: set, max_extra: int = 2) -> list[dict]:
+    """跟踪商品补充路径：routes 接口下架的对子（低库存/卖端饱和）用价格行重建。
+
+    部分装载：qty 按实际库存取，不满载也成立（用户明确需求）。
+    """
+    tracked = watchlist.get("tracked_commodities") or {}
+    if not tracked:
+        return []
+    origin_planet = profile["origin"]["id_planet"]
+    term_by_id = {t.id: t for t in ctx.cache.terminals} if ctx else {}
+    legs = []
+    calls = 0
+    for cid_str, cname in list(tracked.items())[:6]:
+        if calls >= max_extra:
+            break
+        cid = int(cid_str)
+        current_pairs = {k for k in have_pairs if k[0] == cid}
+        # 该商品所有已知航腿对子（来自本次 routes 结果），缺哪个才补哪个——简化：
+        # 只要本次 routes 结果里已出现该商品，就跳过
+        if current_pairs:
+            continue
+        rows = common.throttled_get(client, "commodities_prices", {"id_commodity": cid})
+        calls += 1
+        if not rows:
+            continue
+        buy_side = []
+        sell_prices = []
+        for r in rows:
+            tid = r.get("id_terminal")
+            t = term_by_id.get(tid)
+            try:
+                pb = float(r.get("price_buy") or 0)
+                ps = float(r.get("price_sell") or 0)
+            except (TypeError, ValueError):
+                continue
+            if t is None:
+                continue
+            if pb > 0 and t.id_planet == origin_planet:
+                buy_side.append((r, t))
+            if ps > 0:
+                sell_prices.append((ps, r, t))
+        for r, t in buy_side:
+            best_sell = max((s for s in sell_prices if s[2].id != t.id),
+                            key=lambda x: x[0], default=None)
+            if not best_sell:
+                continue
+            ps, srow, sterm = best_sell
+            buy = int(float(r["price_buy"]))
+            if ps <= buy:
+                continue
+            stock = r.get("scu_buy_stock")
+            qty = min(profile["ship"]["scu_total"], budget // buy,
+                      int(stock) if stock else profile["ship"]["scu_total"])
+            capacity = common.packable_scu(
+                common.parse_box_sizes(r.get("container_sizes_origin")), profile)
+            qty = min(qty, capacity or profile["ship"]["scu_total"])
+            if qty <= 0:
+                continue
+            is_pyro = getattr(sterm, "star_system_name", "").lower() == "pyro"
+            if is_pyro and not profile.get("include_pyro"):
+                continue
+            legs.append({
+                "commodity": cname, "id_commodity": cid,
+                "buy_terminal": {"id": t.id, "name": t.name},
+                "sell_terminal": {"id": sterm.id, "name": sterm.name},
+                "id_planet_destination": getattr(sterm, "id_planet", 0) or 0,
+                "destination_planet": getattr(sterm, "planet_name", ""),
+                "destination_system": getattr(sterm, "star_system_name", ""),
+                "price_buy": buy, "price_sell": int(ps),
+                "scu_stock": int(stock) if stock else qty,
+                "qty": qty, "box_sizes": [],
+                "leg_profit": qty * (int(ps) - buy),
+                "roi": round((ps - buy) / buy * 100, 1),
+                "intra": getattr(sterm, "id_planet", 0) == origin_planet,
+                "pyro": is_pyro,
+                "partial": bool(stock) and qty < profile["ship"]["scu_total"],
+            })
+    legs.sort(key=lambda x: x["leg_profit"], reverse=True)
+    return legs[:4]
+
+
 def find_return_leg(client, origin_planet: int, budget: int,
                     dest_planet: int) -> dict | None:
     """从目的地行星找回出发行星的盈利腿（多一次 API 调用）。"""
@@ -308,7 +390,7 @@ def main() -> int:
                         help="船型 key（profile.json ships 里的键，默认 default_ship）")
     parser.add_argument("--top", type=int, default=5)
     parser.add_argument("--include-pyro", action="store_true")
-    parser.add_argument("--max-calls", type=int, default=4,
+    parser.add_argument("--max-calls", type=int, default=6,
                         help="本次最多 UEX API 调用数（限速保护）")
     args = parser.parse_args()
 
@@ -326,21 +408,37 @@ def main() -> int:
         profile["include_pyro"] = True
 
     client = common.get_client()
+    watchlist = common.load_watchlist()
     origin_planet = profile["origin"]["id_planet"]
     rows = fetch_routes(client, origin_planet, budget)
     if not rows:
-        print("ERROR: 未取到路线数据（API 限速或网络）", file=sys.stderr)
-        return 1
+        print("WARN: routes 接口未返回数据（限速/网络/全部下架），走跟踪商品补充路径",
+              file=sys.stderr)
 
-    legs = filter_legs(rows, budget, profile, profile["include_pyro"])
+    legs = filter_legs(rows or [], budget, profile, profile["include_pyro"])
+    ctx = None
+    try:
+        ctx = common.build_ctx()
+    except Exception:
+        pass
+    have_pairs = {(l["id_commodity"], l["buy_terminal"]["id"]) for l in legs}
+    extra = partial_load_legs(client, ctx, watchlist, budget, profile, have_pairs)
+    if extra:
+        print(f"[partial] 跟踪商品补充 {len(extra)} 条部分装载航腿", file=sys.stderr)
+        legs = sorted(legs + extra, key=lambda x: x["leg_profit"], reverse=True)
     if not legs:
         print("ERROR: 过滤后无可用航腿", file=sys.stderr)
         return 1
 
     new_routes = build_routes(legs, budget, profile, client, args.max_calls,
                               ship_key=ship_key)
-    watchlist = common.load_watchlist()
     watchlist, added = merge_watchlist(watchlist, new_routes)
+    # 登记跟踪商品：下次即使被 routes 接口下架，也能走部分装载补充路径
+    tracked = watchlist.setdefault("tracked_commodities", {})
+    for r in watchlist["routes"]:
+        for l in r["legs"]:
+            if l.get("id_commodity"):
+                tracked[str(l["id_commodity"])] = l["commodity"]
     # 组合重建后重置调仓基线：当前最优即起始首选
     active = [r for r in watchlist["routes"] if r["status"] != "retired"]
     if active:

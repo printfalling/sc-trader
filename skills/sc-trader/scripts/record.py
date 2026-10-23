@@ -141,6 +141,11 @@ def main() -> int:
     terminal = fuzzy_pick(list(ctx.cache.terminals), args.terminal, "终端")
     commodity = fuzzy_pick(list(ctx.cache.commodities), args.commodity, "商品")
 
+    # 录入的商品进入跟踪表：即使被 routes 接口下架也会被补充路径持续监控
+    wl = common.load_watchlist()
+    wl.setdefault("tracked_commodities", {})[str(commodity.id)] = commodity.name
+    common.save_watchlist(wl)
+
     write_scan(terminal.id, terminal.name, commodity.id, commodity.name,
                args.price_buy, args.price_sell, args.qty, args.source)
     touched = update_watchlist(terminal.id, terminal.name, commodity.id,
