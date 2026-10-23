@@ -257,6 +257,41 @@ def snapshot_of(leg: dict, source: str) -> dict:
     }
 
 
+def annotate_terminals(legs: list[dict], ctx, freight_by_id: dict | None = None,
+                      profile: dict | None = None) -> None:
+    """给每个终端标注自动装载能力：以「有无机库」为准。
+
+    游戏内需先在机库叫出飞船、再用货运电梯自动装箱；地表前哨无机库 → 手搬。
+    优先级：用户实测覆盖 > 机库判定（id_space_station / id_city）。
+    """
+    if ctx is None:
+        return
+    meta: dict = {}
+    for t in getattr(ctx.cache, "terminals", []) or []:
+        mcs = getattr(t, "max_container_size", 0) or 0
+        # 有机库（空间站/城市）才能叫船 + 用货运电梯 → 自动装载；
+        # 地表前哨无库 → 只能手搬
+        has_hangar = bool(getattr(t, "id_space_station", 0) or getattr(t, "id_city", 0))
+        meta[t.id] = {"auto": has_hangar, "max_box": mcs or 32,
+                      "hangar": has_hangar}
+    # 用户实测覆盖（权威最高）→ UEX 数据 → 名称启发式
+    overrides = (profile or {}).get("loading_overrides") or {}
+    for leg in legs:
+        for side in ("buy_terminal", "sell_terminal"):
+            term = leg.get(side, {})
+            name = term.get("name", "")
+            ov = next((v for k, v in overrides.items() if k.lower() in name.lower()), None)
+            m = meta.get(term.get("id"))
+            if ov is not None:
+                term["auto"] = str(ov).lower() == "auto"
+            elif m:
+                term["auto"] = m["auto"]
+            if m:
+                term["max_box"] = m["max_box"]
+            term["loading_source"] = ("override" if ov is not None
+                                      else ("hangar" if m else "heuristic"))
+
+
 def build_routes(legs: list[dict], budget: int, profile: dict,
                  client, max_calls: int, ship_key: str = "",
                  max_routes: int = 6) -> list[dict]:
@@ -491,6 +526,13 @@ def main() -> int:
         print(f"WARN: routes 接口失败（{str(e)[:120]}），走本地算路引擎", file=sys.stderr)
         rows = []
 
+    freight_by_id: dict = {}
+    for r in rows or []:
+        if r.get("id_terminal_origin") is not None:
+            freight_by_id[r["id_terminal_origin"]] = r.get("has_freight_elevator_origin")
+        if r.get("id_terminal_destination") is not None:
+            freight_by_id[r["id_terminal_destination"]] = r.get("has_freight_elevator_destination")
+
     legs = filter_legs(rows or [], budget, profile, profile["include_pyro"])
     ctx = None
     try:
@@ -510,6 +552,7 @@ def main() -> int:
         print(f"[computed] 本地算路补充 {len(computed)} 条航腿（sc-trade.tools 同方法，价格源 UEX）",
               file=sys.stderr)
         legs = sorted(legs + computed, key=lambda x: x["leg_profit"], reverse=True)
+    annotate_terminals(legs, ctx, freight_by_id, profile)
     if not legs:
         print("ERROR: 过滤后无可用航腿。", file=sys.stderr)
         if api_error:

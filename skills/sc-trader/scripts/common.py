@@ -349,10 +349,17 @@ def route_time_min(profile: dict, legs: list[dict], extra_min: float = 0.0) -> f
                      or tm.get("auto_loading"))
     qty_default = (profile.get("ship") or {}).get("scu_total", 8)
 
-    def stop_minutes(terminal_name: str, qty: int, box_sizes) -> float:
-        auto = ship_auto and terminal_loading_mode(terminal_name, profile)
+    def stop_minutes(term: dict, qty: int, box_sizes) -> float:
+        # 优先用终端数据（UEX max_container_size / has_freight_elevator），
+        # 缺失时退回名称启发式
+        if "auto" in term:
+            auto = ship_auto and bool(term["auto"])
+        else:
+            auto = ship_auto and terminal_loading_mode(term.get("name", ""), profile)
         if auto:
-            size = max([s for s in (box_sizes or []) if 0 < s <= 32] or [32])
+            cap = term.get("max_box") or 32
+            usable = [b for b in (box_sizes or []) if 0 < b <= cap]
+            size = max(usable) if usable else min(cap, 32)
             crates = -(-(qty or 0) // max(1, size))
             handling = crates * crate_min + extra
         else:
@@ -363,8 +370,8 @@ def route_time_min(profile: dict, legs: list[dict], extra_min: float = 0.0) -> f
     for leg in legs:
         total += (leg.get("qt_sec") or 0) / 60
         qty = leg.get("qty") or qty_default
-        total += stop_minutes(leg["buy_terminal"]["name"], qty, leg.get("box_sizes"))
-        total += stop_minutes(leg["sell_terminal"]["name"], qty, leg.get("box_sizes"))
+        total += stop_minutes(leg["buy_terminal"], qty, leg.get("box_sizes"))
+        total += stop_minutes(leg["sell_terminal"], qty, leg.get("box_sizes"))
     return round(total + extra_min, 1)
 
 

@@ -51,7 +51,10 @@
     "qt_speed_km_s": 200000
   },
   "loading_overrides": {
+    "Rayari Anvik": "manual",
+    "Research Outpost": "manual",
+    "MIC-L2": "auto",
     "Long Forest": "auto",
-    "Research Outpost": "manual"
+    "Samson": "manual"
   }
 }
