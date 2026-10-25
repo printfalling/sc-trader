@@ -110,20 +110,25 @@ TOP_SELLS = 5  # 候选卖点数
 
 
 def computed_legs_from_prices(client, ctx, budget: int, profile: dict,
-                              have_triples: set) -> list[dict]:
+                              have_triples: set,
+                              system_id="auto") -> list[dict]:
     """本地算路引擎（与 sc-trade.tools 同方法）：一次拉全市场价格，本地配对。
 
     覆盖 routes 配对接口遗漏的航腿：精炼矿物、卖端饱和下架、跨行星货源。
     每商品取最便宜买点 ×2、最贵卖点 ×3，配对去重后按利润排序。
     """
     from collections import defaultdict
-    system_id = profile["origin"].get("id_star_system") or 68
+    # "auto"=出发星系；None=不限星系
+    if system_id == "auto":
+        system_id = profile["origin"].get("id_star_system") or 68
     term_by_id = {t.id: t for t in ctx.cache.terminals} if ctx else {}
     rows = common.throttled_get(client, "commodities_prices_all")
     by_commodity = defaultdict(list)
     for r in rows or []:
         t = term_by_id.get(r.get("id_terminal"))
-        if t is None or getattr(t, "id_star_system", 0) != system_id:
+        if t is None:
+            continue
+        if system_id is not None and getattr(t, "id_star_system", 0) != system_id:
             continue
         by_commodity[(r.get("id_commodity"), r.get("commodity_name", ""))].append((r, t))
 
@@ -367,11 +372,16 @@ def build_routes(legs: list[dict], budget: int, profile: dict,
             "loop_profit": sum(x["leg_profit"] for x in legs_pair),
         }
         source_count[source] = source_count.get(source, 0) + 1
+        fallback_min = float((profile.get("time_model") or {}).get("fallback_leg_min", 15.0))
         for x in legs_pair:
             x["qt_sec"] = None
             if ctx is not None:
                 x["qt_sec"] = common.qt_seconds(
                     ctx, x["buy_terminal"]["name"], x["sell_terminal"]["name"])
+            if x["qt_sec"] is None:
+                # 图上无路径（跨星系/节点缺失）→ 兜底估算，不再按 0
+                x["qt_sec"] = fallback_min * 60
+                x["qt_estimated"] = True
                 # 展示规范：每个终端附位置路径（全名不缩写）
                 for side in ("buy_terminal", "sell_terminal"):
                     x[side]["path"] = common.terminal_path(ctx, x[side].get("id"))
@@ -505,6 +515,8 @@ def main() -> int:
                         help="船型 key（profile.json ships 里的键，默认 default_ship）")
     parser.add_argument("--top", type=int, default=5)
     parser.add_argument("--include-pyro", action="store_true")
+    parser.add_argument("--system", default=None,
+                        help="限定星系（默认 profile 出发星系；传 all 不限）")
     parser.add_argument("--auto-loading", action="store_true",
                         help="按自动装载估算时间（0.5min/次固定开销）；"
                              "不给则按 profile.time_model.auto_loading（默认手动 1min/SCU）")
@@ -551,9 +563,13 @@ def main() -> int:
         pass
     have_triples = {(l["id_commodity"], l["buy_terminal"]["id"], l["sell_terminal"]["id"])
                     for l in legs}
+    want_system = None if (args.system or "").lower() == "all" else (
+        int(args.system) if (args.system or "").isdigit()
+        else (profile["origin"].get("id_star_system") or 68))
     api_error = False
     try:
-        computed = computed_legs_from_prices(client, ctx, budget, profile, have_triples)
+        computed = computed_legs_from_prices(client, ctx, budget, profile,
+                                             have_triples, system_id=want_system)
     except Exception as e:
         api_error = True
         print(f"WARN: 本地算路失败（{str(e)[:120]}）", file=sys.stderr)

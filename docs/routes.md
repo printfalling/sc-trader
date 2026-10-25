@@ -66,66 +66,81 @@ curl -s "https://api.uexcorp.space/2.0/commodities_prices?commodity_name=Medical
 <!-- sc-trader:auto-begin -->
 ### 监控中的路线
 
-**预算 2,000,000 aUEC · 生成于 2026-10-23T19:36:04+00:00**
+**预算 2,000,000 aUEC · 生成于 2026-10-25T10:48:59+00:00**
 
-### r395 备选 · intra · 风险 normal
-圈利润 **+674,560** · 圈时间 149min · 时薪 272,182/h
-- 航段1：买 Compboard 26,460/SCU × 64 SCU @ Rayari Kaltag Research Outpost [Stanton > MicroTech > Calliope]
-  → 卖 37,000/SCU @ Shubin Mining Facility SM0-10 [Stanton > MicroTech]
-  本段利润 +674,560（库存 72，量子 6min）
+### r413 ★首选 · there-back · 风险 normal
+圈利润 **+4,524,060** · 圈时间 180min · 时薪 1,508,020/h
+- 航段1：买 Osoian Hides 283,500/SCU × 7 SCU @ The Golden Riviera
+  → 卖 870,000/SCU @ Devlin Scrap and Salvage
+  本段利润 +4,105,500（量子 11min）
+- 航段2：买 Compboard 26,460/SCU × 64 SCU @ Rayari Kaltag Research Outpost
+  → 卖 33,000/SCU @ The Golden Riviera
+  本段利润 +418,560（库存 72，量子 11min）
 
-### r396 备选 · intra · 风险 normal
-圈利润 **+674,560** · 圈时间 149min · 时薪 272,182/h
-- 航段1：买 Compboard 26,460/SCU × 64 SCU @ Rayari Kaltag Research Outpost [Stanton > MicroTech > Calliope]
-  → 卖 37,000/SCU @ Shubin Mining Facility SM0-13 [Stanton > MicroTech]
-  本段利润 +674,560（库存 72，量子 6min）
+### r414 备选 · there-back · 风险 normal
+圈利润 **+1,987,584** · 圈时间 241min · 时薪 494,218/h
+- 航段1：买 Audio-Visual Equipment 25,004/SCU × 64 SCU @ Seer's Canyon
+  → 卖 46,000/SCU @ HDMS-Bezdek
+  本段利润 +1,343,744（量子 9min）
+- 航段2：买 Bexalite 23,940/SCU × 64 SCU @ HDMS-Hadley
+  → 卖 34,000/SCU @ Admin - Rat's Nest
+  本段利润 +643,840（库存 64，量子 11min）
 
-### r397 备选 · intra · 风险 normal
-圈利润 **+674,560** · 圈时间 149min · 时薪 272,182/h
-- 航段1：买 Compboard 26,460/SCU × 64 SCU @ Rayari Anvik Research Outpost [Stanton > MicroTech > Calliope]
-  → 卖 37,000/SCU @ Shubin Mining Facility SM0-10 [Stanton > MicroTech]
-  本段利润 +674,560（量子 6min）
+### r415 备选 · there-back · 风险 normal
+圈利润 **+1,987,584** · 圈时间 241min · 时薪 494,218/h
+- 航段1：买 Audio-Visual Equipment 25,004/SCU × 64 SCU @ Seer's Canyon
+  → 卖 46,000/SCU @ HDMS-Lathan
+  本段利润 +1,343,744（量子 9min）
+- 航段2：买 Bexalite 23,940/SCU × 64 SCU @ HDMS-Hadley
+  → 卖 34,000/SCU @ Admin - Rat's Nest
+  本段利润 +643,840（库存 64，量子 11min）
 
-### r398 备选 · intra · 风险 normal
-圈利润 **+674,560** · 圈时间 149min · 时薪 272,182/h
-- 航段1：买 Compboard 26,460/SCU × 64 SCU @ Rayari Anvik Research Outpost [Stanton > MicroTech > Calliope]
-  → 卖 37,000/SCU @ Shubin Mining Facility SM0-13 [Stanton > MicroTech]
-  本段利润 +674,560（量子 6min）
+### r416 备选 · there-back · 风险 normal
+圈利润 **+1,507,796** · 圈时间 220min · 时薪 411,217/h
+- 航段1：买 Audio-Visual Equipment 25,004/SCU × 64 SCU @ Fallow Field
+  → 卖 46,000/SCU @ HDMS-Bezdek
+  本段利润 +1,343,744（量子 9min）
+- 航段2：买 Taranite 21,924/SCU × 27 SCU @ HDMS-Woodruff
+  → 卖 28,000/SCU @ Fallow Field
+  本段利润 +164,052（库存 27，量子 9min）
 
-### r399 ★首选 · there-back · 风险 normal
-圈利润 **+878,712** · 圈时间 107min · 时薪 493,658/h
-- 航段1：买 Taranite 18,792/SCU × 64 SCU @ Samson & Son's Salvage Center [Stanton > ArcCorp > Wala]
-  → 卖 29,000/SCU @ TDD - Trade and Development Division - Cloudview Center - Orison [Stanton > Crusader]
-  本段利润 +653,312（量子 4min）
-- 航段2：买 Gold 26,492/SCU × 50 SCU @ Admin - CRU-L5 [Stanton > Crusader > Crusader Lagrange Point 5]
-  → 卖 31,000/SCU @ TDD - Trade and Development Division - Area 18 [Stanton > ArcCorp]
-  本段利润 +225,400（库存 50，量子 4min）
+### r417 备选 · there-back · 风险 normal
+圈利润 **+1,507,796** · 圈时间 220min · 时薪 411,217/h
+- 航段1：买 Audio-Visual Equipment 25,004/SCU × 64 SCU @ Fallow Field
+  → 卖 46,000/SCU @ HDMS-Lathan
+  本段利润 +1,343,744（量子 9min）
+- 航段2：买 Taranite 21,924/SCU × 27 SCU @ HDMS-Woodruff
+  → 卖 28,000/SCU @ Fallow Field
+  本段利润 +164,052（库存 27，量子 9min）
 
-### r400 备选 · there-back · 风险 normal
-圈利润 **+684,752** · 圈时间 143min · 时薪 286,907/h
-- 航段1：买 Taranite 18,792/SCU × 64 SCU @ Samson & Son's Salvage Center [Stanton > ArcCorp > Wala]
-  → 卖 28,000/SCU @ TDD - Trade and Development Division - Commons - New Babbage [Stanton > MicroTech]
-  本段利润 +589,312（量子 5min）
-- 航段2：买 Fresh Food 21,614/SCU × 40 SCU @ Rayari Anvik Research Outpost [Stanton > MicroTech > Calliope]
-  → 卖 24,000/SCU @ TDD - Trade and Development Division - Area 18 [Stanton > ArcCorp]
-  本段利润 +95,440（库存 40，量子 5min）
+### r418 备选 · one-way · 风险 pyro
+圈利润 **+1,230,784** · 圈时间 87min · 时薪 851,753/h
+- 航段1：买 Tritium 15,769/SCU × 64 SCU @ Hickes Research Outpost
+  → 卖 35,000/SCU @ Admin - Endgame
+  本段利润 +1,230,784（量子 5min）
 
-### r401 备选 · there-back · 风险 normal
-圈利润 **+539,540** · 圈时间 171min · 时薪 189,533/h
-- 航段1：买 Fresh Food 21,614/SCU × 64 SCU @ Rayari Kaltag Research Outpost [Stanton > MicroTech > Calliope]
-  → 卖 29,000/SCU @ HDMS-Stanhope [Stanton > Hurston]
-  本段利润 +472,704（库存 81，量子 3min）
-- 航段2：买 Taranite 21,924/SCU × 11 SCU @ HDMS-Woodruff [Stanton > Hurston > Ita]
-  → 卖 28,000/SCU @ TDD - Trade and Development Division - Commons - New Babbage [Stanton > MicroTech]
-  本段利润 +66,836（库存 11，量子 3min）
+### r419 备选 · one-way · 风险 pyro
+圈利润 **+1,166,784** · 圈时间 96min · 时薪 727,723/h
+- 航段1：买 Tritium 15,769/SCU × 64 SCU @ Hickes Research Outpost
+  → 卖 34,000/SCU @ Admin - Gaslight
+  本段利润 +1,166,784（量子 10min）
 
-### r402 备选 · there-back · 风险 normal
-圈利润 **+539,540** · 圈时间 171min · 时薪 189,533/h
-- 航段1：买 Fresh Food 21,614/SCU × 64 SCU @ Rayari Kaltag Research Outpost [Stanton > MicroTech > Calliope]
-  → 卖 29,000/SCU @ HDMS-Thedus [Stanton > Hurston]
-  本段利润 +472,704（库存 81，量子 3min）
-- 航段2：买 Taranite 21,924/SCU × 11 SCU @ HDMS-Woodruff [Stanton > Hurston > Ita]
-  → 卖 28,000/SCU @ TDD - Trade and Development Division - Commons - New Babbage [Stanton > MicroTech]
-  本段利润 +66,836（库存 11，量子 3min）
+### r420 备选 · one-way · 风险 normal
+圈利润 **+1,154,240** · 圈时间 92min · 时薪 752,765/h
+- 航段1：买 Audio-Visual Equipment 27,965/SCU × 64 SCU @ Admin - People's Service Station Lambda [Nyx > People's Service Station Lambda]
+  → 卖 46,000/SCU @ HDMS-Bezdek [Stanton > Hurston > Arial]
+  本段利润 +1,154,240（量子 15min）
+
+### r421 备选 · one-way · 风险 normal
+圈利润 **+1,154,240** · 圈时间 92min · 时薪 752,765/h
+- 航段1：买 Audio-Visual Equipment 27,965/SCU × 64 SCU @ Admin - People's Service Station Lambda [Nyx > People's Service Station Lambda]
+  → 卖 46,000/SCU @ HDMS-Lathan [Stanton > Hurston > Arial]
+  本段利润 +1,154,240（量子 15min）
+
+### r422 备选 · one-way · 风险 normal
+圈利润 **+1,057,456** · 圈时间 113min · 时薪 559,994/h
+- 航段1：买 Gasping Weevil Eggs 46,408/SCU × 43 SCU @ Fallow Field
+  → 卖 71,000/SCU @ Devlin Scrap and Salvage
+  本段利润 +1,057,456（量子 10min）
 
 <!-- sc-trader:auto-end -->
