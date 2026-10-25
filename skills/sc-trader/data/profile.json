@@ -58,5 +58,8 @@
     "MIC-L2": "auto",
     "Long Forest": "auto",
     "Samson": "manual"
-  }
+  },
+  "excluded_commodities": [
+    "Osoian Hides"
+  ]
 }

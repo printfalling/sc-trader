@@ -343,6 +343,18 @@ def travel_seconds(ctx, from_name: str, from_sys: str, to_name: str, to_sys: str
     return total
 
 
+def snap_to_crate(qty: int, box_sizes, max_box: int = 32) -> int:
+    """把数量向下取整到整箱：商品只按箱卖，买不到散装 SCU。
+
+    取不超过 max_box 的最大箱型，再按该箱型整除；无法凑满一箱则返回 0（不可买）。
+    """
+    sizes = [b for b in (box_sizes or []) if isinstance(b, int) and 0 < b <= max_box]
+    if not sizes:
+        return int(qty)
+    box = max(sizes)
+    return (int(qty) // box) * box
+
+
 def crate_size_for(leg: dict, profile: dict) -> int:
     """该航段的实际箱规格：取终端可售箱型（leg.box_sizes）中不超过船槽上限的最大值。
 

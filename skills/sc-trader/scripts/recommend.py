@@ -136,8 +136,9 @@ def computed_legs_from_prices(client, ctx, budget: int, profile: dict,
 
     scu_total = profile["ship"]["scu_total"]
     legs = []
+    excluded = {str(e).lower() for e in (profile.get("excluded_commodities") or [])}
     for (cid, cname), entries in by_commodity.items():
-        if not cid:
+        if not cid or str(cname).lower() in excluded:
             continue
         buys, sells = [], []
         for r, t in entries:
@@ -167,6 +168,9 @@ def computed_legs_from_prices(client, ctx, budget: int, profile: dict,
                           int(stock) if stock else scu_total)
                 qty = common.stock_capped_qty(scu_total, qty,
                                               br.get("status_buy"), sr.get("status_sell"))
+                # 只按整箱卖：向下取整到箱型（如 Osoian Hides 仅 4-SCU 箱）
+                qty = common.snap_to_crate(qty, br.get("container_sizes"),
+                                           (profile.get("ship") or {}).get("max_box", 32))
                 if qty <= 0:
                     continue
                 is_pyro = getattr(st, "star_system_name", "").lower() == "pyro"
