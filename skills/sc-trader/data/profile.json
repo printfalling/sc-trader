@@ -50,7 +50,7 @@
     "seconds_per_gm": 5.0,
     "qt_speed_km_s": 200000,
     "fallback_leg_min": 15.0,
-    "jump_gate_min": 12.0
+    "jump_gate_min": 5.0
   },
   "loading_overrides": {
     "Rayari Anvik": "manual",

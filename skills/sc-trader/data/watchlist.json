@@ -1,14 +1,14 @@
 {
   "version": 1,
-  "updated_at": "2026-10-25T10:57:22+00:00",
+  "updated_at": "2026-10-25T11:00:25+00:00",
   "routes": [
     {
-      "id": "r433",
+      "id": "r443",
       "type": "there-back",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-25T10:56:56+00:00",
+      "created_at": "2026-10-25T10:59:58+00:00",
       "legs": [
         {
           "commodity": "Osoian Hides",
@@ -19,7 +19,8 @@
             "auto": false,
             "max_box": 24,
             "system": "Pyro",
-            "loading_source": "hangar"
+            "loading_source": "hangar",
+            "path": "Pyro > Bloom"
           },
           "sell_terminal": {
             "id": 24,
@@ -27,7 +28,8 @@
             "auto": false,
             "max_box": 32,
             "system": "Stanton",
-            "loading_source": "hangar"
+            "loading_source": "hangar",
+            "path": "Stanton > MicroTech > Euterpe"
           },
           "id_planet_origin": 242,
           "origin_planet": "Bloom",
@@ -48,7 +50,8 @@
           "intra": false,
           "pyro": false,
           "source": "computed",
-          "qt_sec": 640.0
+          "qt_sec": 945.0,
+          "cross_system": true
         },
         {
           "commodity": "Compboard",
@@ -81,23 +84,23 @@
         }
       ],
       "loop_profit": 1591560,
-      "qt_sec_total": 1280.0,
+      "qt_sec_total": 1585.0,
       "transit_sec": 40.0,
       "closed": true,
       "reposition_sec": null,
       "reposition_kind": null,
-      "loop_time_min": 182.0,
-      "profit_per_hour": 524690,
+      "loop_time_min": 180.1,
+      "profit_per_hour": 530225,
       "snapshots": [
         {
-          "ts": "2026-10-25T10:56:56+00:00",
+          "ts": "2026-10-25T10:59:58+00:00",
           "price_buy": 283500,
           "price_sell": 870000,
           "scu_stock": 2,
           "source": "uex"
         },
         {
-          "ts": "2026-10-25T10:56:56+00:00",
+          "ts": "2026-10-25T10:59:58+00:00",
           "price_buy": 26460,
           "price_sell": 33000,
           "scu_stock": 72,
@@ -106,12 +109,12 @@
       ]
     },
     {
-      "id": "r434",
+      "id": "r444",
       "type": "intra",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-25T10:56:56+00:00",
+      "created_at": "2026-10-25T10:59:58+00:00",
       "legs": [
         {
           "commodity": "Compboard",
@@ -162,7 +165,7 @@
       "profit_per_hour": 272182,
       "snapshots": [
         {
-          "ts": "2026-10-25T10:56:56+00:00",
+          "ts": "2026-10-25T10:59:58+00:00",
           "price_buy": 26460,
           "price_sell": 37000,
           "scu_stock": 72,
@@ -171,12 +174,12 @@
       ]
     },
     {
-      "id": "r435",
+      "id": "r445",
       "type": "there-back",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-25T10:57:03+00:00",
+      "created_at": "2026-10-25T11:00:09+00:00",
       "legs": [
         {
           "commodity": "Compboard",
@@ -258,14 +261,14 @@
       "profit_per_hour": 270084,
       "snapshots": [
         {
-          "ts": "2026-10-25T10:57:03+00:00",
+          "ts": "2026-10-25T11:00:09+00:00",
           "price_buy": 26460,
           "price_sell": 37000,
           "scu_stock": 72,
           "source": "uex"
         },
         {
-          "ts": "2026-10-25T10:57:03+00:00",
+          "ts": "2026-10-25T11:00:09+00:00",
           "price_buy": 21924,
           "price_sell": 28000,
           "scu_stock": 27,
@@ -274,12 +277,12 @@
       ]
     },
     {
-      "id": "r436",
+      "id": "r446",
       "type": "there-back",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-25T10:57:09+00:00",
+      "created_at": "2026-10-25T11:00:12+00:00",
       "legs": [
         {
           "commodity": "Compboard",
@@ -322,8 +325,8 @@
           "intra": false,
           "pyro": false,
           "source": "computed",
-          "qt_sec": 900.0,
-          "qt_estimated": true
+          "qt_sec": 1640.0,
+          "cross_system": true
         },
         {
           "commodity": "Compboard",
@@ -356,23 +359,23 @@
         }
       ],
       "loop_profit": 1207720,
-      "qt_sec_total": 1280.0,
+      "qt_sec_total": 2020.0,
       "transit_sec": 380.0,
       "closed": false,
-      "reposition_sec": null,
+      "reposition_sec": 900.0,
       "reposition_kind": "ferry",
-      "loop_time_min": 248.7,
-      "profit_per_hour": 291367,
+      "loop_time_min": 269.0,
+      "profit_per_hour": 269379,
       "snapshots": [
         {
-          "ts": "2026-10-25T10:57:09+00:00",
+          "ts": "2026-10-25T11:00:12+00:00",
           "price_buy": 28114,
           "price_sell": 37000,
           "scu_stock": 60,
           "source": "uex"
         },
         {
-          "ts": "2026-10-25T10:57:09+00:00",
+          "ts": "2026-10-25T11:00:12+00:00",
           "price_buy": 26460,
           "price_sell": 37000,
           "scu_stock": 72,
@@ -381,12 +384,12 @@
       ]
     },
     {
-      "id": "r437",
+      "id": "r447",
       "type": "there-back",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-25T10:57:16+00:00",
+      "created_at": "2026-10-25T11:00:18+00:00",
       "legs": [
         {
           "commodity": "Compboard",
@@ -429,8 +432,8 @@
           "intra": false,
           "pyro": false,
           "source": "computed",
-          "qt_sec": 900.0,
-          "qt_estimated": true
+          "qt_sec": 1605.0,
+          "cross_system": true
         },
         {
           "commodity": "Taranite",
@@ -465,23 +468,23 @@
         }
       ],
       "loop_profit": 697212,
-      "qt_sec_total": 1090.0,
+      "qt_sec_total": 1795.0,
       "transit_sec": 200.0,
       "closed": false,
-      "reposition_sec": null,
+      "reposition_sec": 900.0,
       "reposition_kind": "ferry",
-      "loop_time_min": 146.5,
-      "profit_per_hour": 285547,
+      "loop_time_min": 166.3,
+      "profit_per_hour": 251549,
       "snapshots": [
         {
-          "ts": "2026-10-25T10:57:16+00:00",
+          "ts": "2026-10-25T11:00:18+00:00",
           "price_buy": 28114,
           "price_sell": 37000,
           "scu_stock": 60,
           "source": "uex"
         },
         {
-          "ts": "2026-10-25T10:57:16+00:00",
+          "ts": "2026-10-25T11:00:18+00:00",
           "price_buy": 21924,
           "price_sell": 28000,
           "scu_stock": 27,
@@ -490,12 +493,12 @@
       ]
     },
     {
-      "id": "r438",
+      "id": "r448",
       "type": "there-back",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-25T10:57:22+00:00",
+      "created_at": "2026-10-25T11:00:25+00:00",
       "legs": [
         {
           "commodity": "Fresh Food",
@@ -506,7 +509,8 @@
             "auto": false,
             "max_box": 32,
             "system": "Pyro",
-            "loading_source": "hangar"
+            "loading_source": "hangar",
+            "path": "Pyro > Bloom"
           },
           "sell_terminal": {
             "id": 39,
@@ -514,7 +518,8 @@
             "auto": false,
             "max_box": 24,
             "system": "Stanton",
-            "loading_source": "hangar"
+            "loading_source": "hangar",
+            "path": "Stanton > Hurston"
           },
           "id_planet_origin": 242,
           "origin_planet": "Bloom",
@@ -539,7 +544,8 @@
           "intra": false,
           "pyro": false,
           "source": "computed",
-          "qt_sec": 500.0
+          "qt_sec": 805.0,
+          "cross_system": true
         },
         {
           "commodity": "Bexalite",
@@ -574,23 +580,23 @@
         }
       ],
       "loop_profit": 911296,
-      "qt_sec_total": 970.0,
+      "qt_sec_total": 1275.0,
       "transit_sec": 230.0,
       "closed": false,
       "reposition_sec": 175.0,
       "reposition_kind": "ferry",
-      "loop_time_min": 247.9,
-      "profit_per_hour": 220563,
+      "loop_time_min": 246.0,
+      "profit_per_hour": 222267,
       "snapshots": [
         {
-          "ts": "2026-10-25T10:57:22+00:00",
+          "ts": "2026-10-25T11:00:25+00:00",
           "price_buy": 20821,
           "price_sell": 29000,
           "scu_stock": 128,
           "source": "uex"
         },
         {
-          "ts": "2026-10-25T10:57:22+00:00",
+          "ts": "2026-10-25T11:00:25+00:00",
           "price_buy": 23940,
           "price_sell": 30000,
           "scu_stock": 64,
@@ -599,12 +605,12 @@
       ]
     },
     {
-      "id": "r439",
+      "id": "r449",
       "type": "one-way",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-25T10:57:22+00:00",
+      "created_at": "2026-10-25T11:00:25+00:00",
       "legs": [
         {
           "commodity": "Fresh Food",
@@ -615,7 +621,8 @@
             "auto": false,
             "max_box": 32,
             "system": "Pyro",
-            "loading_source": "hangar"
+            "loading_source": "hangar",
+            "path": "Pyro > Bloom"
           },
           "sell_terminal": {
             "id": 40,
@@ -623,7 +630,8 @@
             "auto": false,
             "max_box": 24,
             "system": "Stanton",
-            "loading_source": "hangar"
+            "loading_source": "hangar",
+            "path": "Stanton > Hurston"
           },
           "id_planet_origin": 242,
           "origin_planet": "Bloom",
@@ -648,20 +656,21 @@
           "intra": false,
           "pyro": false,
           "source": "computed",
-          "qt_sec": 500.0
+          "qt_sec": 805.0,
+          "cross_system": true
         }
       ],
       "loop_profit": 523456,
-      "qt_sec_total": 500.0,
+      "qt_sec_total": 805.0,
       "transit_sec": null,
       "closed": false,
-      "reposition_sec": 1220.0,
+      "reposition_sec": 805.0,
       "reposition_kind": "empty-return",
-      "loop_time_min": 176.7,
-      "profit_per_hour": 177743,
+      "loop_time_min": 167.8,
+      "profit_per_hour": 187171,
       "snapshots": [
         {
-          "ts": "2026-10-25T10:57:22+00:00",
+          "ts": "2026-10-25T11:00:25+00:00",
           "price_buy": 20821,
           "price_sell": 29000,
           "scu_stock": 128,
@@ -670,12 +679,12 @@
       ]
     },
     {
-      "id": "r440",
+      "id": "r450",
       "type": "one-way",
       "status": "candidate",
       "risk": "pyro",
       "ship": "c1_spirit",
-      "created_at": "2026-10-25T10:57:22+00:00",
+      "created_at": "2026-10-25T11:00:25+00:00",
       "legs": [
         {
           "commodity": "Atlasium",
@@ -728,7 +737,7 @@
       "profit_per_hour": 521231,
       "snapshots": [
         {
-          "ts": "2026-10-25T10:57:22+00:00",
+          "ts": "2026-10-25T11:00:25+00:00",
           "price_buy": 73394,
           "price_sell": 94000,
           "scu_stock": 27,
@@ -737,12 +746,12 @@
       ]
     },
     {
-      "id": "r441",
+      "id": "r451",
       "type": "one-way",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-25T10:57:22+00:00",
+      "created_at": "2026-10-25T11:00:25+00:00",
       "legs": [
         {
           "commodity": "Degnous Root",
@@ -785,21 +794,21 @@
           "intra": false,
           "pyro": false,
           "source": "computed",
-          "qt_sec": 900.0,
-          "qt_estimated": true
+          "qt_sec": 1690.0,
+          "cross_system": true
         }
       ],
       "loop_profit": 493101,
-      "qt_sec_total": 900.0,
+      "qt_sec_total": 1690.0,
       "transit_sec": null,
       "closed": false,
-      "reposition_sec": 720.0,
+      "reposition_sec": 1690.0,
       "reposition_kind": "empty-return",
-      "loop_time_min": 57.0,
-      "profit_per_hour": 519053,
+      "loop_time_min": 79.3,
+      "profit_per_hour": 373090,
       "snapshots": [
         {
-          "ts": "2026-10-25T10:57:22+00:00",
+          "ts": "2026-10-25T11:00:25+00:00",
           "price_buy": 44737,
           "price_sell": 63000,
           "scu_stock": 27,
@@ -808,12 +817,12 @@
       ]
     },
     {
-      "id": "r442",
+      "id": "r452",
       "type": "intra",
       "status": "candidate",
       "risk": "normal",
       "ship": "c1_spirit",
-      "created_at": "2026-10-25T10:57:22+00:00",
+      "created_at": "2026-10-25T11:00:25+00:00",
       "legs": [
         {
           "commodity": "Degnous Root",
@@ -856,21 +865,21 @@
           "intra": true,
           "pyro": false,
           "source": "computed",
-          "qt_sec": 900.0,
-          "qt_estimated": true
+          "qt_sec": 1760.0,
+          "cross_system": true
         }
       ],
       "loop_profit": 493101,
-      "qt_sec_total": 900.0,
+      "qt_sec_total": 1760.0,
       "transit_sec": null,
       "closed": false,
-      "reposition_sec": 720.0,
+      "reposition_sec": 1760.0,
       "reposition_kind": "empty-return",
-      "loop_time_min": 57.0,
-      "profit_per_hour": 519053,
+      "loop_time_min": 81.7,
+      "profit_per_hour": 362130,
       "snapshots": [
         {
-          "ts": "2026-10-25T10:57:22+00:00",
+          "ts": "2026-10-25T11:00:25+00:00",
           "price_buy": 44737,
           "price_sell": 63000,
           "scu_stock": 27,
@@ -879,18 +888,18 @@
       ]
     }
   ],
-  "next_id": 443,
+  "next_id": 453,
   "ranking_prev": [
-    "r433",
-    "r436",
-    "r438",
-    "r435",
-    "r437",
-    "r434",
-    "r439",
-    "r440",
-    "r441",
-    "r442"
+    "r443",
+    "r446",
+    "r448",
+    "r445",
+    "r447",
+    "r444",
+    "r449",
+    "r450",
+    "r451",
+    "r452"
   ],
   "tracked_commodities": {
     "51": "Medical Supplies",

@@ -382,16 +382,19 @@ def build_routes(legs: list[dict], budget: int, profile: dict,
             "loop_profit": sum(x["leg_profit"] for x in legs_pair),
         }
         source_count[source] = source_count.get(source, 0) + 1
-        fallback_min = float((profile.get("time_model") or {}).get("fallback_leg_min", 15.0))
+        tm = profile.get("time_model") or {}
+        fallback_min = float(tm.get("fallback_leg_min", 15.0))
+        jump_min = float(tm.get("jump_gate_min", 5.0))
+        seconds_per_gm = float(tm.get("seconds_per_gm", 5.0))
         for x in legs_pair:
-            x["qt_sec"] = None
-            if ctx is not None:
-                x["qt_sec"] = common.qt_seconds(
-                    ctx, x["buy_terminal"]["name"], x["sell_terminal"]["name"])
-            if x["qt_sec"] is None:
-                # 图上无路径（跨星系/节点缺失）→ 兜底估算，不再按 0
-                x["qt_sec"] = fallback_min * 60
-                x["qt_estimated"] = True
+            x["qt_sec"] = common.travel_seconds(
+                ctx, x["buy_terminal"]["name"], x["buy_terminal"].get("system"),
+                x["sell_terminal"]["name"], x["sell_terminal"].get("system"),
+                seconds_per_gm=seconds_per_gm, jump_min=jump_min,
+                fallback_min=fallback_min)
+            if x["buy_terminal"].get("system") and x["sell_terminal"].get("system") \
+                    and x["buy_terminal"]["system"] != x["sell_terminal"]["system"]:
+                x["cross_system"] = True
                 # 展示规范：每个终端附位置路径（全名不缩写）
                 for side in ("buy_terminal", "sell_terminal"):
                     x[side]["path"] = common.terminal_path(ctx, x[side].get("id"))
@@ -403,25 +406,24 @@ def build_routes(legs: list[dict], budget: int, profile: dict,
         transit_sec = 0.0
         for prev_, nxt_ in zip(legs_pair, legs_pair[1:]):
             if prev_["sell_terminal"]["id"] != nxt_["buy_terminal"]["id"]:
-                t = (common.qt_seconds(ctx, prev_["sell_terminal"]["name"],
-                                       nxt_["buy_terminal"]["name"])
-                     if ctx is not None else None)
+                t = common.travel_seconds(
+                    ctx, prev_["sell_terminal"]["name"],
+                    prev_["sell_terminal"].get("system"),
+                    nxt_["buy_terminal"]["name"],
+                    nxt_["buy_terminal"].get("system"),
+                    seconds_per_gm=seconds_per_gm, jump_min=jump_min,
+                    fallback_min=fallback_min)
                 transit_sec += t or 0.0
-                if (prev_["sell_terminal"].get("system")
-                        and nxt_["buy_terminal"].get("system")
-                        and prev_["sell_terminal"]["system"] != nxt_["buy_terminal"]["system"]):
-                    transit_sec += float((profile.get("time_model") or {})
-                                         .get("jump_gate_min", 12.0)) * 60
+
         route["transit_sec"] = transit_sec or None
         repo_sec = None
         if last_sell["id"] != first_buy["id"]:
             # 未回到起点终端：补一段回起点的时间（有货=摆渡，单程=空载返回）
-            repo_sec = (common.qt_seconds(ctx, last_sell["name"], first_buy["name"])
-                        if ctx is not None else None)
-            if (last_sell.get("system") and first_buy.get("system")
-                    and last_sell["system"] != first_buy["system"]):
-                repo_sec = (repo_sec or 0) + float(
-                    (profile.get("time_model") or {}).get("jump_gate_min", 12.0)) * 60
+            repo_sec = common.travel_seconds(
+                ctx, last_sell["name"], last_sell.get("system"),
+                first_buy["name"], first_buy.get("system"),
+                seconds_per_gm=seconds_per_gm, jump_min=jump_min,
+                fallback_min=fallback_min)
         route["closed"] = last_sell["id"] == first_buy["id"]
         route["reposition_sec"] = repo_sec
         route["reposition_kind"] = (None if route["closed"]

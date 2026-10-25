@@ -318,6 +318,31 @@ def stock_capped_qty(scu_total: int, qty: int, status_buy, status_sell) -> int:
     return max(0, int(q))
 
 
+def gateway_node(system_from: str, system_to: str) -> str:
+    """星门节点命名：位于 system_from、通往 system_to 的门（uexinfo 图约定）。"""
+    return f"{system_to} Gateway ({system_from})"
+
+
+def travel_seconds(ctx, from_name: str, from_sys: str, to_name: str, to_sys: str,
+                   seconds_per_gm: float = 5.0, jump_min: float = 5.0,
+                   fallback_min: float = 15.0) -> float:
+    """跨星系行程 = 飞到本星系星门 → 穿越（jump_min）→ 从对方星系门飞到目的地。
+
+    任一段图上无路径时用 fallback_min 兜底。
+    """
+    if ctx is None:
+        return fallback_min * 60
+    if not from_sys or not to_sys or from_sys == to_sys:
+        t = qt_seconds(ctx, from_name, to_name, seconds_per_gm)
+        return t if t is not None else fallback_min * 60
+    a = qt_seconds(ctx, from_name, gateway_node(from_sys, to_sys), seconds_per_gm)
+    b = qt_seconds(ctx, gateway_node(to_sys, from_sys), to_name, seconds_per_gm)
+    total = (a if a is not None else fallback_min * 60)
+    total += jump_min * 60
+    total += (b if b is not None else fallback_min * 60)
+    return total
+
+
 def crate_size_for(leg: dict, profile: dict) -> int:
     """该航段的实际箱规格：取终端可售箱型（leg.box_sizes）中不超过船槽上限的最大值。
 
