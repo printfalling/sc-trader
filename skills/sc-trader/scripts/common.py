@@ -300,6 +300,24 @@ def terminal_path(ctx, terminal_id: int) -> str:
     return " > ".join(p for p in dedup if p)
 
 
+def stock_capped_qty(scu_total: int, qty: int, status_buy, status_sell) -> int:
+    """按买端/卖端库存状态封顶实际可交易量（uexinfo 规则 D1/D5）。
+
+    买端：库存越满越能买（Max=100%，Out=0）
+    卖端：库存越空越能收（Out=100%，Max=0）
+    """
+    try:
+        from uexinfo.rules.stock import buy_quantity, sell_quantity
+    except Exception:
+        return max(0, int(qty))
+    try:
+        q = min(int(qty), buy_quantity(int(scu_total), int(status_buy or 0)))
+        q = sell_quantity(int(q), int(status_sell or 0))
+    except Exception:
+        return max(0, int(qty))
+    return max(0, int(q))
+
+
 def crate_size_for(leg: dict, profile: dict) -> int:
     """该航段的实际箱规格：取终端可售箱型（leg.box_sizes）中不超过船槽上限的最大值。
 
@@ -366,9 +384,15 @@ def route_time_min(profile: dict, legs: list[dict], extra_min: float = 0.0) -> f
             handling = manual_per_scu * (qty or 0)
         return base + handling
 
+    jump_gate = float(tm.get("jump_gate_min", 12.0))
     total = 0.0
     for leg in legs:
         total += (leg.get("qt_sec") or 0) / 60
+        # 跨星系必须过星门：进闸定位 + 充能 + 排队 + 出闸，与距离无关
+        bs = (leg.get("buy_terminal") or {}).get("system")
+        ss = (leg.get("sell_terminal") or {}).get("system")
+        if bs and ss and bs != ss:
+            total += jump_gate
         qty = leg.get("qty") or qty_default
         total += stop_minutes(leg["buy_terminal"], qty, leg.get("box_sizes"))
         total += stop_minutes(leg["sell_terminal"], qty, leg.get("box_sizes"))

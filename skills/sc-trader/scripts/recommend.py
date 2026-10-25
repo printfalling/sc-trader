@@ -57,6 +57,8 @@ def filter_legs(rows: list[dict], budget: int, profile: dict,
             continue
         stock = int(r.get("scu_origin") or 0)
         qty = min(scu_total, capacity, budget // int(buy), stock or capacity)
+        qty = common.stock_capped_qty(scu_total, qty,
+                                      r.get("status_origin"), r.get("status_destination"))
         if qty <= 0:
             continue
         is_pyro = str(r.get("destination_star_system_name", "")).lower() == "pyro"
@@ -160,7 +162,11 @@ def computed_legs_from_prices(client, ctx, budget: int, profile: dict,
                     continue
                 box_sizes = common.parse_box_sizes(br.get("container_sizes"))
                 capacity = common.packable_scu(box_sizes, profile) or scu_total
-                qty = min(scu_total, capacity, budget // int(pb))
+                stock = br.get("scu_buy")
+                qty = min(scu_total, capacity, budget // int(pb),
+                          int(stock) if stock else scu_total)
+                qty = common.stock_capped_qty(scu_total, qty,
+                                              br.get("status_buy"), sr.get("status_sell"))
                 if qty <= 0:
                     continue
                 is_pyro = getattr(st, "star_system_name", "").lower() == "pyro"
@@ -176,7 +182,9 @@ def computed_legs_from_prices(client, ctx, budget: int, profile: dict,
                     "destination_planet": getattr(st, "planet_name", ""),
                     "destination_system": getattr(st, "star_system_name", ""),
                     "price_buy": int(pb), "price_sell": int(ps),
-                    "scu_stock": 0,
+                    "scu_stock": int(stock) if stock else 0,
+                    "status_buy": br.get("status_buy"),
+                    "status_sell": sr.get("status_sell"),
                     "qty": qty, "box_sizes": box_sizes,
                     "leg_profit": qty * (int(ps) - int(pb)),
                     "roi": round((ps - pb) / pb * 100, 1),
@@ -278,7 +286,8 @@ def annotate_terminals(legs: list[dict], ctx, freight_by_id: dict | None = None,
         # 地表前哨无库 → 只能手搬
         has_hangar = bool(getattr(t, "id_space_station", 0) or getattr(t, "id_city", 0))
         meta[t.id] = {"auto": has_hangar, "max_box": mcs or 32,
-                      "hangar": has_hangar}
+                      "hangar": has_hangar,
+                      "system": getattr(t, "star_system_name", "") or ""}
     # 用户实测覆盖（权威最高）→ UEX 数据 → 名称启发式
     overrides = (profile or {}).get("loading_overrides") or {}
     for leg in legs:
@@ -293,6 +302,7 @@ def annotate_terminals(legs: list[dict], ctx, freight_by_id: dict | None = None,
                 term["auto"] = m["auto"]
             if m:
                 term["max_box"] = m["max_box"]
+                term["system"] = m.get("system", "")
             term["loading_source"] = ("override" if ov is not None
                                       else ("hangar" if m else "heuristic"))
 
@@ -397,12 +407,21 @@ def build_routes(legs: list[dict], budget: int, profile: dict,
                                        nxt_["buy_terminal"]["name"])
                      if ctx is not None else None)
                 transit_sec += t or 0.0
+                if (prev_["sell_terminal"].get("system")
+                        and nxt_["buy_terminal"].get("system")
+                        and prev_["sell_terminal"]["system"] != nxt_["buy_terminal"]["system"]):
+                    transit_sec += float((profile.get("time_model") or {})
+                                         .get("jump_gate_min", 12.0)) * 60
         route["transit_sec"] = transit_sec or None
         repo_sec = None
         if last_sell["id"] != first_buy["id"]:
             # 未回到起点终端：补一段回起点的时间（有货=摆渡，单程=空载返回）
             repo_sec = (common.qt_seconds(ctx, last_sell["name"], first_buy["name"])
                         if ctx is not None else None)
+            if (last_sell.get("system") and first_buy.get("system")
+                    and last_sell["system"] != first_buy["system"]):
+                repo_sec = (repo_sec or 0) + float(
+                    (profile.get("time_model") or {}).get("jump_gate_min", 12.0)) * 60
         route["closed"] = last_sell["id"] == first_buy["id"]
         route["reposition_sec"] = repo_sec
         route["reposition_kind"] = (None if route["closed"]
