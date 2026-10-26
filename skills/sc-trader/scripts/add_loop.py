@@ -141,8 +141,10 @@ def main() -> int:
                      if x["buy_ci"] == ci or x["sell_ci"] == ci)
         spend = sum(b["qty"] * b["price"] for b in buys)
         income = sum(s["qty"] * s["price"] for s in sells)
-        if spend > cash:
-            raise SystemExit(f"ERROR: 第{ci+1}站 {t.name} 现金不足（需 {spend:,}，有 {cash:,}）")
+        # 同站先卸货收款、再装货付款（卖了才有钱买）
+        if spend > cash + income:
+            raise SystemExit(f"ERROR: 第{ci+1}站 {t.name} 现金不足"
+                             f"（需 {spend:,}，手头 {cash:,} + 本站卖得 {income:,}）")
         cash += income - spend
         hangar = bool(getattr(t, "id_space_station", 0) or getattr(t, "id_city", 0))
         auto = ship.get("auto_loading_capable") and hangar
