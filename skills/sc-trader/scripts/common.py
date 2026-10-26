@@ -413,9 +413,18 @@ def route_time_min(profile: dict, legs: list[dict], extra_min: float = 0.0) -> f
             auto = ship_auto and bool(term["auto"])
         else:
             auto = ship_auto and terminal_loading_mode(term.get("name", ""), profile)
-        cap = term.get("max_box") or 32
-        usable = [b for b in (box_sizes or []) if 0 < b <= cap]
-        size = max(usable) if usable else (min(cap, 32) if cap else None)
+        try:
+            cap = int(term.get("max_box") or 32)
+        except (TypeError, ValueError):
+            cap = 32
+        sizes = []
+        for b in box_sizes or []:
+            try:
+                sizes.append(int(b))
+            except (TypeError, ValueError):
+                continue      # 跳过 "1,2,4" 这类未解析的字符串
+        usable = [b for b in sizes if 0 < b <= cap]
+        size = max(usable) if usable else None
         if auto:
             crates = -(-(qty or 0) // max(1, size)) if size else 0
             handling = crates * crate_min + extra
