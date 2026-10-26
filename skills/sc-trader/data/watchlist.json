@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-10-25T12:16:12+00:00",
+  "updated_at": "2026-10-26T06:36:28+00:00",
   "routes": [
     {
       "id": "r453",
@@ -747,9 +747,139 @@
           "source": "uex"
         }
       ]
+    },
+    {
+      "id": "r461",
+      "type": "manual-loop",
+      "status": "candidate",
+      "risk": "pyro",
+      "ship": "c1_spirit",
+      "source": "manual",
+      "created_at": "2026-10-26T06:36:28+00:00",
+      "legs": [
+        {
+          "commodity": "Bexalite",
+          "id_commodity": 13,
+          "buy_terminal": {
+            "id": 551,
+            "name": "Bueno Ravine",
+            "auto": false,
+            "max_box": 16,
+            "system": "Pyro",
+            "loading_source": "hangar"
+          },
+          "sell_terminal": {
+            "id": 665,
+            "name": "The Golden Riviera",
+            "auto": false,
+            "max_box": 24,
+            "system": "Pyro",
+            "loading_source": "hangar"
+          },
+          "price_buy": 23556,
+          "price_sell": 28000,
+          "qty": 38,
+          "box_sizes": "1,2,4,8",
+          "leg_profit": 168872,
+          "scu_stock": 131,
+          "status_buy": 4,
+          "status_sell": 1,
+          "qt_sec": 20.0,
+          "source": "manual"
+        },
+        {
+          "commodity": "Bioplastic",
+          "id_commodity": 112,
+          "buy_terminal": {
+            "id": 665,
+            "name": "The Golden Riviera",
+            "auto": false,
+            "max_box": 24,
+            "system": "Pyro",
+            "loading_source": "hangar"
+          },
+          "sell_terminal": {
+            "id": 590,
+            "name": "Rustville",
+            "auto": false,
+            "max_box": 16,
+            "system": "Pyro",
+            "loading_source": "hangar"
+          },
+          "price_buy": 6538,
+          "price_sell": 8100,
+          "qty": 64,
+          "box_sizes": "1,2,4,8,16",
+          "leg_profit": 99968,
+          "scu_stock": 525,
+          "status_buy": 7,
+          "status_sell": 1,
+          "qt_sec": 65.0,
+          "source": "manual"
+        },
+        {
+          "commodity": "Dymantium",
+          "id_commodity": 127,
+          "buy_terminal": {
+            "id": 590,
+            "name": "Rustville",
+            "auto": false,
+            "max_box": 16,
+            "system": "Pyro",
+            "loading_source": "hangar"
+          },
+          "sell_terminal": {
+            "id": 551,
+            "name": "Bueno Ravine",
+            "auto": false,
+            "max_box": 16,
+            "system": "Pyro",
+            "loading_source": "hangar"
+          },
+          "price_buy": 17480,
+          "price_sell": 23000,
+          "qty": 9,
+          "box_sizes": "1,2,4,8",
+          "leg_profit": 49680,
+          "scu_stock": 128,
+          "status_buy": 7,
+          "status_sell": 5,
+          "qt_sec": 65.0,
+          "source": "manual"
+        }
+      ],
+      "loop_profit": 318520,
+      "loop_time_min": 278.5,
+      "profit_per_hour": 68621,
+      "closed": true,
+      "transit_sec": 1800.0,
+      "reposition_sec": null,
+      "snapshots": [
+        {
+          "ts": "2026-10-26T06:36:28+00:00",
+          "price_buy": 23556,
+          "price_sell": 28000,
+          "scu_stock": 131,
+          "source": "manual"
+        },
+        {
+          "ts": "2026-10-26T06:36:28+00:00",
+          "price_buy": 6538,
+          "price_sell": 8100,
+          "scu_stock": 525,
+          "source": "manual"
+        },
+        {
+          "ts": "2026-10-26T06:36:28+00:00",
+          "price_buy": 17480,
+          "price_sell": 23000,
+          "scu_stock": 128,
+          "source": "manual"
+        }
+      ]
     }
   ],
-  "next_id": 461,
+  "next_id": 462,
   "ranking_prev": [
     "r455",
     "r457",
