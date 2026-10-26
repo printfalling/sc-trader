@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-10-26T08:28:41+00:00",
+  "updated_at": "2026-10-26T08:36:03+00:00",
   "routes": [
     {
       "id": "r464",
@@ -251,6 +251,13 @@
               "price_sell": 21000,
               "scu_stock": 34,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-26T08:35:30+00:00",
+              "price_buy": 15449,
+              "price_sell": 21000,
+              "scu_stock": 34,
+              "source": "uex"
             }
           ]
         },
@@ -281,6 +288,13 @@
           "snapshots": [
             {
               "ts": "2026-10-26T08:28:14+00:00",
+              "price_buy": 16295,
+              "price_sell": 27000,
+              "scu_stock": 32,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-26T08:35:30+00:00",
               "price_buy": 16295,
               "price_sell": 27000,
               "scu_stock": 32,
@@ -319,6 +333,13 @@
               "price_sell": 24000,
               "scu_stock": 35,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-26T08:35:30+00:00",
+              "price_buy": 17389,
+              "price_sell": 24000,
+              "scu_stock": 35,
+              "source": "uex"
             }
           ]
         },
@@ -351,6 +372,13 @@
               "price_sell": 33000,
               "scu_stock": 9,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-26T08:35:30+00:00",
+              "price_buy": 26450,
+              "price_sell": 33000,
+              "scu_stock": 9,
+              "source": "uex"
             }
           ]
         },
@@ -379,6 +407,13 @@
           "snapshots": [
             {
               "ts": "2026-10-26T08:28:14+00:00",
+              "price_buy": 27000,
+              "price_sell": 33000,
+              "scu_stock": 72,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-26T08:35:30+00:00",
               "price_buy": 27000,
               "price_sell": 33000,
               "scu_stock": 72,
@@ -417,6 +452,13 @@
               "price_sell": 25000,
               "scu_stock": 32,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-26T08:35:30+00:00",
+              "price_buy": 21614,
+              "price_sell": 25000,
+              "scu_stock": 32,
+              "source": "uex"
             }
           ]
         },
@@ -447,6 +489,13 @@
           "snapshots": [
             {
               "ts": "2026-10-26T08:28:14+00:00",
+              "price_buy": 21614,
+              "price_sell": 25000,
+              "scu_stock": 10,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-26T08:35:30+00:00",
               "price_buy": 21614,
               "price_sell": 25000,
               "scu_stock": 10,
@@ -510,6 +559,150 @@
           "source": "itinerary"
         }
       ]
+    },
+    {
+      "id": "r458",
+      "type": "there-back",
+      "status": "candidate",
+      "risk": "normal",
+      "ship": "c1_spirit",
+      "created_at": "2026-10-25T12:16:12+00:00",
+      "legs": [
+        {
+          "commodity": "Fresh Food",
+          "id_commodity": 120,
+          "buy_terminal": {
+            "id": 555,
+            "name": "Shepherd's Rest",
+            "auto": false,
+            "max_box": 32,
+            "system": "Pyro",
+            "loading_source": "hangar",
+            "path": "Pyro > Bloom"
+          },
+          "sell_terminal": {
+            "id": 40,
+            "name": "HDMS-Thedus",
+            "auto": false,
+            "max_box": 24,
+            "system": "Stanton",
+            "loading_source": "hangar",
+            "path": "Stanton > Hurston"
+          },
+          "id_planet_origin": 242,
+          "origin_planet": "Bloom",
+          "id_planet_destination": 116,
+          "destination_planet": "Hurston",
+          "destination_system": "Stanton",
+          "price_buy": 20821,
+          "price_sell": 29000,
+          "scu_stock": 128,
+          "status_buy": 7,
+          "status_sell": 1,
+          "qty": 64,
+          "box_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16
+          ],
+          "leg_profit": 523456,
+          "roi": 39.3,
+          "intra": false,
+          "pyro": false,
+          "source": "computed",
+          "qt_sec": 805.0,
+          "cross_system": true,
+          "snapshots": [
+            {
+              "ts": "2026-10-26T07:10:34+00:00",
+              "price_buy": 20821,
+              "price_sell": 29000,
+              "scu_stock": 128,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-26T08:35:30+00:00",
+              "price_buy": 20821,
+              "price_sell": 29000,
+              "scu_stock": 128,
+              "source": "uex"
+            }
+          ]
+        },
+        {
+          "commodity": "Bexalite",
+          "id_commodity": 13,
+          "buy_terminal": {
+            "id": 31,
+            "name": "HDMS-Hadley"
+          },
+          "sell_terminal": {
+            "id": 453,
+            "name": "Admin - Patch City"
+          },
+          "id_planet_destination": 242,
+          "destination_planet": "Bloom",
+          "destination_system": "Pyro",
+          "price_buy": 23940,
+          "price_sell": 30000,
+          "scu_stock": 64,
+          "qty": 64,
+          "box_sizes": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "leg_profit": 387840,
+          "roi": 25.3,
+          "intra": true,
+          "pyro": false,
+          "closed_terminal": false,
+          "qt_sec": 470.0,
+          "snapshots": [
+            {
+              "ts": "2026-10-26T07:10:34+00:00",
+              "price_buy": 23940,
+              "price_sell": 30000,
+              "scu_stock": 64,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-26T08:35:30+00:00",
+              "price_buy": 23940,
+              "price_sell": 30000,
+              "scu_stock": 64,
+              "source": "uex"
+            }
+          ]
+        }
+      ],
+      "loop_profit": 911296,
+      "qt_sec_total": 1275.0,
+      "transit_sec": 230.0,
+      "closed": false,
+      "reposition_sec": 175.0,
+      "reposition_kind": "ferry",
+      "loop_time_min": 79.0,
+      "profit_per_hour": 692123,
+      "snapshots": [
+        {
+          "ts": "2026-10-25T12:16:12+00:00",
+          "price_buy": 20821,
+          "price_sell": 29000,
+          "scu_stock": 128,
+          "source": "uex"
+        },
+        {
+          "ts": "2026-10-25T12:16:12+00:00",
+          "price_buy": 23940,
+          "price_sell": 30000,
+          "scu_stock": 64,
+          "source": "uex"
+        }
+      ]
     }
   ],
   "next_id": 465,
@@ -536,6 +729,7 @@
     "24": "Degnous Root"
   },
   "ranking_prev": [
-    "r464"
+    "r464",
+    "r458"
   ]
 }
