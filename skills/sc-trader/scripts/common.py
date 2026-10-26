@@ -404,21 +404,27 @@ def route_time_min(profile: dict, legs: list[dict], extra_min: float = 0.0) -> f
                      or tm.get("auto_loading"))
     qty_default = (profile.get("ship") or {}).get("scu_total", 8)
 
+    manual_crate = float(tm.get("manual_crate_min", 1.0))
+    manual_extra = float(tm.get("manual_extra_min", 3.0))
+
     def stop_minutes(term: dict, qty: int, box_sizes) -> float:
-        # 优先用终端数据（UEX max_container_size / has_freight_elevator），
-        # 缺失时退回名称启发式
+        """单次停靠 = base + 搬运；搬运按【箱数】计 = ceil(数量/该箱规格)。"""
         if "auto" in term:
             auto = ship_auto and bool(term["auto"])
         else:
             auto = ship_auto and terminal_loading_mode(term.get("name", ""), profile)
+        cap = term.get("max_box") or 32
+        usable = [b for b in (box_sizes or []) if 0 < b <= cap]
+        size = max(usable) if usable else (min(cap, 32) if cap else None)
         if auto:
-            cap = term.get("max_box") or 32
-            usable = [b for b in (box_sizes or []) if 0 < b <= cap]
-            size = max(usable) if usable else min(cap, 32)
-            crates = -(-(qty or 0) // max(1, size))
+            crates = -(-(qty or 0) // max(1, size)) if size else 0
             handling = crates * crate_min + extra
+        elif size:
+            # 手动：搬的是箱，不是散装 SCU
+            crates = -(-(qty or 0) // max(1, size))
+            handling = crates * manual_crate + manual_extra
         else:
-            handling = manual_per_scu * (qty or 0)
+            handling = manual_per_scu * (qty or 0)   # 无箱型信息时的兜底
         return base + handling
 
     jump_gate = float(tm.get("jump_gate_min", 12.0))
