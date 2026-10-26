@@ -1,259 +1,355 @@
 {
   "version": 1,
-  "updated_at": "2026-10-26T07:11:21+00:00",
+  "updated_at": "2026-10-26T08:28:41+00:00",
   "routes": [
     {
-      "id": "r453",
-      "type": "intra",
+      "id": "r464",
+      "type": "itinerary",
       "status": "candidate",
-      "risk": "normal",
-      "ship": "c1_spirit",
-      "created_at": "2026-10-25T12:15:39+00:00",
-      "legs": [
+      "risk": "pyro",
+      "ship": "starlancer",
+      "source": "manual",
+      "created_at": "2026-10-26T08:28:01+00:00",
+      "stops": [
         {
-          "commodity": "Compboard",
-          "id_commodity": 18,
-          "buy_terminal": {
-            "id": 72,
-            "name": "Rayari Kaltag Research Outpost",
-            "auto": false,
-            "max_box": 24,
-            "system": "Stanton",
-            "loading_source": "override"
+          "terminal": {
+            "id": 507,
+            "name": "Ashland",
+            "system": "Pyro",
+            "auto": false
           },
-          "sell_terminal": {
-            "id": 81,
-            "name": "Shubin Mining Facility SM0-13",
-            "auto": false,
-            "max_box": 24,
-            "system": "Stanton",
-            "loading_source": "hangar"
-          },
-          "id_planet_origin": 190,
-          "origin_planet": "MicroTech",
-          "id_planet_destination": 190,
-          "destination_planet": "MicroTech",
-          "destination_system": "Stanton",
-          "price_buy": 27000,
-          "price_sell": 37000,
-          "scu_stock": 72,
-          "qty": 64,
-          "box_sizes": [
-            1,
-            2
-          ],
-          "leg_profit": 640000,
-          "roi": 39.8,
-          "intra": true,
-          "pyro": false,
-          "qt_sec": 380.0,
-          "snapshots": [
+          "buy": [
             {
-              "ts": "2026-10-26T07:10:34+00:00",
-              "price_buy": 27000,
-              "price_sell": 37000,
-              "scu_stock": 72,
-              "source": "uex"
-            }
-          ]
-        }
-      ],
-      "loop_profit": 640000,
-      "qt_sec_total": 380.0,
-      "transit_sec": null,
-      "closed": false,
-      "reposition_sec": 380.0,
-      "reposition_kind": "empty-return",
-      "loop_time_min": 90.7,
-      "profit_per_hour": 423373,
-      "snapshots": [
-        {
-          "ts": "2026-10-25T12:15:39+00:00",
-          "price_buy": 26460,
-          "price_sell": 37000,
-          "scu_stock": 72,
-          "source": "uex"
-        }
-      ]
-    },
-    {
-      "id": "r454",
-      "type": "there-back",
-      "status": "candidate",
-      "risk": "normal",
-      "ship": "c1_spirit",
-      "created_at": "2026-10-25T12:15:46+00:00",
-      "legs": [
-        {
-          "commodity": "Compboard",
-          "id_commodity": 18,
-          "buy_terminal": {
-            "id": 72,
-            "name": "Rayari Kaltag Research Outpost",
-            "auto": false,
-            "max_box": 24,
-            "system": "Stanton",
-            "loading_source": "override"
-          },
-          "sell_terminal": {
-            "id": 36,
-            "name": "HDMS-Perlman",
-            "auto": false,
-            "max_box": 32,
-            "system": "Stanton",
-            "loading_source": "hangar"
-          },
-          "id_planet_origin": 190,
-          "origin_planet": "MicroTech",
-          "id_planet_destination": 116,
-          "destination_planet": "Hurston",
-          "destination_system": "Stanton",
-          "price_buy": 27000,
-          "price_sell": 37000,
-          "scu_stock": 72,
-          "qty": 64,
-          "box_sizes": [
-            1,
-            2
-          ],
-          "leg_profit": 640000,
-          "roi": 39.8,
-          "intra": false,
-          "pyro": false,
-          "qt_sec": 190.0,
-          "snapshots": [
+              "commodity": "Neon",
+              "qty": 24,
+              "price": 15449
+            },
             {
-              "ts": "2026-10-26T07:10:34+00:00",
-              "price_buy": 27000,
-              "price_sell": 37000,
-              "scu_stock": 72,
-              "source": "uex"
+              "commodity": "E'tam",
+              "qty": 32,
+              "price": 16295
+            },
+            {
+              "commodity": "Amioshi Plague",
+              "qty": 32,
+              "price": 17389
             }
-          ]
+          ],
+          "sell": [],
+          "crates": 11,
+          "stop_min": 18.0,
+          "loading": "manual",
+          "cash_after": 1551336
         },
         {
-          "commodity": "Taranite",
-          "id_commodity": 73,
+          "terminal": {
+            "id": 74,
+            "name": "Reclamation and Disposal Orinth",
+            "system": "Stanton",
+            "auto": false
+          },
+          "buy": [],
+          "sell": [
+            {
+              "commodity": "Neon",
+              "qty": 24,
+              "price": 21000
+            }
+          ],
+          "crates": 3,
+          "stop_min": 10.0,
+          "loading": "manual",
+          "cash_after": 2055336
+        },
+        {
+          "terminal": {
+            "id": 16,
+            "name": "Brio's Breaker Yard",
+            "system": "Stanton",
+            "auto": false
+          },
+          "buy": [],
+          "sell": [
+            {
+              "commodity": "E'tam",
+              "qty": 32,
+              "price": 27000
+            }
+          ],
+          "crates": 4,
+          "stop_min": 11.0,
+          "loading": "manual",
+          "cash_after": 2919336
+        },
+        {
+          "terminal": {
+            "id": 73,
+            "name": "Rayari McGrath Research Outpost",
+            "system": "Stanton",
+            "auto": false
+          },
+          "buy": [],
+          "sell": [
+            {
+              "commodity": "Amioshi Plague",
+              "qty": 32,
+              "price": 24000
+            }
+          ],
+          "crates": 4,
+          "stop_min": 11.0,
+          "loading": "manual",
+          "cash_after": 3687336
+        },
+        {
+          "terminal": {
+            "id": 69,
+            "name": "Rayari Anvik Research Outpost",
+            "system": "Stanton",
+            "auto": false
+          },
+          "buy": [
+            {
+              "commodity": "Compboard",
+              "qty": 8,
+              "price": 26450
+            },
+            {
+              "commodity": "Fresh Food",
+              "qty": 32,
+              "price": 21614
+            }
+          ],
+          "sell": [],
+          "crates": 8,
+          "stop_min": 15.0,
+          "loading": "manual",
+          "cash_after": 2784088
+        },
+        {
+          "terminal": {
+            "id": 72,
+            "name": "Rayari Kaltag Research Outpost",
+            "system": "Stanton",
+            "auto": false
+          },
+          "buy": [
+            {
+              "commodity": "Compboard",
+              "qty": 72,
+              "price": 27000
+            },
+            {
+              "commodity": "Fresh Food",
+              "qty": 8,
+              "price": 21614
+            }
+          ],
+          "sell": [],
+          "crates": 37,
+          "stop_min": 44.0,
+          "loading": "manual",
+          "cash_after": 667176
+        },
+        {
+          "terminal": {
+            "id": 507,
+            "name": "Ashland",
+            "system": "Pyro",
+            "auto": false
+          },
+          "buy": [],
+          "sell": [
+            {
+              "commodity": "Compboard",
+              "qty": 8,
+              "price": 33000
+            },
+            {
+              "commodity": "Compboard",
+              "qty": 72,
+              "price": 33000
+            },
+            {
+              "commodity": "Fresh Food",
+              "qty": 32,
+              "price": 25000
+            },
+            {
+              "commodity": "Fresh Food",
+              "qty": 8,
+              "price": 25000
+            }
+          ],
+          "crates": 45,
+          "stop_min": 52.0,
+          "loading": "manual",
+          "cash_after": 4307176
+        }
+      ],
+      "hops": [
+        {
+          "from": "Ashland",
+          "to": "Reclamation and Disposal Orinth",
+          "min": 15.2
+        },
+        {
+          "from": "Reclamation and Disposal Orinth",
+          "to": "Brio's Breaker Yard",
+          "min": 2.7
+        },
+        {
+          "from": "Brio's Breaker Yard",
+          "to": "Rayari McGrath Research Outpost",
+          "min": 4.8
+        },
+        {
+          "from": "Rayari McGrath Research Outpost",
+          "to": "Rayari Anvik Research Outpost",
+          "min": 0.7
+        },
+        {
+          "from": "Rayari Anvik Research Outpost",
+          "to": "Rayari Kaltag Research Outpost",
+          "min": 0.7
+        },
+        {
+          "from": "Rayari Kaltag Research Outpost",
+          "to": "Ashland",
+          "min": 18.3
+        }
+      ],
+      "legs": [
+        {
+          "commodity": "Neon",
+          "id_commodity": 52,
           "buy_terminal": {
-            "id": 41,
-            "name": "HDMS-Woodruff"
+            "id": 507,
+            "name": "Ashland"
           },
           "sell_terminal": {
-            "id": 89,
-            "name": "TDD - Trade and Development Division - Commons - New Babbage"
+            "id": 74,
+            "name": "Reclamation and Disposal Orinth"
           },
-          "id_planet_destination": 190,
-          "destination_planet": "MicroTech",
-          "destination_system": "Stanton",
-          "price_buy": 21924,
-          "price_sell": 28000,
-          "scu_stock": 27,
-          "qty": 27,
+          "price_buy": 15449,
+          "price_sell": 21000,
+          "qty": 24,
           "box_sizes": [
             1,
             2,
             4,
             8
           ],
-          "leg_profit": 164052,
-          "roi": 27.7,
-          "intra": true,
-          "pyro": false,
-          "closed_terminal": false,
-          "qt_sec": 190.0,
+          "leg_profit": 133224,
+          "scu_stock": 34,
+          "qt_sec": null,
+          "source": "itinerary",
           "snapshots": [
             {
-              "ts": "2026-10-26T07:10:34+00:00",
-              "price_buy": 21924,
-              "price_sell": 28000,
-              "scu_stock": 27,
+              "ts": "2026-10-26T08:28:14+00:00",
+              "price_buy": 15449,
+              "price_sell": 21000,
+              "scu_stock": 34,
               "source": "uex"
             }
           ]
-        }
-      ],
-      "loop_profit": 804052,
-      "qt_sec_total": 380.0,
-      "transit_sec": 200.0,
-      "closed": false,
-      "reposition_sec": 40.0,
-      "reposition_kind": "ferry",
-      "loop_time_min": 108.3,
-      "profit_per_hour": 445458,
-      "snapshots": [
-        {
-          "ts": "2026-10-25T12:15:46+00:00",
-          "price_buy": 26460,
-          "price_sell": 37000,
-          "scu_stock": 72,
-          "source": "uex"
         },
         {
-          "ts": "2026-10-25T12:15:46+00:00",
-          "price_buy": 21924,
-          "price_sell": 28000,
-          "scu_stock": 27,
-          "source": "uex"
-        }
-      ]
-    },
-    {
-      "id": "r455",
-      "type": "there-back",
-      "status": "candidate",
-      "risk": "normal",
-      "ship": "c1_spirit",
-      "created_at": "2026-10-25T12:15:52+00:00",
-      "legs": [
+          "commodity": "E'tam",
+          "id_commodity": 29,
+          "buy_terminal": {
+            "id": 507,
+            "name": "Ashland"
+          },
+          "sell_terminal": {
+            "id": 16,
+            "name": "Brio's Breaker Yard"
+          },
+          "price_buy": 16295,
+          "price_sell": 27000,
+          "qty": 32,
+          "box_sizes": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "leg_profit": 342560,
+          "scu_stock": 32,
+          "qt_sec": null,
+          "source": "itinerary",
+          "snapshots": [
+            {
+              "ts": "2026-10-26T08:28:14+00:00",
+              "price_buy": 16295,
+              "price_sell": 27000,
+              "scu_stock": 32,
+              "source": "uex"
+            }
+          ]
+        },
+        {
+          "commodity": "Amioshi Plague",
+          "id_commodity": 7,
+          "buy_terminal": {
+            "id": 507,
+            "name": "Ashland"
+          },
+          "sell_terminal": {
+            "id": 73,
+            "name": "Rayari McGrath Research Outpost"
+          },
+          "price_buy": 17389,
+          "price_sell": 24000,
+          "qty": 32,
+          "box_sizes": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "leg_profit": 211552,
+          "scu_stock": 35,
+          "qt_sec": null,
+          "source": "itinerary",
+          "snapshots": [
+            {
+              "ts": "2026-10-26T08:28:14+00:00",
+              "price_buy": 17389,
+              "price_sell": 24000,
+              "scu_stock": 35,
+              "source": "uex"
+            }
+          ]
+        },
         {
           "commodity": "Compboard",
           "id_commodity": 18,
           "buy_terminal": {
-            "id": 855,
-            "name": "Admin - People's Service Station Delta",
-            "auto": true,
-            "max_box": 32,
-            "system": "Nyx",
-            "loading_source": "hangar",
-            "path": "Nyx > People's Service Station Delta"
+            "id": 69,
+            "name": "Rayari Anvik Research Outpost"
           },
           "sell_terminal": {
-            "id": 81,
-            "name": "Shubin Mining Facility SM0-13",
-            "auto": false,
-            "max_box": 24,
-            "system": "Stanton",
-            "loading_source": "hangar",
-            "path": "Stanton > MicroTech"
+            "id": 507,
+            "name": "Ashland"
           },
-          "id_planet_origin": 0,
-          "origin_planet": "",
-          "id_planet_destination": 190,
-          "destination_planet": "MicroTech",
-          "destination_system": "Stanton",
-          "price_buy": 28114,
-          "price_sell": 37000,
-          "scu_stock": 60,
-          "status_buy": 7,
-          "status_sell": 1,
-          "qty": 60,
+          "price_buy": 26450,
+          "price_sell": 33000,
+          "qty": 8,
           "box_sizes": [
             1,
             2
           ],
-          "leg_profit": 533160,
-          "roi": 31.6,
-          "intra": false,
-          "pyro": false,
-          "source": "computed",
-          "qt_sec": 1640.0,
-          "cross_system": true,
+          "leg_profit": 52400,
+          "scu_stock": 9,
+          "qt_sec": null,
+          "source": "itinerary",
           "snapshots": [
             {
-              "ts": "2026-10-26T07:10:34+00:00",
-              "price_buy": 28114,
-              "price_sell": 37000,
-              "scu_stock": 60,
+              "ts": "2026-10-26T08:28:14+00:00",
+              "price_buy": 26450,
+              "price_sell": 33000,
+              "scu_stock": 9,
               "source": "uex"
             }
           ]
@@ -266,775 +362,157 @@
             "name": "Rayari Kaltag Research Outpost"
           },
           "sell_terminal": {
-            "id": 80,
-            "name": "Shubin Mining Facility SM0-10"
+            "id": 507,
+            "name": "Ashland"
           },
-          "id_planet_destination": 190,
-          "destination_planet": "MicroTech",
-          "destination_system": "Stanton",
           "price_buy": 27000,
-          "price_sell": 31000,
-          "scu_stock": 72,
-          "qty": 64,
+          "price_sell": 33000,
+          "qty": 72,
           "box_sizes": [
             1,
             2
           ],
-          "leg_profit": 256000,
-          "roi": 39.8,
-          "intra": true,
-          "pyro": false,
-          "closed_terminal": false,
-          "qt_sec": 380.0,
+          "leg_profit": 432000,
+          "scu_stock": 72,
+          "qt_sec": null,
+          "source": "itinerary",
           "snapshots": [
             {
-              "ts": "2026-10-26T07:10:34+00:00",
+              "ts": "2026-10-26T08:28:14+00:00",
               "price_buy": 27000,
-              "price_sell": 31000,
+              "price_sell": 33000,
               "scu_stock": 72,
               "source": "uex"
             }
           ]
-        }
-      ],
-      "loop_profit": 789160,
-      "qt_sec_total": 2020.0,
-      "transit_sec": 380.0,
-      "closed": false,
-      "reposition_sec": 900.0,
-      "reposition_kind": "ferry",
-      "loop_time_min": 184.0,
-      "profit_per_hour": 257334,
-      "snapshots": [
-        {
-          "ts": "2026-10-25T12:15:52+00:00",
-          "price_buy": 28114,
-          "price_sell": 37000,
-          "scu_stock": 60,
-          "source": "uex"
         },
-        {
-          "ts": "2026-10-25T12:15:52+00:00",
-          "price_buy": 26460,
-          "price_sell": 37000,
-          "scu_stock": 72,
-          "source": "uex"
-        }
-      ]
-    },
-    {
-      "id": "r456",
-      "type": "there-back",
-      "status": "candidate",
-      "risk": "normal",
-      "ship": "c1_spirit",
-      "created_at": "2026-10-25T12:16:00+00:00",
-      "legs": [
-        {
-          "commodity": "Compboard",
-          "id_commodity": 18,
-          "buy_terminal": {
-            "id": 855,
-            "name": "Admin - People's Service Station Delta",
-            "auto": true,
-            "max_box": 32,
-            "system": "Nyx",
-            "loading_source": "hangar",
-            "path": "Nyx > People's Service Station Delta"
-          },
-          "sell_terminal": {
-            "id": 36,
-            "name": "HDMS-Perlman",
-            "auto": false,
-            "max_box": 32,
-            "system": "Stanton",
-            "loading_source": "hangar",
-            "path": "Stanton > Hurston > Magda"
-          },
-          "id_planet_origin": 0,
-          "origin_planet": "",
-          "id_planet_destination": 116,
-          "destination_planet": "Hurston",
-          "destination_system": "Stanton",
-          "price_buy": 28114,
-          "price_sell": 37000,
-          "scu_stock": 60,
-          "status_buy": 7,
-          "status_sell": 1,
-          "qty": 60,
-          "box_sizes": [
-            1,
-            2
-          ],
-          "leg_profit": 533160,
-          "roi": 31.6,
-          "intra": false,
-          "pyro": false,
-          "source": "computed",
-          "qt_sec": 1605.0,
-          "cross_system": true,
-          "snapshots": [
-            {
-              "ts": "2026-10-26T07:10:34+00:00",
-              "price_buy": 28114,
-              "price_sell": 37000,
-              "scu_stock": 60,
-              "source": "uex"
-            }
-          ]
-        },
-        {
-          "commodity": "Taranite",
-          "id_commodity": 73,
-          "buy_terminal": {
-            "id": 41,
-            "name": "HDMS-Woodruff"
-          },
-          "sell_terminal": {
-            "id": 89,
-            "name": "TDD - Trade and Development Division - Commons - New Babbage"
-          },
-          "id_planet_destination": 190,
-          "destination_planet": "MicroTech",
-          "destination_system": "Stanton",
-          "price_buy": 21924,
-          "price_sell": 28000,
-          "scu_stock": 27,
-          "qty": 27,
-          "box_sizes": [
-            1,
-            2,
-            4,
-            8
-          ],
-          "leg_profit": 164052,
-          "roi": 27.7,
-          "intra": true,
-          "pyro": false,
-          "closed_terminal": false,
-          "qt_sec": 190.0,
-          "snapshots": [
-            {
-              "ts": "2026-10-26T07:10:34+00:00",
-              "price_buy": 21924,
-              "price_sell": 28000,
-              "scu_stock": 27,
-              "source": "uex"
-            }
-          ]
-        }
-      ],
-      "loop_profit": 697212,
-      "qt_sec_total": 1795.0,
-      "transit_sec": 200.0,
-      "closed": false,
-      "reposition_sec": 900.0,
-      "reposition_kind": "ferry",
-      "loop_time_min": 119.2,
-      "profit_per_hour": 350945,
-      "snapshots": [
-        {
-          "ts": "2026-10-25T12:16:00+00:00",
-          "price_buy": 28114,
-          "price_sell": 37000,
-          "scu_stock": 60,
-          "source": "uex"
-        },
-        {
-          "ts": "2026-10-25T12:16:00+00:00",
-          "price_buy": 21924,
-          "price_sell": 28000,
-          "scu_stock": 27,
-          "source": "uex"
-        }
-      ]
-    },
-    {
-      "id": "r457",
-      "type": "there-back",
-      "status": "candidate",
-      "risk": "normal",
-      "ship": "c1_spirit",
-      "created_at": "2026-10-25T12:16:05+00:00",
-      "legs": [
         {
           "commodity": "Fresh Food",
           "id_commodity": 120,
           "buy_terminal": {
-            "id": 555,
-            "name": "Shepherd's Rest",
-            "auto": false,
-            "max_box": 32,
-            "system": "Pyro",
-            "loading_source": "hangar",
-            "path": "Pyro > Bloom"
+            "id": 69,
+            "name": "Rayari Anvik Research Outpost"
           },
           "sell_terminal": {
-            "id": 39,
-            "name": "HDMS-Stanhope",
-            "auto": false,
-            "max_box": 24,
-            "system": "Stanton",
-            "loading_source": "hangar",
-            "path": "Stanton > Hurston"
+            "id": 507,
+            "name": "Ashland"
           },
-          "id_planet_origin": 242,
-          "origin_planet": "Bloom",
-          "id_planet_destination": 116,
-          "destination_planet": "Hurston",
-          "destination_system": "Stanton",
-          "price_buy": 20821,
-          "price_sell": 24000,
-          "scu_stock": 128,
-          "status_buy": 7,
-          "status_sell": 1,
-          "qty": 64,
-          "box_sizes": [
-            1,
-            2,
-            4,
-            8,
-            16
-          ],
-          "leg_profit": 203456,
-          "roi": 39.3,
-          "intra": false,
-          "pyro": false,
-          "source": "computed",
-          "qt_sec": 805.0,
-          "cross_system": true,
-          "snapshots": [
-            {
-              "ts": "2026-10-26T07:10:34+00:00",
-              "price_buy": 20821,
-              "price_sell": 24000,
-              "scu_stock": 128,
-              "source": "uex"
-            }
-          ]
-        },
-        {
-          "commodity": "Bexalite",
-          "id_commodity": 13,
-          "buy_terminal": {
-            "id": 31,
-            "name": "HDMS-Hadley"
-          },
-          "sell_terminal": {
-            "id": 453,
-            "name": "Admin - Patch City"
-          },
-          "id_planet_destination": 242,
-          "destination_planet": "Bloom",
-          "destination_system": "Pyro",
-          "price_buy": 23940,
-          "price_sell": 30000,
-          "scu_stock": 64,
-          "qty": 64,
+          "price_buy": 21614,
+          "price_sell": 25000,
+          "qty": 32,
           "box_sizes": [
             1,
             2,
             4,
             8
           ],
-          "leg_profit": 387840,
-          "roi": 25.3,
-          "intra": true,
-          "pyro": false,
-          "closed_terminal": false,
-          "qt_sec": 470.0,
+          "leg_profit": 108352,
+          "scu_stock": 32,
+          "qt_sec": null,
+          "source": "itinerary",
           "snapshots": [
             {
-              "ts": "2026-10-26T07:10:34+00:00",
-              "price_buy": 23940,
-              "price_sell": 30000,
-              "scu_stock": 64,
+              "ts": "2026-10-26T08:28:14+00:00",
+              "price_buy": 21614,
+              "price_sell": 25000,
+              "scu_stock": 32,
               "source": "uex"
             }
           ]
-        }
-      ],
-      "loop_profit": 591296,
-      "qt_sec_total": 1275.0,
-      "transit_sec": 230.0,
-      "closed": false,
-      "reposition_sec": 175.0,
-      "reposition_kind": "ferry",
-      "loop_time_min": 79.0,
-      "profit_per_hour": 449085,
-      "snapshots": [
-        {
-          "ts": "2026-10-25T12:16:05+00:00",
-          "price_buy": 20821,
-          "price_sell": 29000,
-          "scu_stock": 128,
-          "source": "uex"
         },
-        {
-          "ts": "2026-10-25T12:16:05+00:00",
-          "price_buy": 23940,
-          "price_sell": 30000,
-          "scu_stock": 64,
-          "source": "uex"
-        }
-      ]
-    },
-    {
-      "id": "r458",
-      "type": "there-back",
-      "status": "candidate",
-      "risk": "normal",
-      "ship": "c1_spirit",
-      "created_at": "2026-10-25T12:16:12+00:00",
-      "legs": [
         {
           "commodity": "Fresh Food",
           "id_commodity": 120,
           "buy_terminal": {
-            "id": 555,
-            "name": "Shepherd's Rest",
-            "auto": false,
-            "max_box": 32,
-            "system": "Pyro",
-            "loading_source": "hangar",
-            "path": "Pyro > Bloom"
+            "id": 72,
+            "name": "Rayari Kaltag Research Outpost"
           },
           "sell_terminal": {
-            "id": 40,
-            "name": "HDMS-Thedus",
-            "auto": false,
-            "max_box": 24,
-            "system": "Stanton",
-            "loading_source": "hangar",
-            "path": "Stanton > Hurston"
+            "id": 507,
+            "name": "Ashland"
           },
-          "id_planet_origin": 242,
-          "origin_planet": "Bloom",
-          "id_planet_destination": 116,
-          "destination_planet": "Hurston",
-          "destination_system": "Stanton",
-          "price_buy": 20821,
-          "price_sell": 29000,
-          "scu_stock": 128,
-          "status_buy": 7,
-          "status_sell": 1,
-          "qty": 64,
-          "box_sizes": [
-            1,
-            2,
-            4,
-            8,
-            16
-          ],
-          "leg_profit": 523456,
-          "roi": 39.3,
-          "intra": false,
-          "pyro": false,
-          "source": "computed",
-          "qt_sec": 805.0,
-          "cross_system": true,
-          "snapshots": [
-            {
-              "ts": "2026-10-26T07:10:34+00:00",
-              "price_buy": 20821,
-              "price_sell": 29000,
-              "scu_stock": 128,
-              "source": "uex"
-            }
-          ]
-        },
-        {
-          "commodity": "Bexalite",
-          "id_commodity": 13,
-          "buy_terminal": {
-            "id": 31,
-            "name": "HDMS-Hadley"
-          },
-          "sell_terminal": {
-            "id": 453,
-            "name": "Admin - Patch City"
-          },
-          "id_planet_destination": 242,
-          "destination_planet": "Bloom",
-          "destination_system": "Pyro",
-          "price_buy": 23940,
-          "price_sell": 30000,
-          "scu_stock": 64,
-          "qty": 64,
+          "price_buy": 21614,
+          "price_sell": 25000,
+          "qty": 8,
           "box_sizes": [
             1,
             2,
             4,
             8
           ],
-          "leg_profit": 387840,
-          "roi": 25.3,
-          "intra": true,
-          "pyro": false,
-          "closed_terminal": false,
-          "qt_sec": 470.0,
+          "leg_profit": 27088,
+          "scu_stock": 10,
+          "qt_sec": null,
+          "source": "itinerary",
           "snapshots": [
             {
-              "ts": "2026-10-26T07:10:34+00:00",
-              "price_buy": 23940,
-              "price_sell": 30000,
-              "scu_stock": 64,
+              "ts": "2026-10-26T08:28:14+00:00",
+              "price_buy": 21614,
+              "price_sell": 25000,
+              "scu_stock": 10,
               "source": "uex"
             }
           ]
         }
       ],
-      "loop_profit": 911296,
-      "qt_sec_total": 1275.0,
-      "transit_sec": 230.0,
-      "closed": false,
-      "reposition_sec": 175.0,
-      "reposition_kind": "ferry",
-      "loop_time_min": 79.0,
-      "profit_per_hour": 692123,
-      "snapshots": [
-        {
-          "ts": "2026-10-25T12:16:12+00:00",
-          "price_buy": 20821,
-          "price_sell": 29000,
-          "scu_stock": 128,
-          "source": "uex"
-        },
-        {
-          "ts": "2026-10-25T12:16:12+00:00",
-          "price_buy": 23940,
-          "price_sell": 30000,
-          "scu_stock": 64,
-          "source": "uex"
-        }
-      ]
-    },
-    {
-      "id": "r459",
-      "type": "one-way",
-      "status": "candidate",
-      "risk": "pyro",
-      "ship": "c1_spirit",
-      "created_at": "2026-10-25T12:16:12+00:00",
-      "legs": [
-        {
-          "commodity": "Atlasium",
-          "id_commodity": 130,
-          "buy_terminal": {
-            "id": 510,
-            "name": "Chawla's Beach",
-            "auto": false,
-            "max_box": 16,
-            "system": "Pyro",
-            "loading_source": "hangar"
-          },
-          "sell_terminal": {
-            "id": 518,
-            "name": "Seer's Canyon",
-            "auto": false,
-            "max_box": 16,
-            "system": "Pyro",
-            "loading_source": "hangar"
-          },
-          "id_planet_origin": 243,
-          "origin_planet": "Pyro IV",
-          "id_planet_destination": 244,
-          "destination_planet": "Pyro V",
-          "destination_system": "Pyro",
-          "price_buy": 73394,
-          "price_sell": 87000,
-          "scu_stock": 27,
-          "status_buy": 3,
-          "status_sell": 1,
-          "qty": 25,
-          "box_sizes": [
-            8
-          ],
-          "leg_profit": 340150,
-          "roi": 28.1,
-          "intra": false,
-          "pyro": true,
-          "source": "computed",
-          "qt_sec": 40.0,
-          "snapshots": [
-            {
-              "ts": "2026-10-26T07:10:34+00:00",
-              "price_buy": 73394,
-              "price_sell": 87000,
-              "scu_stock": 27,
-              "source": "uex"
-            }
-          ]
-        }
-      ],
-      "loop_profit": 340150,
-      "qt_sec_total": 40.0,
-      "transit_sec": null,
-      "closed": false,
-      "reposition_sec": 40.0,
-      "reposition_kind": "empty-return",
-      "loop_time_min": 23.3,
-      "profit_per_hour": 875922,
-      "snapshots": [
-        {
-          "ts": "2026-10-25T12:16:12+00:00",
-          "price_buy": 73394,
-          "price_sell": 94000,
-          "scu_stock": 27,
-          "source": "uex"
-        }
-      ]
-    },
-    {
-      "id": "r460",
-      "type": "one-way",
-      "status": "candidate",
-      "risk": "normal",
-      "ship": "c1_spirit",
-      "created_at": "2026-10-25T12:16:12+00:00",
-      "legs": [
-        {
-          "commodity": "Degnous Root",
-          "id_commodity": 24,
-          "buy_terminal": {
-            "id": 839,
-            "name": "Admin - People's Service Station Theta",
-            "auto": true,
-            "max_box": 32,
-            "system": "Nyx",
-            "loading_source": "hangar",
-            "path": "Nyx > People's Service Station Theta"
-          },
-          "sell_terminal": {
-            "id": 2,
-            "name": "Admin - ARC-L2",
-            "auto": true,
-            "max_box": 32,
-            "system": "Stanton",
-            "loading_source": "hangar",
-            "path": "Stanton > ArcCorp > ArcCorp Lagrange Point 2"
-          },
-          "id_planet_origin": 0,
-          "origin_planet": "",
-          "id_planet_destination": 4,
-          "destination_planet": "ArcCorp",
-          "destination_system": "Stanton",
-          "price_buy": 44737,
-          "price_sell": 63000,
-          "scu_stock": 27,
-          "status_buy": 4,
-          "status_sell": 1,
-          "qty": 27,
-          "box_sizes": [
-            1,
-            2
-          ],
-          "leg_profit": 493101,
-          "roi": 40.8,
-          "intra": false,
-          "pyro": false,
-          "source": "computed",
-          "qt_sec": 1690.0,
-          "cross_system": true,
-          "snapshots": [
-            {
-              "ts": "2026-10-26T07:10:34+00:00",
-              "price_buy": 44737,
-              "price_sell": 63000,
-              "scu_stock": 27,
-              "source": "uex"
-            }
-          ]
-        }
-      ],
-      "loop_profit": 493101,
-      "qt_sec_total": 1690.0,
-      "transit_sec": null,
-      "closed": false,
-      "reposition_sec": 1690.0,
-      "reposition_kind": "empty-return",
-      "loop_time_min": 79.3,
-      "profit_per_hour": 373090,
-      "snapshots": [
-        {
-          "ts": "2026-10-25T12:16:12+00:00",
-          "price_buy": 44737,
-          "price_sell": 63000,
-          "scu_stock": 27,
-          "source": "uex"
-        }
-      ]
-    },
-    {
-      "id": "r461",
-      "type": "manual-loop",
-      "status": "candidate",
-      "risk": "pyro",
-      "ship": "c1_spirit",
-      "source": "manual",
-      "created_at": "2026-10-26T06:36:28+00:00",
-      "legs": [
-        {
-          "commodity": "Bexalite",
-          "id_commodity": 13,
-          "buy_terminal": {
-            "id": 551,
-            "name": "Bueno Ravine",
-            "auto": false,
-            "max_box": 16,
-            "system": "Pyro",
-            "loading_source": "hangar"
-          },
-          "sell_terminal": {
-            "id": 665,
-            "name": "The Golden Riviera",
-            "auto": false,
-            "max_box": 24,
-            "system": "Pyro",
-            "loading_source": "hangar"
-          },
-          "price_buy": 23556,
-          "price_sell": 28000,
-          "qty": 38,
-          "box_sizes": "1,2,4,8",
-          "leg_profit": 168872,
-          "scu_stock": 131,
-          "status_buy": 4,
-          "status_sell": 1,
-          "qt_sec": 20.0,
-          "source": "manual",
-          "snapshots": [
-            {
-              "ts": "2026-10-26T07:10:34+00:00",
-              "price_buy": 23556,
-              "price_sell": 28000,
-              "scu_stock": 131,
-              "source": "uex"
-            }
-          ]
-        },
-        {
-          "commodity": "Bioplastic",
-          "id_commodity": 112,
-          "buy_terminal": {
-            "id": 665,
-            "name": "The Golden Riviera",
-            "auto": false,
-            "max_box": 24,
-            "system": "Pyro",
-            "loading_source": "hangar"
-          },
-          "sell_terminal": {
-            "id": 590,
-            "name": "Rustville",
-            "auto": false,
-            "max_box": 16,
-            "system": "Pyro",
-            "loading_source": "hangar"
-          },
-          "price_buy": 6538,
-          "price_sell": 8100,
-          "qty": 64,
-          "box_sizes": "1,2,4,8,16",
-          "leg_profit": 99968,
-          "scu_stock": 525,
-          "status_buy": 7,
-          "status_sell": 1,
-          "qt_sec": 65.0,
-          "source": "manual",
-          "snapshots": [
-            {
-              "ts": "2026-10-26T07:10:34+00:00",
-              "price_buy": 6538,
-              "price_sell": 8100,
-              "scu_stock": 525,
-              "source": "uex"
-            }
-          ]
-        },
-        {
-          "commodity": "Dymantium",
-          "id_commodity": 127,
-          "buy_terminal": {
-            "id": 590,
-            "name": "Rustville",
-            "auto": false,
-            "max_box": 16,
-            "system": "Pyro",
-            "loading_source": "hangar"
-          },
-          "sell_terminal": {
-            "id": 551,
-            "name": "Bueno Ravine",
-            "auto": false,
-            "max_box": 16,
-            "system": "Pyro",
-            "loading_source": "hangar"
-          },
-          "price_buy": 17480,
-          "price_sell": 23000,
-          "qty": 9,
-          "box_sizes": "1,2,4,8",
-          "leg_profit": 49680,
-          "scu_stock": 128,
-          "status_buy": 7,
-          "status_sell": 5,
-          "qt_sec": 65.0,
-          "source": "manual",
-          "snapshots": [
-            {
-              "ts": "2026-10-26T07:10:34+00:00",
-              "price_buy": 17480,
-              "price_sell": 23000,
-              "scu_stock": 128,
-              "source": "uex"
-            }
-          ]
-        }
-      ],
-      "loop_profit": 318520,
-      "loop_time_min": 104.5,
-      "profit_per_hour": 182882,
+      "loop_profit": 1307176,
+      "loop_time_min": 210.0,
+      "profit_per_hour": 373478,
       "closed": true,
-      "transit_sec": 1800.0,
-      "reposition_sec": null,
       "snapshots": [
         {
-          "ts": "2026-10-26T06:36:28+00:00",
-          "price_buy": 23556,
-          "price_sell": 28000,
-          "scu_stock": 131,
-          "source": "manual"
+          "ts": "2026-10-26T08:28:01+00:00",
+          "price_buy": 15449,
+          "price_sell": 21000,
+          "scu_stock": 34,
+          "source": "itinerary"
         },
         {
-          "ts": "2026-10-26T06:36:28+00:00",
-          "price_buy": 6538,
-          "price_sell": 8100,
-          "scu_stock": 525,
-          "source": "manual"
+          "ts": "2026-10-26T08:28:01+00:00",
+          "price_buy": 16295,
+          "price_sell": 27000,
+          "scu_stock": 32,
+          "source": "itinerary"
         },
         {
-          "ts": "2026-10-26T06:36:28+00:00",
-          "price_buy": 17480,
-          "price_sell": 23000,
-          "scu_stock": 128,
-          "source": "manual"
+          "ts": "2026-10-26T08:28:01+00:00",
+          "price_buy": 17389,
+          "price_sell": 24000,
+          "scu_stock": 35,
+          "source": "itinerary"
+        },
+        {
+          "ts": "2026-10-26T08:28:01+00:00",
+          "price_buy": 26450,
+          "price_sell": 33000,
+          "scu_stock": 9,
+          "source": "itinerary"
+        },
+        {
+          "ts": "2026-10-26T08:28:01+00:00",
+          "price_buy": 27000,
+          "price_sell": 33000,
+          "scu_stock": 72,
+          "source": "itinerary"
+        },
+        {
+          "ts": "2026-10-26T08:28:01+00:00",
+          "price_buy": 21614,
+          "price_sell": 25000,
+          "scu_stock": 32,
+          "source": "itinerary"
+        },
+        {
+          "ts": "2026-10-26T08:28:01+00:00",
+          "price_buy": 21614,
+          "price_sell": 25000,
+          "scu_stock": 10,
+          "source": "itinerary"
         }
       ]
     }
   ],
-  "next_id": 462,
-  "ranking_prev": [
-    "r458",
-    "r454",
-    "r455",
-    "r456",
-    "r453",
-    "r457",
-    "r460",
-    "r459",
-    "r461"
-  ],
+  "next_id": 465,
   "tracked_commodities": {
     "51": "Medical Supplies",
     "44": "Iron",
@@ -1056,5 +534,8 @@
     "32": "Gasping Weevil Eggs",
     "130": "Atlasium",
     "24": "Degnous Root"
-  }
+  },
+  "ranking_prev": [
+    "r464"
+  ]
 }

@@ -28,6 +28,18 @@
         }
       ],
       "auto_loading_capable": true
+    },
+    "starlancer": {
+      "name": "Starlancer (128 SCU)",
+      "scu_total": 128,
+      "max_box": 32,
+      "slots": [
+        {
+          "size": 32,
+          "count": 4
+        }
+      ],
+      "auto_loading_capable": true
     }
   },
   "budget_default": 100000,
