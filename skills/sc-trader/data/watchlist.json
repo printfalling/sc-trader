@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-10-26T08:46:09+00:00",
+  "updated_at": "2026-10-26T08:57:12+00:00",
   "routes": [
     {
       "id": "r464",
@@ -279,6 +279,13 @@
               "price_sell": 21000,
               "scu_stock": 34,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-26T08:56:39+00:00",
+              "price_buy": 15449,
+              "price_sell": 21000,
+              "scu_stock": 34,
+              "source": "uex"
             }
           ]
         },
@@ -337,6 +344,13 @@
             },
             {
               "ts": "2026-10-26T08:45:35+00:00",
+              "price_buy": 16295,
+              "price_sell": 27000,
+              "scu_stock": 32,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-26T08:56:39+00:00",
               "price_buy": 16295,
               "price_sell": 27000,
               "scu_stock": 32,
@@ -403,6 +417,13 @@
               "price_sell": 24000,
               "scu_stock": 35,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-26T08:56:39+00:00",
+              "price_buy": 17389,
+              "price_sell": 24000,
+              "scu_stock": 35,
+              "source": "uex"
             }
           ]
         },
@@ -463,6 +484,13 @@
               "price_sell": 33000,
               "scu_stock": 9,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-26T08:56:39+00:00",
+              "price_buy": 26450,
+              "price_sell": 33000,
+              "scu_stock": 9,
+              "source": "uex"
             }
           ]
         },
@@ -519,6 +547,13 @@
             },
             {
               "ts": "2026-10-26T08:45:35+00:00",
+              "price_buy": 27000,
+              "price_sell": 33000,
+              "scu_stock": 72,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-26T08:56:39+00:00",
               "price_buy": 27000,
               "price_sell": 33000,
               "scu_stock": 72,
@@ -585,6 +620,13 @@
               "price_sell": 25000,
               "scu_stock": 32,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-26T08:56:39+00:00",
+              "price_buy": 21614,
+              "price_sell": 25000,
+              "scu_stock": 32,
+              "source": "uex"
             }
           ]
         },
@@ -643,6 +685,13 @@
             },
             {
               "ts": "2026-10-26T08:45:35+00:00",
+              "price_buy": 21614,
+              "price_sell": 25000,
+              "scu_stock": 10,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-26T08:56:39+00:00",
               "price_buy": 21614,
               "price_sell": 25000,
               "scu_stock": 10,
@@ -796,6 +845,13 @@
               "price_sell": 29000,
               "scu_stock": 128,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-26T08:56:39+00:00",
+              "price_buy": 20821,
+              "price_sell": 29000,
+              "scu_stock": 128,
+              "source": "uex"
             }
           ]
         },
@@ -860,6 +916,13 @@
             },
             {
               "ts": "2026-10-26T08:45:35+00:00",
+              "price_buy": 23940,
+              "price_sell": 30000,
+              "scu_stock": 64,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-26T08:56:39+00:00",
               "price_buy": 23940,
               "price_sell": 30000,
               "scu_stock": 64,
@@ -1063,6 +1126,13 @@
               "price_sell": 29000,
               "scu_stock": 128,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-26T08:56:39+00:00",
+              "price_buy": 20821,
+              "price_sell": 29000,
+              "scu_stock": 128,
+              "source": "uex"
             }
           ]
         },
@@ -1093,6 +1163,13 @@
           "snapshots": [
             {
               "ts": "2026-10-26T08:45:35+00:00",
+              "price_buy": 23940,
+              "price_sell": 30000,
+              "scu_stock": 141,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-26T08:56:39+00:00",
               "price_buy": 23940,
               "price_sell": 30000,
               "scu_stock": 141,
@@ -1131,6 +1208,13 @@
               "price_sell": 30000,
               "scu_stock": 64,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-26T08:56:39+00:00",
+              "price_buy": 23940,
+              "price_sell": 30000,
+              "scu_stock": 64,
+              "source": "uex"
             }
           ]
         }
@@ -1162,9 +1246,370 @@
           "source": "itinerary"
         }
       ]
+    },
+    {
+      "id": "r466",
+      "type": "itinerary",
+      "status": "candidate",
+      "risk": "pyro",
+      "ship": "starlancer",
+      "source": "manual",
+      "created_at": "2026-10-26T08:56:30+00:00",
+      "stops": [
+        {
+          "terminal": {
+            "id": 507,
+            "name": "Ashland",
+            "system": "Pyro",
+            "auto": false
+          },
+          "buy": [
+            {
+              "commodity": "E'tam",
+              "qty": 32,
+              "price": 16295
+            }
+          ],
+          "sell": [],
+          "crates": 4,
+          "stop_min": 11.0,
+          "loading": "manual",
+          "cash_after": 2478560
+        },
+        {
+          "terminal": {
+            "id": 555,
+            "name": "Shepherd's Rest",
+            "system": "Pyro",
+            "auto": false
+          },
+          "buy": [
+            {
+              "commodity": "Fresh Food",
+              "qty": 96,
+              "price": 20821
+            }
+          ],
+          "sell": [],
+          "crates": 6,
+          "stop_min": 13.0,
+          "loading": "manual",
+          "cash_after": 479744
+        },
+        {
+          "terminal": {
+            "id": 16,
+            "name": "Brio's Breaker Yard",
+            "system": "Stanton",
+            "auto": false
+          },
+          "buy": [],
+          "sell": [
+            {
+              "commodity": "E'tam",
+              "qty": 32,
+              "price": 27000
+            }
+          ],
+          "crates": 4,
+          "stop_min": 11.0,
+          "loading": "manual",
+          "cash_after": 1343744
+        },
+        {
+          "terminal": {
+            "id": 40,
+            "name": "HDMS-Thedus",
+            "system": "Stanton",
+            "auto": false
+          },
+          "buy": [
+            {
+              "commodity": "Bexalite",
+              "qty": 76,
+              "price": 23940
+            }
+          ],
+          "sell": [
+            {
+              "commodity": "Fresh Food",
+              "qty": 96,
+              "price": 29000
+            }
+          ],
+          "crates": 16,
+          "stop_min": 23.0,
+          "loading": "manual",
+          "cash_after": 2308304
+        },
+        {
+          "terminal": {
+            "id": 31,
+            "name": "HDMS-Hadley",
+            "system": "Stanton",
+            "auto": false
+          },
+          "buy": [
+            {
+              "commodity": "Bexalite",
+              "qty": 51,
+              "price": 23940
+            }
+          ],
+          "sell": [],
+          "crates": 7,
+          "stop_min": 14.0,
+          "loading": "manual",
+          "cash_after": 1087364
+        },
+        {
+          "terminal": {
+            "id": 453,
+            "name": "Admin - Patch City",
+            "system": "Pyro",
+            "auto": true
+          },
+          "buy": [],
+          "sell": [
+            {
+              "commodity": "Bexalite",
+              "qty": 76,
+              "price": 30000
+            },
+            {
+              "commodity": "Bexalite",
+              "qty": 51,
+              "price": 30000
+            }
+          ],
+          "crates": 17,
+          "stop_min": 9.0,
+          "loading": "auto",
+          "cash_after": 4897364
+        },
+        {
+          "terminal": {
+            "id": 507,
+            "name": "Ashland",
+            "system": "Pyro",
+            "auto": false
+          },
+          "buy": [],
+          "sell": [],
+          "crates": 0,
+          "stop_min": 7.0,
+          "loading": "manual",
+          "cash_after": 4897364
+        }
+      ],
+      "hops": [
+        {
+          "from": "Ashland",
+          "to": "Shepherd's Rest",
+          "min": 4.3
+        },
+        {
+          "from": "Shepherd's Rest",
+          "to": "Brio's Breaker Yard",
+          "min": 12.9
+        },
+        {
+          "from": "Brio's Breaker Yard",
+          "to": "HDMS-Thedus",
+          "min": 2.7
+        },
+        {
+          "from": "HDMS-Thedus",
+          "to": "HDMS-Hadley",
+          "min": 3.8
+        },
+        {
+          "from": "HDMS-Hadley",
+          "to": "Admin - Patch City",
+          "min": 12.9
+        },
+        {
+          "from": "Admin - Patch City",
+          "to": "Ashland",
+          "min": 3.1
+        }
+      ],
+      "legs": [
+        {
+          "commodity": "E'tam",
+          "id_commodity": 29,
+          "buy_terminal": {
+            "id": 507,
+            "name": "Ashland"
+          },
+          "sell_terminal": {
+            "id": 16,
+            "name": "Brio's Breaker Yard"
+          },
+          "price_buy": 16295,
+          "price_sell": 27000,
+          "qty": 32,
+          "box_sizes": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "leg_profit": 342560,
+          "scu_stock": 32,
+          "qt_sec": null,
+          "source": "itinerary",
+          "snapshots": [
+            {
+              "ts": "2026-10-26T08:56:39+00:00",
+              "price_buy": 16295,
+              "price_sell": 27000,
+              "scu_stock": 32,
+              "source": "uex"
+            }
+          ]
+        },
+        {
+          "commodity": "Fresh Food",
+          "id_commodity": 120,
+          "buy_terminal": {
+            "id": 555,
+            "name": "Shepherd's Rest"
+          },
+          "sell_terminal": {
+            "id": 40,
+            "name": "HDMS-Thedus"
+          },
+          "price_buy": 20821,
+          "price_sell": 29000,
+          "qty": 96,
+          "box_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16
+          ],
+          "leg_profit": 785184,
+          "scu_stock": 128,
+          "qt_sec": null,
+          "source": "itinerary",
+          "snapshots": [
+            {
+              "ts": "2026-10-26T08:56:39+00:00",
+              "price_buy": 20821,
+              "price_sell": 29000,
+              "scu_stock": 128,
+              "source": "uex"
+            }
+          ]
+        },
+        {
+          "commodity": "Bexalite",
+          "id_commodity": 13,
+          "buy_terminal": {
+            "id": 40,
+            "name": "HDMS-Thedus"
+          },
+          "sell_terminal": {
+            "id": 453,
+            "name": "Admin - Patch City"
+          },
+          "price_buy": 23940,
+          "price_sell": 30000,
+          "qty": 76,
+          "box_sizes": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "leg_profit": 460560,
+          "scu_stock": 141,
+          "qt_sec": null,
+          "source": "itinerary",
+          "snapshots": [
+            {
+              "ts": "2026-10-26T08:56:39+00:00",
+              "price_buy": 23940,
+              "price_sell": 30000,
+              "scu_stock": 141,
+              "source": "uex"
+            }
+          ]
+        },
+        {
+          "commodity": "Bexalite",
+          "id_commodity": 13,
+          "buy_terminal": {
+            "id": 31,
+            "name": "HDMS-Hadley"
+          },
+          "sell_terminal": {
+            "id": 453,
+            "name": "Admin - Patch City"
+          },
+          "price_buy": 23940,
+          "price_sell": 30000,
+          "qty": 51,
+          "box_sizes": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "leg_profit": 309060,
+          "scu_stock": 64,
+          "qt_sec": null,
+          "source": "itinerary",
+          "snapshots": [
+            {
+              "ts": "2026-10-26T08:56:39+00:00",
+              "price_buy": 23940,
+              "price_sell": 30000,
+              "scu_stock": 64,
+              "source": "uex"
+            }
+          ]
+        }
+      ],
+      "loop_profit": 1897364,
+      "loop_time_min": 97.0,
+      "profit_per_hour": 1173627,
+      "closed": true,
+      "snapshots": [
+        {
+          "ts": "2026-10-26T08:56:30+00:00",
+          "price_buy": 16295,
+          "price_sell": 27000,
+          "scu_stock": 32,
+          "source": "itinerary"
+        },
+        {
+          "ts": "2026-10-26T08:56:30+00:00",
+          "price_buy": 20821,
+          "price_sell": 29000,
+          "scu_stock": 128,
+          "source": "itinerary"
+        },
+        {
+          "ts": "2026-10-26T08:56:30+00:00",
+          "price_buy": 23940,
+          "price_sell": 30000,
+          "scu_stock": 141,
+          "source": "itinerary"
+        },
+        {
+          "ts": "2026-10-26T08:56:30+00:00",
+          "price_buy": 23940,
+          "price_sell": 30000,
+          "scu_stock": 64,
+          "source": "itinerary"
+        }
+      ]
     }
   ],
-  "next_id": 466,
+  "next_id": 467,
   "tracked_commodities": {
     "51": "Medical Supplies",
     "44": "Iron",
@@ -1188,6 +1633,7 @@
     "24": "Degnous Root"
   },
   "ranking_prev": [
+    "r466",
     "r465",
     "r464",
     "r458"
