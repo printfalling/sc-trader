@@ -64,7 +64,8 @@
     "fallback_leg_min": 15.0,
     "jump_gate_min": 5.0,
     "manual_crate_min": 1.0,
-    "manual_extra_min": 3.0
+    "manual_extra_min": 3.0,
+    "intra_system_min": 1.0
   },
   "loading_overrides": {
     "Rayari Anvik": "manual",

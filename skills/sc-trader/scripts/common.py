@@ -189,6 +189,27 @@ def _graph_node_names(ctx) -> set[str]:
     return names
 
 
+_PLANET_CACHE: dict = {}
+
+
+def planet_system_of(ctx, name: str) -> str:
+    """终端所属行星系（行星 + 其卫星归为同一系）。"""
+    if not ctx or not name:
+        return ""
+    if name in _PLANET_CACHE:
+        return _PLANET_CACHE[name]
+    val = ""
+    try:
+        for t in ctx.cache.terminals:
+            if t.name == name:
+                val = getattr(t, "planet_name", "") or ""
+                break
+    except Exception:
+        val = ""
+    _PLANET_CACHE[name] = val
+    return val
+
+
 def _resolve_node(ctx, name: str) -> str | None:
     """UEX 终端名 → 图节点名：先精确，再逐段匹配（剥 "Admin - " 等前缀）。"""
     nodes = _graph_node_names(ctx)
@@ -221,6 +242,16 @@ def qt_seconds(ctx, from_loc: str, to_loc: str,
                                    .get("seconds_per_gm", 10.0))
         except Exception:
             seconds_per_gm = 10.0
+    # 同一行星系（行星+卫星）：用户校准为固定 1 分钟，不再按图距离算
+    try:
+        intra = float((load_profile().get("time_model") or {})
+                      .get("intra_system_min", 1.0))
+        pf = planet_system_of(ctx, from_loc)
+        pt = planet_system_of(ctx, to_loc)
+        if pf and pt and pf == pt:
+            return intra * 60.0
+    except Exception:
+        pass
     try:
         src = _resolve_node(ctx, from_loc)
         dst = _resolve_node(ctx, to_loc)

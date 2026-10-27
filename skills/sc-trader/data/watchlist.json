@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-10-26T09:34:25+00:00",
+  "updated_at": "2026-10-27T09:19:12+00:00",
   "routes": [
     {
       "id": "r464",
@@ -232,7 +232,7 @@
             "name": "Reclamation and Disposal Orinth"
           },
           "price_buy": 15449,
-          "price_sell": 21000,
+          "price_sell": 15000,
           "qty": 24,
           "box_sizes": [
             1,
@@ -298,6 +298,13 @@
               "ts": "2026-10-26T09:20:18+00:00",
               "price_buy": 15449,
               "price_sell": 21000,
+              "scu_stock": 34,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-27T09:18:39+00:00",
+              "price_buy": 15449,
+              "price_sell": 15000,
               "scu_stock": 34,
               "source": "uex"
             }
@@ -379,6 +386,13 @@
             },
             {
               "ts": "2026-10-26T09:20:18+00:00",
+              "price_buy": 16295,
+              "price_sell": 27000,
+              "scu_stock": 32,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-27T09:18:39+00:00",
               "price_buy": 16295,
               "price_sell": 27000,
               "scu_stock": 32,
@@ -466,6 +480,13 @@
               "price_sell": 24000,
               "scu_stock": 35,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-27T09:18:39+00:00",
+              "price_buy": 17389,
+              "price_sell": 24000,
+              "scu_stock": 35,
+              "source": "uex"
             }
           ]
         },
@@ -547,6 +568,13 @@
               "price_sell": 33000,
               "scu_stock": 9,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-27T09:18:39+00:00",
+              "price_buy": 26450,
+              "price_sell": 33000,
+              "scu_stock": 9,
+              "source": "uex"
             }
           ]
         },
@@ -624,6 +652,13 @@
             },
             {
               "ts": "2026-10-26T09:20:18+00:00",
+              "price_buy": 27000,
+              "price_sell": 33000,
+              "scu_stock": 72,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-27T09:18:39+00:00",
               "price_buy": 27000,
               "price_sell": 33000,
               "scu_stock": 72,
@@ -711,6 +746,13 @@
               "price_sell": 25000,
               "scu_stock": 32,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-27T09:18:39+00:00",
+              "price_buy": 21614,
+              "price_sell": 25000,
+              "scu_stock": 32,
+              "source": "uex"
             }
           ]
         },
@@ -790,6 +832,13 @@
             },
             {
               "ts": "2026-10-26T09:20:18+00:00",
+              "price_buy": 21614,
+              "price_sell": 25000,
+              "scu_stock": 10,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-27T09:18:39+00:00",
               "price_buy": 21614,
               "price_sell": 25000,
               "scu_stock": 10,
@@ -1004,7 +1053,7 @@
             "name": "HDMS-Thedus"
           },
           "price_buy": 20821,
-          "price_sell": 29000,
+          "price_sell": 24000,
           "qty": 128,
           "box_sizes": [
             1,
@@ -1013,7 +1062,7 @@
             8,
             16
           ],
-          "leg_profit": 1046912,
+          "leg_profit": 406912,
           "scu_stock": 128,
           "qt_sec": null,
           "source": "itinerary",
@@ -1045,6 +1094,13 @@
               "price_sell": 29000,
               "scu_stock": 128,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-27T09:18:39+00:00",
+              "price_buy": 20821,
+              "price_sell": 24000,
+              "scu_stock": 128,
+              "source": "uex"
             }
           ]
         },
@@ -1069,7 +1125,7 @@
             8
           ],
           "leg_profit": 460560,
-          "scu_stock": 141,
+          "scu_stock": 192,
           "qt_sec": null,
           "source": "itinerary",
           "snapshots": [
@@ -1099,6 +1155,13 @@
               "price_buy": 23940,
               "price_sell": 30000,
               "scu_stock": 141,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-27T09:18:39+00:00",
+              "price_buy": 23940,
+              "price_sell": 30000,
+              "scu_stock": 192,
               "source": "uex"
             }
           ]
@@ -1124,7 +1187,7 @@
             8
           ],
           "leg_profit": 309060,
-          "scu_stock": 64,
+          "scu_stock": 213,
           "qt_sec": null,
           "source": "itinerary",
           "snapshots": [
@@ -1155,13 +1218,20 @@
               "price_sell": 30000,
               "scu_stock": 64,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-27T09:18:39+00:00",
+              "price_buy": 23940,
+              "price_sell": 30000,
+              "scu_stock": 213,
+              "source": "uex"
             }
           ]
         }
       ],
-      "loop_profit": 1816532,
+      "loop_profit": 1176532,
       "loop_time_min": 79.0,
-      "profit_per_hour": 1379644,
+      "profit_per_hour": 893568,
       "closed": true,
       "snapshots": [
         {
@@ -1420,6 +1490,13 @@
               "price_sell": 27000,
               "scu_stock": 32,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-27T09:18:39+00:00",
+              "price_buy": 16295,
+              "price_sell": 27000,
+              "scu_stock": 32,
+              "source": "uex"
             }
           ]
         },
@@ -1435,7 +1512,7 @@
             "name": "HDMS-Thedus"
           },
           "price_buy": 20821,
-          "price_sell": 29000,
+          "price_sell": 24000,
           "qty": 96,
           "box_sizes": [
             1,
@@ -1444,7 +1521,7 @@
             8,
             16
           ],
-          "leg_profit": 785184,
+          "leg_profit": 305184,
           "scu_stock": 128,
           "qt_sec": null,
           "source": "itinerary",
@@ -1467,6 +1544,13 @@
               "ts": "2026-10-26T09:20:18+00:00",
               "price_buy": 20821,
               "price_sell": 29000,
+              "scu_stock": 128,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-27T09:18:39+00:00",
+              "price_buy": 20821,
+              "price_sell": 24000,
               "scu_stock": 128,
               "source": "uex"
             }
@@ -1493,7 +1577,7 @@
             8
           ],
           "leg_profit": 460560,
-          "scu_stock": 141,
+          "scu_stock": 192,
           "qt_sec": null,
           "source": "itinerary",
           "snapshots": [
@@ -1516,6 +1600,13 @@
               "price_buy": 23940,
               "price_sell": 30000,
               "scu_stock": 141,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-27T09:18:39+00:00",
+              "price_buy": 23940,
+              "price_sell": 30000,
+              "scu_stock": 192,
               "source": "uex"
             }
           ]
@@ -1541,7 +1632,7 @@
             8
           ],
           "leg_profit": 309060,
-          "scu_stock": 64,
+          "scu_stock": 213,
           "qt_sec": null,
           "source": "itinerary",
           "snapshots": [
@@ -1565,13 +1656,20 @@
               "price_sell": 30000,
               "scu_stock": 64,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-27T09:18:39+00:00",
+              "price_buy": 23940,
+              "price_sell": 30000,
+              "scu_stock": 213,
+              "source": "uex"
             }
           ]
         }
       ],
-      "loop_profit": 1897364,
+      "loop_profit": 1417364,
       "loop_time_min": 97.0,
-      "profit_per_hour": 1173627,
+      "profit_per_hour": 876720,
       "closed": true,
       "snapshots": [
         {
@@ -1740,6 +1838,13 @@
               "price_sell": 37000,
               "scu_stock": 9,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-27T09:18:39+00:00",
+              "price_buy": 26450,
+              "price_sell": 37000,
+              "scu_stock": 9,
+              "source": "uex"
             }
           ]
         },
@@ -1768,6 +1873,13 @@
           "snapshots": [
             {
               "ts": "2026-10-26T09:20:18+00:00",
+              "price_buy": 27000,
+              "price_sell": 37000,
+              "scu_stock": 72,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-27T09:18:39+00:00",
               "price_buy": 27000,
               "price_sell": 37000,
               "scu_stock": 72,
@@ -1820,5 +1932,11 @@
     "32": "Gasping Weevil Eggs",
     "130": "Atlasium",
     "24": "Degnous Root"
-  }
+  },
+  "ranking_prev": [
+    "r466",
+    "r464",
+    "r465",
+    "r468"
+  ]
 }
