@@ -51,6 +51,9 @@ def filter_legs(rows: list[dict], budget: int, profile: dict,
         if not r.get("id_planet_destination"):
             # 目的地不挂行星（id=0）的行无法组装循环，跳过
             continue
+        if not common.is_tradeable(ctx, r.get("id_commodity")):
+            continue
+
         box_sizes = common.parse_box_sizes(r.get("container_sizes_origin"))
         capacity = common.packable_scu(box_sizes, profile)
         if capacity <= 0:
@@ -140,6 +143,8 @@ def computed_legs_from_prices(client, ctx, budget: int, profile: dict,
     for (cid, cname), entries in by_commodity.items():
         if not cid or str(cname).lower() in excluded:
             continue
+        if not common.is_tradeable(ctx, cid):
+            continue      # 只考虑真实可买卖的商品
         buys, sells = [], []
         for r, t in entries:
             try:

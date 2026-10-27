@@ -40,6 +40,30 @@
         }
       ],
       "auto_loading_capable": true
+    },
+    "nomad": {
+      "name": "Nomad (24 SCU)",
+      "scu_total": 24,
+      "max_box": 8,
+      "slots": [
+        {
+          "size": 8,
+          "count": 3
+        }
+      ],
+      "auto_loading_capable": false
+    },
+    "hull_a": {
+      "name": "Hull A (64 SCU, 租 32,319)",
+      "scu_total": 64,
+      "max_box": 16,
+      "slots": [
+        {
+          "size": 16,
+          "count": 4
+        }
+      ],
+      "auto_loading_capable": false
     }
   },
   "budget_default": 100000,

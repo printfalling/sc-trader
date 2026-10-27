@@ -190,6 +190,91 @@ def _graph_node_names(ctx) -> set[str]:
 
 
 _PLANET_CACHE: dict = {}
+_TRADEABLE: dict = {}
+_TERM2NODE: dict = {}
+_NODE2PLANET: dict = {}
+_PAIR_MEDIAN: dict = {}
+
+
+def _build_maps(ctx) -> None:
+    """终端 → 图节点 别名映射（图节点是地点级名称，不含商店前缀）。"""
+    if _TERM2NODE:
+        return
+    try:
+        nodes = set(ctx.cache.transport_graph.nodes)
+    except Exception:
+        return
+    for t in ctx.cache.terminals:
+        cands = [t.name]
+        for attr in ("display_name", "space_station_name", "city_name", "outpost_name"):
+            v = getattr(t, attr, "")
+            if v:
+                cands.append(v)
+        if " - " in t.name:                      # 'Admin - HUR-L3' → 'HUR-L3'
+            cands.append(t.name.split(" - ")[-1])
+        for c in cands:
+            if c in nodes:
+                _TERM2NODE[t.name] = c
+                _NODE2PLANET.setdefault(c, getattr(t, "planet_name", "") or "")
+                break
+
+
+_LPOINT = {"HUR": "Hurston", "MIC": "MicroTech", "ARC": "ArcCorp", "CRU": "Crusader"}
+
+
+def node_planet(ctx, node: str) -> str:
+    """图节点 → 行星系：终端映射优先，其次拉格朗日点前缀（HUR-L3 → Hurston）。"""
+    _build_maps(ctx)
+    v = _NODE2PLANET.get(node)
+    if not v:
+        for k, p in _LPOINT.items():
+            if node.startswith(k + "-"):
+                v = p
+                break
+    _NODE2PLANET[node] = v or ""
+    return v or ""
+
+
+def pair_median(ctx, pa: str, pb: str) -> float:
+    """两行星系之间的典型距离中位数（由图自身统计，用于离群校正）。"""
+    if not (pa and pb) or pa == pb:
+        return 0.0
+    key = (pa, pb)
+    if key in _PAIR_MEDIAN:
+        return _PAIR_MEDIAN[key]
+    import statistics
+    vals = []
+    try:
+        for e in ctx.cache.transport_graph.edges:
+            a, b = node_planet(ctx, e.from_node), node_planet(ctx, e.to_node)
+            if {a, b} == {pa, pb} and e.distance_gm:
+                vals.append(e.distance_gm)
+    except Exception:
+        vals = []
+    med = statistics.median(vals) if vals else 0.0
+    _PAIR_MEDIAN[key] = med
+    _PAIR_MEDIAN[(pb, pa)] = med
+    return med
+
+
+
+def is_tradeable(ctx, cid) -> bool:
+    """商品是否真实可买卖（UEX is_buyable & is_sellable）。
+
+    过滤掉 is_buyable=0 的脏数据/临时条目（如 Audio-Visual Equipment 只可卖不可买，
+    扫描时会伪装成高利润商品，实际跑不出来）。
+    """
+    try:
+        cid = int(cid)
+    except (TypeError, ValueError):
+        return False
+    if not _TRADEABLE:
+        try:
+            for c in ctx.cache.commodities:
+                _TRADEABLE[c.id] = bool(getattr(c, "is_buyable", 0)) and bool(getattr(c, "is_sellable", 0))
+        except Exception:
+            pass
+    return bool(_TRADEABLE.get(cid, False))
 
 
 def planet_system_of(ctx, name: str) -> str:
@@ -211,6 +296,13 @@ def planet_system_of(ctx, name: str) -> str:
 
 
 def _resolve_node(ctx, name: str) -> str | None:
+    _build_maps(ctx)
+    if name in _TERM2NODE:
+        return _TERM2NODE[name]
+    return _resolve_node_raw(ctx, name)
+
+
+def _resolve_node_raw(ctx, name: str) -> str | None:
     """UEX 终端名 → 图节点名：先精确，再逐段匹配（剥 "Admin - " 等前缀）。"""
     nodes = _graph_node_names(ctx)
     if not nodes or not name:
@@ -263,6 +355,11 @@ def qt_seconds(ctx, from_loc: str, to_loc: str,
             return float(duration)
         distance_gm = float(getattr(result, "total_distance", 0) or 0)
         if distance_gm > 0:
+            # 离群校正：远低于该行星对典型距离（<50%）→ 判定坏边，改用典型值
+            pa, pb = node_planet(ctx, src), node_planet(ctx, dst)
+            med = pair_median(ctx, pa, pb)
+            if med and distance_gm < med * 0.5:
+                distance_gm = med
             # 实测口径：1 Gm ≈ 10 秒（时间模型可配 seconds_per_gm）
             return distance_gm * seconds_per_gm
         return None
