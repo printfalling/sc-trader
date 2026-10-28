@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-10-27T11:47:17+00:00",
+  "updated_at": "2026-10-28T02:03:52+00:00",
   "routes": [
     {
       "id": "r464",
@@ -246,13 +246,6 @@
           "source": "itinerary",
           "snapshots": [
             {
-              "ts": "2026-10-26T08:28:14+00:00",
-              "price_buy": 15449,
-              "price_sell": 21000,
-              "scu_stock": 34,
-              "source": "uex"
-            },
-            {
               "ts": "2026-10-26T08:35:30+00:00",
               "price_buy": 15449,
               "price_sell": 21000,
@@ -314,6 +307,13 @@
               "price_sell": 15000,
               "scu_stock": 23,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-28T02:03:19+00:00",
+              "price_buy": 15449,
+              "price_sell": 15000,
+              "scu_stock": 23,
+              "source": "uex"
             }
           ]
         },
@@ -338,17 +338,10 @@
             8
           ],
           "leg_profit": 342560,
-          "scu_stock": 5,
+          "scu_stock": 16,
           "qt_sec": null,
           "source": "itinerary",
           "snapshots": [
-            {
-              "ts": "2026-10-26T08:28:14+00:00",
-              "price_buy": 16295,
-              "price_sell": 27000,
-              "scu_stock": 32,
-              "source": "uex"
-            },
             {
               "ts": "2026-10-26T08:35:30+00:00",
               "price_buy": 16295,
@@ -411,6 +404,13 @@
               "price_sell": 27000,
               "scu_stock": 5,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-28T02:03:19+00:00",
+              "price_buy": 16295,
+              "price_sell": 27000,
+              "scu_stock": 16,
+              "source": "uex"
             }
           ]
         },
@@ -435,17 +435,10 @@
             8
           ],
           "leg_profit": 211552,
-          "scu_stock": 35,
+          "scu_stock": 61,
           "qt_sec": null,
           "source": "itinerary",
           "snapshots": [
-            {
-              "ts": "2026-10-26T08:28:14+00:00",
-              "price_buy": 17389,
-              "price_sell": 24000,
-              "scu_stock": 35,
-              "source": "uex"
-            },
             {
               "ts": "2026-10-26T08:35:30+00:00",
               "price_buy": 17389,
@@ -507,6 +500,13 @@
               "price_buy": 17389,
               "price_sell": 24000,
               "scu_stock": 35,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-28T02:03:19+00:00",
+              "price_buy": 17389,
+              "price_sell": 24000,
+              "scu_stock": 61,
               "source": "uex"
             }
           ]
@@ -535,13 +535,6 @@
           "source": "itinerary",
           "snapshots": [
             {
-              "ts": "2026-10-26T08:28:14+00:00",
-              "price_buy": 26450,
-              "price_sell": 33000,
-              "scu_stock": 9,
-              "source": "uex"
-            },
-            {
               "ts": "2026-10-26T08:35:30+00:00",
               "price_buy": 26450,
               "price_sell": 33000,
@@ -599,6 +592,13 @@
             },
             {
               "ts": "2026-10-27T11:46:43+00:00",
+              "price_buy": 26450,
+              "price_sell": 33000,
+              "scu_stock": 9,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-28T02:03:19+00:00",
               "price_buy": 26450,
               "price_sell": 33000,
               "scu_stock": 9,
@@ -630,13 +630,6 @@
           "source": "itinerary",
           "snapshots": [
             {
-              "ts": "2026-10-26T08:28:14+00:00",
-              "price_buy": 27000,
-              "price_sell": 33000,
-              "scu_stock": 72,
-              "source": "uex"
-            },
-            {
               "ts": "2026-10-26T08:35:30+00:00",
               "price_buy": 27000,
               "price_sell": 33000,
@@ -694,6 +687,13 @@
             },
             {
               "ts": "2026-10-27T11:46:43+00:00",
+              "price_buy": 27000,
+              "price_sell": 33000,
+              "scu_stock": 72,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-28T02:03:19+00:00",
               "price_buy": 27000,
               "price_sell": 33000,
               "scu_stock": 72,
@@ -727,13 +727,6 @@
           "source": "itinerary",
           "snapshots": [
             {
-              "ts": "2026-10-26T08:28:14+00:00",
-              "price_buy": 21614,
-              "price_sell": 25000,
-              "scu_stock": 32,
-              "source": "uex"
-            },
-            {
               "ts": "2026-10-26T08:35:30+00:00",
               "price_buy": 21614,
               "price_sell": 25000,
@@ -791,6 +784,13 @@
             },
             {
               "ts": "2026-10-27T11:46:43+00:00",
+              "price_buy": 21614,
+              "price_sell": 25000,
+              "scu_stock": 32,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-28T02:03:19+00:00",
               "price_buy": 21614,
               "price_sell": 25000,
               "scu_stock": 32,
@@ -824,13 +824,6 @@
           "source": "itinerary",
           "snapshots": [
             {
-              "ts": "2026-10-26T08:28:14+00:00",
-              "price_buy": 21614,
-              "price_sell": 25000,
-              "scu_stock": 10,
-              "source": "uex"
-            },
-            {
               "ts": "2026-10-26T08:35:30+00:00",
               "price_buy": 21614,
               "price_sell": 25000,
@@ -888,6 +881,13 @@
             },
             {
               "ts": "2026-10-27T11:46:43+00:00",
+              "price_buy": 21614,
+              "price_sell": 25000,
+              "scu_stock": 10,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-28T02:03:19+00:00",
               "price_buy": 21614,
               "price_sell": 25000,
               "scu_stock": 10,
@@ -1157,6 +1157,13 @@
               "price_sell": 24000,
               "scu_stock": 128,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-28T02:03:19+00:00",
+              "price_buy": 20821,
+              "price_sell": 24000,
+              "scu_stock": 128,
+              "source": "uex"
             }
           ]
         },
@@ -1226,6 +1233,13 @@
               "price_sell": 30000,
               "scu_stock": 192,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-28T02:03:19+00:00",
+              "price_buy": 23940,
+              "price_sell": 30000,
+              "scu_stock": 192,
+              "source": "uex"
             }
           ]
         },
@@ -1291,6 +1305,13 @@
             },
             {
               "ts": "2026-10-27T11:46:43+00:00",
+              "price_buy": 23940,
+              "price_sell": 30000,
+              "scu_stock": 213,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-28T02:03:19+00:00",
               "price_buy": 23940,
               "price_sell": 30000,
               "scu_stock": 213,
@@ -1536,7 +1557,7 @@
             8
           ],
           "leg_profit": 342560,
-          "scu_stock": 5,
+          "scu_stock": 16,
           "qt_sec": null,
           "source": "itinerary",
           "snapshots": [
@@ -1573,6 +1594,13 @@
               "price_buy": 16295,
               "price_sell": 27000,
               "scu_stock": 5,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-28T02:03:19+00:00",
+              "price_buy": 16295,
+              "price_sell": 27000,
+              "scu_stock": 16,
               "source": "uex"
             }
           ]
@@ -1633,6 +1661,13 @@
             },
             {
               "ts": "2026-10-27T11:46:43+00:00",
+              "price_buy": 20821,
+              "price_sell": 24000,
+              "scu_stock": 128,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-28T02:03:19+00:00",
               "price_buy": 20821,
               "price_sell": 24000,
               "scu_stock": 128,
@@ -1699,6 +1734,13 @@
               "price_sell": 30000,
               "scu_stock": 192,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-28T02:03:19+00:00",
+              "price_buy": 23940,
+              "price_sell": 30000,
+              "scu_stock": 192,
+              "source": "uex"
             }
           ]
         },
@@ -1757,6 +1799,13 @@
             },
             {
               "ts": "2026-10-27T11:46:43+00:00",
+              "price_buy": 23940,
+              "price_sell": 30000,
+              "scu_stock": 213,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-28T02:03:19+00:00",
               "price_buy": 23940,
               "price_sell": 30000,
               "scu_stock": 213,
@@ -1950,6 +1999,13 @@
               "price_sell": 37000,
               "scu_stock": 9,
               "source": "uex"
+            },
+            {
+              "ts": "2026-10-28T02:03:19+00:00",
+              "price_buy": 26450,
+              "price_sell": 37000,
+              "scu_stock": 9,
+              "source": "uex"
             }
           ]
         },
@@ -1992,6 +2048,13 @@
             },
             {
               "ts": "2026-10-27T11:46:43+00:00",
+              "price_buy": 27000,
+              "price_sell": 37000,
+              "scu_stock": 72,
+              "source": "uex"
+            },
+            {
+              "ts": "2026-10-28T02:03:19+00:00",
               "price_buy": 27000,
               "price_sell": 37000,
               "scu_stock": 72,

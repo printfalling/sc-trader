@@ -355,13 +355,12 @@ def qt_seconds(ctx, from_loc: str, to_loc: str,
             return float(duration)
         distance_gm = float(getattr(result, "total_distance", 0) or 0)
         if distance_gm > 0:
-            # 离群校正：远低于该行星对典型距离（<50%）→ 判定坏边，改用典型值
-            pa, pb = node_planet(ctx, src), node_planet(ctx, dst)
-            med = pair_median(ctx, pa, pb)
-            if med and distance_gm < med * 0.5:
-                distance_gm = med
-            # 实测口径：1 Gm ≈ 10 秒（时间模型可配 seconds_per_gm）
+            # 实测校准：图距离可信（Deakins→HUR-L3 = 7Gm/0.6min 已实测确认），直接采用
             return distance_gm * seconds_per_gm
+        # 图上无路径时才用行星对典型距离兜底（不覆盖已有图距离）
+        med = pair_median(ctx, node_planet(ctx, src), node_planet(ctx, dst))
+        if med:
+            return med * seconds_per_gm
         return None
     except Exception:
         return None

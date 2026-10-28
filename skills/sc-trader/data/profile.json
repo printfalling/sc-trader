@@ -64,6 +64,18 @@
         }
       ],
       "auto_loading_capable": false
+    },
+    "raft": {
+      "name": "Argo RAFT (192 SCU, 租 67,331 @ Lorville)",
+      "scu_total": 192,
+      "max_box": 32,
+      "slots": [
+        {
+          "size": 32,
+          "count": 6
+        }
+      ],
+      "auto_loading_capable": true
     }
   },
   "budget_default": 100000,
