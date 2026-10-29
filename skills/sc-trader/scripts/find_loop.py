@@ -50,14 +50,15 @@ def build_indexes(price_rows, term_by_id, system_filter=None, require_auto_load=
             prev = buy_at[tid].get(cn)
             if prev is None or pb < prev[0]:
                 buy_at[tid][cn] = (pb, r.get("scu_buy"), r.get("container_sizes"),
-                                   r.get("id_commodity"), tid)
+                                   r.get("id_commodity"), tid, r.get("status_buy"))
         if ps > 0:
-            if ps > sell_at[tid].get(cn, 0):
-                sell_at[tid][cn] = ps
+            cur = sell_at[tid].get(cn)
+            if cur is None or ps > cur[0]:
+                sell_at[tid][cn] = (ps, r)
 
     sell_index: dict = defaultdict(list)
     for tid, goods in sell_at.items():
-        for cn, ps in goods.items():
+        for cn, (ps, _row) in goods.items():
             sell_index[cn].append((tid, ps))
     for cn in sell_index:
         sell_index[cn].sort(key=lambda x: -x[1])
@@ -65,12 +66,13 @@ def build_indexes(price_rows, term_by_id, system_filter=None, require_auto_load=
     return buy_at, sell_at, sell_index
 
 
-def leg_for(buy_at, sell_price, tid_a, tid_b, cn, budget, profile):
+def leg_for(buy_at, sell_at, sell_price, tid_a, tid_b, cn, budget, profile,
+            min_supply_ratio: float = 1.0):
     """计算 A 买 cn、B 卖 cn 的可实现数量与利润；不可行返回 None。"""
     entry = buy_at.get(tid_a, {}).get(cn)
     if not entry:
         return None
-    pb, stock, sizes, cid, _ = entry
+    pb, stock, sizes, cid, _, status_buy = entry
     if sell_price <= pb:
         return None
     scu_total = profile["ship"]["scu_total"]
@@ -85,12 +87,17 @@ def leg_for(buy_at, sell_price, tid_a, tid_b, cn, budget, profile):
     qty = C.snap_to_crate(qty, sizes, max_box)
     if qty <= 0:
         return None
+    # 供应倍数：现货至少够跑 N 圈（默认 1 圈）。没有现货数据的按满载放行。
+    if stock and min_supply_ratio > 1 and int(stock) < qty * min_supply_ratio:
+        return None
     return {
         "commodity": cn, "id_commodity": cid,
         "buy_terminal": tid_a, "sell_terminal": tid_b,
         "price_buy": int(pb), "price_sell": int(sell_price),
         "qty": qty, "box_sizes": box_sizes,
-        "scu_stock": int(stock) if stock else 0,
+        "scu_stock": int(stock) if stock else 0,      # 供应：买点现货
+        "status_buy": status_buy,
+        "sell_row": (sell_at.get(tid_b, {}).get(cn) or (None, None))[1],
         "leg_profit": qty * (int(sell_price) - int(pb)),
     }
 
@@ -102,6 +109,10 @@ def main() -> int:
     ap.add_argument("--max-stops", type=int, default=3,
                     help="最多几角（2=来回，3=三角，最大 5）")
     ap.add_argument("--top", type=int, default=5)
+    ap.add_argument("--min-supply-ratio", type=float, default=1.0,
+                    help="买点现货至少要够跑几圈（默认 1；2=至少两圈的量）")
+    ap.add_argument("--detail", action="store_true",
+                    help="逐站展开耗时分解（量子 / 买端停靠 / 卖端停靠）")
     ap.add_argument("--sort", choices=["profit", "hour"], default="profit",
                     help="按圈利润还是时薪排序（默认 profit）")
     ap.add_argument("--auto-load-only", action="store_true",
@@ -163,15 +174,17 @@ def main() -> int:
                     for tid_b, ps in sell_index.get(cn, []):
                         if tid_b == cur or tid_b in path:
                             continue
-                        lg = leg_for(buy_at, ps, cur, tid_b, cn, budget, profile)
+                        lg = leg_for(buy_at, sell_at, ps, cur, tid_b, cn, budget, profile,
+                                min_supply_ratio=args.min_supply_ratio)
                         if not lg:
                             continue
                         if args.auto_load_only and not auto_load_ok(cur):
                             continue
                         cands.append((lg["leg_profit"], tid_b, lg))
                 # 收口：从 cur 买货卖回起点（闭环）
-                for cn, ps in sell_at.get(start, {}).items():
-                    lg = leg_for(buy_at, ps, cur, start, cn, budget, profile)
+                for cn, (ps, _r) in sell_at.get(start, {}).items():
+                    lg = leg_for(buy_at, sell_at, ps, cur, start, cn, budget, profile,
+                                min_supply_ratio=args.min_supply_ratio)
                     if not lg:
                         continue
                     if args.auto_load_only and not auto_load_ok(cur):
@@ -236,6 +249,45 @@ def main() -> int:
         r["loop_time_min"] = C.route_time_min(profile, legs_full)
         r["per_hour"] = int(r["profit"] / r["loop_time_min"] * 60) if r["loop_time_min"] else None
 
+        tm = profile.get("time_model", {})
+        base = tm.get("base_stop_min", 4)
+        manual_crate = float(tm.get("manual_crate_min", 1.0))
+        manual_extra = float(tm.get("manual_extra_min", 3.0))
+        crate_min = float(tm.get("auto_crate_min", 1.0))
+        extra = float(tm.get("auto_load_extra_min", 3.0))
+        ship_auto = bool(profile["ship"].get("auto_loading_capable")
+                         or tm.get("auto_loading"))
+        detail = []
+        for lg, lf in zip(r["legs"], legs_full):
+            sizes = [b for b in (lg["box_sizes"] or []) if isinstance(b, int) and b > 0]
+            box = max([b for b in sizes
+                       if b <= (profile["ship"].get("max_box", 32))] or [0]) or 1
+            crates = -(-lg["qty"] // box)
+            sr = lg.get("sell_row") or {}
+            row = {"commodity": lg["commodity"], "qty": lg["qty"], "box": box,
+                   "crates": crates,
+                   "supply": lg.get("scu_stock"),
+                   "buy_status": lg.get("status_buy"),
+                   "demand_stock": sr.get("scu_sell_stock"),
+                   "sell_status": sr.get("status_sell"),
+                   "buy": term_by_id[lg["buy_terminal"]].name,
+                   "sell": term_by_id[lg["sell_terminal"]].name,
+                   "qt_min": round((lf["qt_sec"] or 0) / 60, 1)}
+            for side, term in (("buy_stop", lf["buy_terminal"]),
+                               ("sell_stop", lf["sell_terminal"])):
+                if side == "sell_stop":
+                    row[side] = round(base + float(tm.get("sell_unload_min", 0.0)), 1)
+                    continue
+                auto = ship_auto and (bool(term.get("auto"))
+                                      or C.terminal_loading_mode(term["name"], profile))
+                handling = (crates * crate_min + extra) if auto else (
+                    crates * manual_crate + manual_extra)
+                row[side] = round(base + handling, 1)
+                row["auto_load"] = auto
+            row["leg_min"] = round(row["qt_min"] + row["buy_stop"] + row["sell_stop"], 1)
+            detail.append(row)
+        r["detail"] = detail
+
     if args.sort == "hour":
         results.sort(key=lambda r: -(r["per_hour"] or 0))
     else:
@@ -252,6 +304,28 @@ def main() -> int:
                   f"{term_by_id[lg['buy_terminal']].name[:28]} → "
                   f"{term_by_id[lg['sell_terminal']].name[:28]} "
                   f"（{lg['price_buy']:,}→{lg['price_sell']:,}，+{lg['leg_profit']:,}）")
+        if args.detail:
+            print(f"\n    {'商品':<20s}{'装货':>5s}{'供应':>8s}{'买端态':>8s}"
+                  f"{'需求(囤)':>9s}{'卖端态':>8s}{'量子':>6s}{'买端':>6s}{'卖端':>6s}{'小计':>7s}")
+            for d in r["detail"]:
+                sup = d.get("supply")
+                dst = d.get("demand_stock")
+                print(f"    {d['commodity'][:20]:<20s}{d['qty']:>5d}"
+                      f"{(sup if sup is not None else '-'):>8}"
+                      f"{C.UEX_STATUS_NAMES.get(d.get('buy_status'), '-')[:7]:>8s}"
+                      f"{(dst if dst is not None else '-'):>9}"
+                      f"{C.UEX_STATUS_NAMES.get(d.get('sell_status'), '-')[:7]:>8s}"
+                      f"{d['qt_min']:>6.1f}{d['buy_stop']:>6.1f}{d['sell_stop']:>6.1f}"
+                      f"{d['leg_min']:>7.1f}")
+            qt = sum(d["qt_min"] for d in r["detail"])
+            bs = sum(d["buy_stop"] for d in r["detail"])
+            ss = sum(d["sell_stop"] for d in r["detail"])
+            print(f"    {'合计':<22s}{'':>6s}{'':>4s}{'':>5s}{qt:>7.1f}{bs:>7.1f}{ss:>7.1f}"
+                  f"{r['loop_time_min']:>8.1f}")
+            print("    口径：买端=起降/交易 4 + 搬运（自动 5/次，手动 箱数×1+3）；"
+                  "卖端=4 + sell_unload_min(0)")
+            print("    供应=买点 scu_buy（现货）；需求(囤)=卖点 scu_sell_stock（它已囤多少）；"
+                  "状态 1=Out…7=Max（卖端越空越能吸收）")
         print()
 
     if args.save:
