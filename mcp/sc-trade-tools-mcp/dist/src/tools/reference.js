@@ -49,7 +49,9 @@ export function registerReferenceTools(server) {
             return fail(e);
         }
     });
-    server.tool('stt_get_commodity_transactions', 'Buy/sell listings for one commodity across all shops (GET /api/commodity/items/{name}/transactions). No token required.', { name: z.string().describe('Commodity name, e.g. "Taranite" or "Agricium (Ore)"') }, async ({ name }) => {
+    server.tool('stt_get_commodity_transactions', 'Buy/sell listings for one commodity across all shops (GET /api/commodity/items/{name}/transactions). ' +
+        'NOTE: probed 2026-10-29 and this endpoint returns HTTP 400 without a token, despite having no ' +
+        'security declared in the OpenAPI spec. Treat as token-gated until the upstream changes.', { name: z.string().describe('Commodity name, e.g. "Taranite" or "Agricium (Ore)"') }, async ({ name }) => {
         try {
             return json(await apiGet(`/api/commodity/items/${enc(name)}/transactions`));
         }
@@ -57,7 +59,8 @@ export function registerReferenceTools(server) {
             return fail(e);
         }
     });
-    server.tool('stt_get_shop_transactions', 'All commodity listings at one shop (GET /api/commodity/shops/{name}/transactions). No token required.', { name: z.string().describe('Shop / terminal name as listed by stt_list_locations or the website') }, async ({ name }) => {
+    server.tool('stt_get_shop_transactions', 'All commodity listings at one shop (GET /api/commodity/shops/{name}/transactions). ' +
+        'NOTE: probed 2026-10-29 and this endpoint returns HTTP 400 without a token (same as the commodity variant).', { name: z.string().describe('Shop / terminal name as listed by stt_list_locations or the website') }, async ({ name }) => {
         try {
             return json(await apiGet(`/api/commodity/shops/${enc(name)}/transactions`));
         }

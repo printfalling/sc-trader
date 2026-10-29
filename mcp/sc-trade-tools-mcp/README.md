@@ -12,7 +12,8 @@ it scrapes the `https://sc-trade.tools/best-buyer?q=…` web page.
 |---|---|
 | Spec | OpenAPI 3.0.1, 34 endpoints, `SC Trade Tools API` |
 | Swagger UI | https://sc-trade.tools/swagger-ui/index.html |
-| Read-only endpoints | **no token needed** — verified live 200s on `/api/commodity/items`, `/api/locations`, `/api/ships`, `/api/crowdsource/commodity-listings` |
+| Read-only endpoints | **mostly no token** — verified live 200s on `/api/commodity/items`, `/api/commodity/shops`, `/api/locations`, `/api/ships`, `/api/factions`, `/api/security-levels`, `/api/location-types`, `/api/item/items`, `/api/item/item-types`, `/api/crowdsource/*` |
+| Transactions endpoints | **HTTP 400 without a token** — `/api/commodity/items/{name}/transactions`, `/api/commodity/shops/{name}/transactions`, `/api/commodity/transactions`, `/api/commodity/reports`. They declare no `security` in the spec but reject unauthenticated calls anyway (probed 2026-10-29) |
 | `POST /api/tools/buyers` | **required `token` header** |
 | `POST /api/tools/circuits/{tradeId}` | **required `token` header** |
 | `POST /api/tools/itinerary` | **required `token` header** |
