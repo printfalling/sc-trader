@@ -30,6 +30,28 @@ description: Star Citizen 跑商助手。按飞船/预算推荐并记录跑商�
 - 用户提供的价格必须带**观察时间**（record `--observed-at`，默认现在）——录的是"何时看到的"，不是"何时录入的"
 - 玩家观察比 UEX 新 → `player★ 时间戳` 生效；比 UEX 旧 → 诚实采用 UEX 并输出 `[时滞]` 提示
 - 基线调研：sc-trade.tools 的路线数字与 UEX 逐位一致（其价格底座即 UEX），两边差异项向用户标注"进游戏核实"，用户实测即最终裁决
+#### 众包交叉核对（sc-trade.tools，免 token）
+
+`mcp/sc-trade-tools-mcp`（工具前缀 `stt_*`）用来**验证 UEX**，不是替代它。
+
+- **口径对应**：众包 `BUYS`（终端收购）= 玩家卖出价 = UEX `price_sell`；`SELLS` = 玩家买入价 = UEX `price_buy`。
+- **免 token 可用**：商品、商店、地点、船、物品、众包成交价、排行榜等 15 个端点。
+- **实测 400（需 token，别浪费调用）**：`commodity/items/{name}/transactions`、`commodity/shops/{name}/transactions`、`commodity/transactions`、`commodity/reports` —— 它们在 OpenAPI 里没声明 security，但匿名调用一律 400。
+- **它跟 UEX 不是独立双源**：sc-trade.tools 网页上的路线数字用的就是 UEX 的价格（实测其 Golden Medmon 卖价 71,000 = UEX Ashland 价，而它自己的众包库只有 54,000）。它自己的众包库更稀疏（大量 `saturation=0.0` / `quantity 0`）。
+
+2026-10-29 实测对照（玩家卖出价）：
+
+| 商品 | UEX | 众包 | 结论 |
+|---|---|---|---|
+| Bexalite | 30,000 @ Patch City | 30,000 | 一致，可信 |
+| Dymantium | 25,000 @ Levski | 25,000 | 一致，可信 |
+| Organics | 14,000 @ People's Service | 14,000 | 一致，可信 |
+| Taranite | 29,000 @ Orison | 28,000 | 差 1,000 |
+| Compboard | 37,000 @ SM0-13 | 34,000 | 差 3,000，以 UEX 为准 |
+| Golden Medmon | 71,000 @ Ashland | 54,000 | **差 31%**，转述时提示进游戏核实 |
+
+两边一致 → 放心按 UEX 跑；不一致 → 以 UEX 为准并在转述时标注"进游戏核实"，用户实测仍是最终裁决。
+
 - **交叉验证通道**：`mcp/sc-trade-tools-mcp`（工具前缀 `stt_*`，已注册在 `.mcp.json`）可直接查它的**众包价**与只读数据（商品/地点/船/成交记录）。它的三个算路端点需要 `SC_TRADE_TOOLS_TOKEN`（上游只发给 Patreon 支持者），没有 token 时用只读工具即可。**它的数据与 UEX 不同源**（玩家众包），只用于交叉核对 UEX，不覆盖用户实测，也不并入 watchlist。
 
 
