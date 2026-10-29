@@ -76,6 +76,18 @@
         }
       ],
       "auto_loading_capable": true
+    },
+    "golem_ox": {
+      "name": "Golem Ox (64 SCU, 买断 1,149,120 @ Lorville)",
+      "scu_total": 64,
+      "max_box": 16,
+      "slots": [
+        {
+          "size": 16,
+          "count": 4
+        }
+      ],
+      "auto_loading_capable": false
     }
   },
   "budget_default": 100000,
