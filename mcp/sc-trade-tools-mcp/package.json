@@ -1,0 +1,31 @@
+{
+  "name": "@uexcorp/sc-trade-tools-mcp",
+  "version": "0.1.0",
+  "description": "MCP server exposing the public SC Trade Tools API (sc-trade.tools) — commodities, locations, ships, crowdsourced listings, and (with a token) route planning.",
+  "type": "module",
+  "bin": {
+    "sc-trade-tools-mcp": "dist/src/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc && chmod +x dist/src/cli.js",
+    "test": "vitest run",
+    "start": "node dist/src/cli.js",
+    "prepublishOnly": "npm run build",
+    "test:e2e": "node test/smoke.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

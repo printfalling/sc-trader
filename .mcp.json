@@ -5,6 +5,12 @@
       "args": [
         "@scfools/scdb-mcp"
       ]
+    },
+    "sc-trade-tools": {
+      "command": "node",
+      "args": [
+        "mcp/sc-trade-tools-mcp/dist/src/cli.js"
+      ]
     }
   }
 }
