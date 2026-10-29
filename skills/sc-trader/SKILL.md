@@ -63,7 +63,7 @@ description: Star Citizen 跑商助手。按飞船/预算推荐并记录跑商�
 3. sc-trade 众包库覆盖稀疏（Taranite 0 条提交）。
 两边数字不一致时：以 UEX 为基线继续计算，差异项向用户标注"进游戏核实"；用户提供的任何实测价（截图或口述）即最终裁决，record 入库后 ★ 优先于一切外部源。
 
-## 四个命令
+## 命令一览
 
 ### 1. check — 环境自检（缺失自动补装）
 
@@ -147,6 +147,25 @@ tools/uexinfo/venv/bin/python skills/sc-trader/scripts/stock.py \
 数据龄（>24h 标 ⚠️）、玩家实测★。
 **用户问"某商品库存/某站能收多少"时用这个**，不要靠推算或旧数据口头回答；
 `--terminals` 支持逗号分隔子串过滤，可只查关心的站点。
+
+### 7. find_loop — 多角闭环搜索（来回 / 三角 / 最多 5 角）
+
+```bash
+tools/uexinfo/venv/bin/python skills/sc-trader/scripts/find_loop.py \
+  --ship <ship_key> --budget <aUEC> [--max-stops 3] [--auto-load-only] \
+  [--sort profit|hour] [--top 5] [--save]
+```
+
+- **与 recommend 的差别**：recommend 先挑单段利润最高的腿再补一段回程，选出来的卖点
+  常常是"死胡同"（纯收购站，不卖货），回程只能空载——576 SCU 的 Caterpillar 尤其明显。
+  find_loop **直接搜索整环**，只有能回到起点的路径才算候选，因此每段都能满载。
+- `--max-stops` 2~5（2=来回，3=三角）。数据取自本地算路引擎的全市场价，
+  **环搜索过程不再调 API**；量子时间走本地交通图（带缓存）。
+- `--sort hour` 按时薪排序（默认 `profit`）；`--save` 写入 watchlist。
+- `--auto-load-only` 只从支持自动装载（`is_auto_load`）的站点买货——大船必开。
+- **实测结论（Caterpillar 576 SCU / 5M）**：3 角是甜点
+  （Seraphim → Everus Harbor → ARC-L3 → Seraphim，+2,045,376 / 46.5min / 263 万/h，
+  三段各 576 SCU 满载）；5 角利润更高（+3,209,472）但时薪降到 235 万/h。
 
 ## 展示规范（用户定案：路径全名，禁止缩写）
 

@@ -47,6 +47,105 @@ def auto_load_by_id(ctx) -> dict:
     return _AUTO_LOAD_CACHE
 
 
+def find_return_leg_local(price_rows, term_by_id, from_tid, to_tid, budget: int,
+                          profile: dict, ctx=None,
+                          require_auto_load: bool = False) -> dict | None:
+    """用本地全市场价找「从卖点(from) 回 买点(to)」的回程货。
+
+    与 find_return_leg 的两点区别：
+    - **不额外调 API**：数据来自本地算路引擎已拉的全市场价
+      （routes 接口会漏掉精炼矿物等，而回程常常正好是这些货）
+    - **按可实现的绝对利润排序** = min(货舱, 库存, 预算) × 单位价差，
+      而不是单位价差——否则永远选到"价差好看但只剩几十 SCU"的回程货
+    """
+    if not price_rows or from_tid is None or to_tid is None:
+        return None
+    ft = term_by_id.get(from_tid)
+    tt = term_by_id.get(to_tid)
+    if ft is None or tt is None:
+        return None
+    if require_auto_load and not getattr(ft, "is_auto_load", 0):
+        return None      # 回程买点也得能自动装载
+
+    scu_total = profile["ship"]["scu_total"]
+    max_box = (profile.get("ship") or {}).get("max_box", 32)
+
+    buy_at_from: dict = {}
+    sell_at_to: dict = {}
+    for r in price_rows:
+        tid = r.get("id_terminal")
+        cn = r.get("commodity_name")
+        if not cn:
+            continue
+        if tid == from_tid:
+            try:
+                pb = float(r.get("price_buy") or 0)
+            except (TypeError, ValueError):
+                pb = 0
+            if pb > 0:
+                prev = buy_at_from.get(cn)
+                if prev is None or pb < prev[0]:
+                    buy_at_from[cn] = (pb, r)
+        elif tid == to_tid:
+            try:
+                ps = float(r.get("price_sell") or 0)
+            except (TypeError, ValueError):
+                ps = 0
+            if ps > 0:
+                prev = sell_at_to.get(cn)
+                if prev is None or ps > prev:
+                    sell_at_to[cn] = ps
+
+    best = None
+    for cn, (pb, br) in buy_at_from.items():
+        ps = sell_at_to.get(cn)
+        if not ps or ps <= pb:
+            continue
+        box_sizes = common.parse_box_sizes(br.get("container_sizes"))
+        capacity = common.packable_scu(box_sizes, profile)
+        if capacity <= 0:
+            if box_sizes:
+                continue      # 箱型都超过船的箱位上限，装不下
+            capacity = scu_total
+        stock = br.get("scu_buy")
+        qty = min(scu_total, capacity, budget // int(pb),
+                  int(stock) if stock else scu_total)
+        qty = common.snap_to_crate(qty, br.get("container_sizes"), max_box)
+        if qty <= 0:
+            continue
+        profit = qty * (int(ps) - int(pb))
+        if best is None or profit > best[0]:
+            best = (profit, cn, int(pb), int(ps), qty, box_sizes, br, stock)
+    if best is None:
+        return None
+    profit, cn, pb, ps, qty, box_sizes, br, stock = best
+    is_pyro = getattr(tt, "star_system_name", "").lower() == "pyro"
+    if is_pyro and not profile.get("include_pyro"):
+        return None
+    return {
+        "commodity": cn,
+        "id_commodity": br.get("id_commodity"),
+        "buy_terminal": {"id": ft.id, "name": ft.name,
+                         "system": getattr(ft, "star_system_name", "")},
+        "sell_terminal": {"id": tt.id, "name": tt.name,
+                          "system": getattr(tt, "star_system_name", "")},
+        "id_planet_origin": getattr(ft, "id_planet", 0),
+        "origin_planet": getattr(ft, "planet_name", ""),
+        "id_planet_destination": getattr(tt, "id_planet", 0),
+        "destination_planet": getattr(tt, "planet_name", ""),
+        "destination_system": getattr(tt, "star_system_name", ""),
+        "price_buy": pb, "price_sell": ps,
+        "scu_stock": int(stock) if stock else 0,
+        "status_buy": br.get("status_buy"),
+        "status_sell": None,
+        "qty": qty, "box_sizes": box_sizes,
+        "leg_profit": profit,
+        "roi": round((ps - pb) / pb * 100, 1),
+        "pyro": is_pyro,
+        "source": "computed-return",
+    }
+
+
 def filter_legs(rows: list[dict], budget: int, profile: dict,
                 include_pyro: bool, ctx=None,
                 require_auto_load: bool = False) -> list[dict]:
@@ -142,7 +241,8 @@ TOP_SELLS = 5  # 候选卖点数
 def computed_legs_from_prices(client, ctx, budget: int, profile: dict,
                               have_triples: set,
                               system_id="auto",
-                              require_auto_load: bool = False) -> list[dict]:
+                              require_auto_load: bool = False,
+                              sink: dict | None = None) -> list[dict]:
     """本地算路引擎（与 sc-trade.tools 同方法）：一次拉全市场价格，本地配对。
 
     覆盖 routes 配对接口遗漏的航腿：精炼矿物、卖端饱和下架、跨行星货源。
@@ -154,6 +254,8 @@ def computed_legs_from_prices(client, ctx, budget: int, profile: dict,
         system_id = profile["origin"].get("id_star_system") or 68
     term_by_id = {t.id: t for t in ctx.cache.terminals} if ctx else {}
     rows = common.throttled_get(client, "commodities_prices_all")
+    if sink is not None:
+        sink["rows"] = rows          # 供回程腿复用，避免再打一次 API
     by_commodity = defaultdict(list)
     for r in rows or []:
         t = term_by_id.get(r.get("id_terminal"))
@@ -356,7 +458,9 @@ def annotate_terminals(legs: list[dict], ctx, freight_by_id: dict | None = None,
 def build_routes(legs: list[dict], budget: int, profile: dict,
                  client, max_calls: int, ship_key: str = "",
                  max_routes: int = 6, ctx=None,
-                 require_auto_load: bool = False) -> list[dict]:
+                 require_auto_load: bool = False,
+                 price_rows: list | None = None,
+                 term_by_id: dict | None = None) -> list[dict]:
     """组装简单循环并生成 watchlist route 结构。
 
     组合多样性：同一供货源（同商品+同买点）最多 2 条路线——同源价格完全联动，
@@ -389,20 +493,31 @@ def build_routes(legs: list[dict], budget: int, profile: dict,
                 legs_pair = [leg]
                 loop_type = "one-way"
             else:
-                calls_left -= 1
-                row, closed_terminal = find_return_leg(
-                    client,
-                    leg.get("id_planet_origin") or profile["origin"]["id_planet"],
-                    budget, leg["id_planet_destination"],
-                    prefer_terminal_id=leg["buy_terminal"]["id"])
-                back = make_return_leg(row, budget, profile) if row else None
-                if back is not None and require_auto_load:
-                    # 回程买点也必须能自动装载，否则大船装不了
-                    if auto_load_by_id(ctx) and not auto_load_by_id(ctx).get(
-                            back["buy_terminal"]["id"]):
-                        back = None
-                if back is not None:
-                    back["closed_terminal"] = closed_terminal
+                back = None
+                # 先用本地全市场价找回程（覆盖 routes 接口漏掉的商品，且不额外调 API）
+                if price_rows and term_by_id:
+                    back = find_return_leg_local(
+                        price_rows, term_by_id,
+                        leg["sell_terminal"]["id"], leg["buy_terminal"]["id"],
+                        budget, profile, ctx,
+                        require_auto_load=require_auto_load)
+                    if back is not None:
+                        back["closed_terminal"] = True   # 回到头段买点，真闭环
+                if back is None and calls_left > 0:
+                    calls_left -= 1
+                    row, closed_terminal = find_return_leg(
+                        client,
+                        leg.get("id_planet_origin") or profile["origin"]["id_planet"],
+                        budget, leg["id_planet_destination"],
+                        prefer_terminal_id=leg["buy_terminal"]["id"])
+                    back = make_return_leg(row, budget, profile) if row else None
+                    if back is not None and require_auto_load:
+                        # 回程买点也必须能自动装载，否则大船装不了
+                        if auto_load_by_id(ctx) and not auto_load_by_id(ctx).get(
+                                back["buy_terminal"]["id"]):
+                            back = None
+                    if back is not None:
+                        back["closed_terminal"] = closed_terminal
                 legs_pair = [leg] + ([back] if back else [])
                 loop_type = "there-back" if back else "one-way"
 
@@ -645,9 +760,13 @@ def main() -> int:
         else (profile["origin"].get("id_star_system") or 68))
     api_error = False
     try:
+        computed_sink: dict = {}
+        term_by_id = ({t.id: t for t in ctx.cache.terminals}
+                      if ctx else {})
         computed = computed_legs_from_prices(client, ctx, budget, profile,
                                              have_triples, system_id=want_system,
-                                             require_auto_load=args.auto_load_only)
+                                             require_auto_load=args.auto_load_only,
+                                             sink=computed_sink)
     except Exception as e:
         api_error = True
         print(f"WARN: 本地算路失败（{str(e)[:120]}）", file=sys.stderr)
@@ -667,6 +786,8 @@ def main() -> int:
 
     new_routes = build_routes(legs, budget, profile, client, args.max_calls,
                               ctx=ctx, require_auto_load=args.auto_load_only,
+                              price_rows=computed_sink.get("rows"),
+                              term_by_id=term_by_id,
                               ship_key=ship_key, max_routes=max(1, args.top))
     watchlist, added = merge_watchlist(watchlist, new_routes)
     # 登记跟踪商品：下次即使被 routes 接口下架，也能走部分装载补充路径
