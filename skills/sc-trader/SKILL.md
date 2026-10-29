@@ -30,6 +30,7 @@ description: Star Citizen 跑商助手。按飞船/预算推荐并记录跑商�
 - 用户提供的价格必须带**观察时间**（record `--observed-at`，默认现在）——录的是"何时看到的"，不是"何时录入的"
 - 玩家观察比 UEX 新 → `player★ 时间戳` 生效；比 UEX 旧 → 诚实采用 UEX 并输出 `[时滞]` 提示
 - 基线调研：sc-trade.tools 的路线数字与 UEX 逐位一致（其价格底座即 UEX），两边差异项向用户标注"进游戏核实"，用户实测即最终裁决
+- **交叉验证通道**：`mcp/sc-trade-tools-mcp`（工具前缀 `stt_*`，已注册在 `.mcp.json`）可直接查它的**众包价**与只读数据（商品/地点/船/成交记录）。它的三个算路端点需要 `SC_TRADE_TOOLS_TOKEN`（上游只发给 Patreon 支持者），没有 token 时用只读工具即可。**它的数据与 UEX 不同源**（玩家众包），只用于交叉核对 UEX，不覆盖用户实测，也不并入 watchlist。
 
 
 
