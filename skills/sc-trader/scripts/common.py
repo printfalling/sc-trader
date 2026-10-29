@@ -547,8 +547,14 @@ def route_time_min(profile: dict, legs: list[dict], extra_min: float = 0.0) -> f
     manual_crate = float(tm.get("manual_crate_min", 1.0))
     manual_extra = float(tm.get("manual_extra_min", 3.0))
 
-    def stop_minutes(term: dict, qty: int, box_sizes) -> float:
-        """单次停靠 = base + 搬运；搬运按【箱数】计 = ceil(数量/该箱规格)。"""
+    def stop_minutes(term: dict, qty: int, box_sizes, selling: bool = False) -> float:
+        """单次停靠 = base + 搬运；搬运按【箱数】计 = ceil(数量/该箱规格)。
+
+        selling=True 表示这是**卖端（卸货）**：用户校准——卖货不用手动搬箱，
+        因此搬运按 `sell_unload_min` 固定值计（默认 0），不再套用装货那套搬箱模型。
+        """
+        if selling:
+            return base + float(tm.get("sell_unload_min", 0.0))
         if "auto" in term:
             auto = ship_auto and bool(term["auto"])
         else:
@@ -590,7 +596,9 @@ def route_time_min(profile: dict, legs: list[dict], extra_min: float = 0.0) -> f
             total += jump_gate
         qty = leg.get("qty") or qty_default
         total += stop_minutes(leg["buy_terminal"], qty, leg.get("box_sizes"))
-        total += stop_minutes(leg["sell_terminal"], qty, leg.get("box_sizes"))
+        # 卖端（卸货）：用户校准——卖货不用手动搬箱，按 sell_unload_min 计
+        total += stop_minutes(leg["sell_terminal"], qty, leg.get("box_sizes"),
+                              selling=True)
     return round(total + extra_min, 1)
 
 
