@@ -1,6 +1,6 @@
 ---
 name: uexcorp-sc
-description: Advanced Star Citizen trade advisor. Query live commodity prices, optimize trade routes, contribute market data, and create trade listings using the UEXCorp API.
+description: UEXCorp API 契约与 marketplace 挂单（端点、payload、限速、认证）。跑商路线推荐/库存/价格入库请用 sc-trader skill。触发词：UEX API、挂单、marketplace、提交价格、物品价格查询。
 metadata:
   openclaw:
     requires:

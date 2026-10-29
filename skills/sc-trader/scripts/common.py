@@ -334,30 +334,38 @@ def qt_seconds(ctx, from_loc: str, to_loc: str,
                                    .get("seconds_per_gm", 10.0))
         except Exception:
             seconds_per_gm = 10.0
-    # 同一行星系（行星+卫星）：用户校准为固定 1 分钟，不再按图距离算
+    def intra_seconds() -> float:
+        """同行星系兜底估值（图上无路径/节点解析不到时用）。"""
+        try:
+            return float((load_profile().get("time_model") or {})
+                         .get("intra_system_min", 1.0)) * 60.0
+        except Exception:
+            return 60.0
+
+    # 同一行星系（行星+卫星）判定：只用于兜底，不短路图距离
     try:
-        intra = float((load_profile().get("time_model") or {})
-                      .get("intra_system_min", 1.0))
         pf = planet_system_of(ctx, from_loc)
         pt = planet_system_of(ctx, to_loc)
-        if pf and pt and pf == pt:
-            return intra * 60.0
+        same_system = bool(pf and pt and pf == pt)
     except Exception:
-        pass
+        same_system = False
     try:
         src = _resolve_node(ctx, from_loc)
         dst = _resolve_node(ctx, to_loc)
         if not src or not dst:
-            return None
+            # 节点解析不到：同行星系按 intra_system_min 估计，否则放弃
+            return intra_seconds() if same_system else None
         result = ctx.cache.transport_graph.find_shortest_path(src, dst)
         duration = getattr(result, "total_duration", None)
         if duration:
             return float(duration)
         distance_gm = float(getattr(result, "total_distance", 0) or 0)
         if distance_gm > 0:
-            # 实测校准：图距离可信（Deakins→HUR-L3 = 7Gm/0.6min 已实测确认），直接采用
+            # 实测校准：图距离可信（Deakins→HUR-L3 = 7Gm 已实测确认），直接采用
             return distance_gm * seconds_per_gm
-        # 图上无路径时才用行星对典型距离兜底（不覆盖已有图距离）
+        # 图上无路径才兜底：同行星系用 intra_system_min，跨行星系用行星对典型距离
+        if same_system:
+            return intra_seconds()
         med = pair_median(ctx, node_planet(ctx, src), node_planet(ctx, dst))
         if med:
             return med * seconds_per_gm
