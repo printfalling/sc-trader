@@ -35,8 +35,12 @@ def fetch_routes(client, id_planet: int, budget: int) -> list[dict]:
 
 
 def filter_legs(rows: list[dict], budget: int, profile: dict,
-                include_pyro: bool) -> list[dict]:
-    """原始路线行 → 合法航腿（带数量/利润/箱体/风险注记）。"""
+                include_pyro: bool, ctx=None) -> list[dict]:
+    """原始路线行 → 合法航腿（带数量/利润/箱体/风险注记）。
+
+    ctx 用于可交易性过滤（is_buyable & is_sellable）；为 None 时该过滤自动跳过，
+    不会误杀商品（见 common.is_tradeable）。
+    """
     scu_total = profile["ship"]["scu_total"]
     origin_planet = profile["origin"]["id_planet"]
     legs = []
@@ -167,7 +171,14 @@ def computed_legs_from_prices(client, ctx, budget: int, profile: dict,
                 if (cid, bt.id, st.id) in have_triples:
                     continue
                 box_sizes = common.parse_box_sizes(br.get("container_sizes"))
-                capacity = common.packable_scu(box_sizes, profile) or scu_total
+                capacity = common.packable_scu(box_sizes, profile)
+                if capacity <= 0:
+                    if box_sizes:
+                        # 有箱型信息但每档都超过本船箱位上限 → 这船根本装不下，
+                        # 不能按满载虚估利润（Corundum/Quartz 只有 8/16-SCU 箱、Aurora 上限 2）
+                        continue
+                    # 无箱型信息：维持满载口径，进游戏以实际为准
+                    capacity = scu_total
                 stock = br.get("scu_buy")
                 qty = min(scu_total, capacity, budget // int(pb),
                           int(stock) if stock else scu_total)
@@ -585,12 +596,12 @@ def main() -> int:
         if r.get("id_terminal_destination") is not None:
             freight_by_id[r["id_terminal_destination"]] = r.get("has_freight_elevator_destination")
 
-    legs = filter_legs(rows or [], budget, profile, profile["include_pyro"])
     ctx = None
     try:
         ctx = common.build_ctx()
     except Exception:
         pass
+    legs = filter_legs(rows or [], budget, profile, profile["include_pyro"], ctx)
     have_triples = {(l["id_commodity"], l["buy_terminal"]["id"], l["sell_terminal"]["id"])
                     for l in legs}
     want_system = None if (args.system or "").lower() == "all" else (

@@ -263,7 +263,12 @@ def is_tradeable(ctx, cid) -> bool:
 
     过滤掉 is_buyable=0 的脏数据/临时条目（如 Audio-Visual Equipment 只可卖不可买，
     扫描时会伪装成高利润商品，实际跑不出来）。
+
+    ctx 为 None 时无法判定，返回 True（不过滤）——fail-closed 会把全部商品误杀，
+    导致 recommend 产出 0 条路线。
     """
+    if ctx is None:
+        return True
     try:
         cid = int(cid)
     except (TypeError, ValueError):
@@ -574,11 +579,14 @@ def route_time_min(profile: dict, legs: list[dict], extra_min: float = 0.0) -> f
     jump_gate = float(tm.get("jump_gate_min", 12.0))
     total = 0.0
     for leg in legs:
-        total += (leg.get("qt_sec") or 0) / 60
-        # 跨星系必须过星门：进闸定位 + 充能 + 排队 + 出闸，与距离无关
+        qt = leg.get("qt_sec")
+        total += (qt or 0) / 60
+        # 跨星系必须过星门：进闸定位 + 充能 + 排队 + 出闸，与距离无关。
+        # travel_seconds() 算出的 qt_sec 已经包含穿越耗时（jump_min），
+        # 所以只有 qt_sec 缺失时才用 jump_gate 兜底——否则每段会重复计一次星门。
         bs = (leg.get("buy_terminal") or {}).get("system")
         ss = (leg.get("sell_terminal") or {}).get("system")
-        if bs and ss and bs != ss:
+        if bs and ss and bs != ss and not qt:
             total += jump_gate
         qty = leg.get("qty") or qty_default
         total += stop_minutes(leg["buy_terminal"], qty, leg.get("box_sizes"))
