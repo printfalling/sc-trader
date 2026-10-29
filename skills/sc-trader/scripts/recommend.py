@@ -302,10 +302,12 @@ def annotate_terminals(legs: list[dict], ctx, freight_by_id: dict | None = None,
     meta: dict = {}
     for t in getattr(ctx.cache, "terminals", []) or []:
         mcs = getattr(t, "max_container_size", 0) or 0
-        # 有机库（空间站/城市）才能叫船 + 用货运电梯 → 自动装载；
-        # 地表前哨无库 → 只能手搬
+        # 有机库（空间站/城市）才能叫船 + 用货运电梯 → 自动装载；地表前哨无库 → 只能手搬。
+        # 权威判据是 UEX 的 is_auto_load（用户定案 2026-10-29）；该字段缺失时才回退机库判据。
         has_hangar = bool(getattr(t, "id_space_station", 0) or getattr(t, "id_city", 0))
-        meta[t.id] = {"auto": has_hangar, "max_box": mcs or 32,
+        ial = getattr(t, "is_auto_load", None)
+        can_auto_load = bool(ial) if ial is not None else has_hangar
+        meta[t.id] = {"auto": can_auto_load, "max_box": mcs or 32,
                       "hangar": has_hangar,
                       "system": getattr(t, "star_system_name", "") or ""}
     # 用户实测覆盖（权威最高）→ UEX 数据 → 名称启发式

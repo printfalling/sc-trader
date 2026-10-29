@@ -65,8 +65,9 @@ tools/uexinfo/venv/bin/python skills/sc-trader/scripts/recommend.py \
 - **本地算路引擎**：routes 配对接口之外，脚本会一次拉取全市场价格（`commodities_prices_all`）本地配对（每商品最便宜买点 ×2 × 最贵卖点 ×3，输出标注 `[computed]`）——精炼矿物（Taranite/Compboard 等）、卖端饱和下架、跨行星货源靠它覆盖。买点数量按 `min(货舱, 预算, 库存)` 取，不满载也成立；computed 航腿无库存数时按满载口径展示，进游戏以实际为准。**箱型门槛优先于数量**：商品每档箱型都超过本船 `max_box` 时（如 Corundum/Quartz 只有 8/16-SCU 箱、Aurora 上限 2），该航段**直接剔除**——不能按满载虚估利润；只有**箱型信息缺失**时才按满载口径估计。
 - **时间模型与效率**：每条路线输出**圈时间**（量子航行 + 起降/终端操作 + 装卸）与**时薪**（圈利润÷圈时间）。装卸分档：手动 1 min/SCU、自动 0.5 min/次（profile.time_model 可调）。首选按圈利润排，但时薪是等量时间下的真实回报——两者冲突时把两个口径都呈给用户。
 - **卖端（卸货）不计搬运**（2026-10-29 用户校准）：**卖货不用手动搬箱**——卖端只计 `base_stop_min`（起降/终端操作），搬运按 `time_model.sell_unload_min` 固定值计（当前 0.0），不再套用装货那套搬箱模型。买端装货仍按手动/自动分档照常计算。同一条环因此从 80 min 降到 62 min（时薪 832k → 1,074k）。
-- **自动装载看机库（Hangar）**：自动装载服务依托**空间站或城市的机库**实现；地表前哨站没有机库 → 只能手搬。判定用 `id_space_station / id_city`（`recommend.py` 的 `has_hangar`），UEX 另有 `is_auto_load` 字段可直接读——它更严格：115 个货运终端里，机库判据会多算 7 个（`Locker Room - CRU-L4`、星门 `Admin - * Gateway` 等有库但不提供装载的终端），而反向 0 个。
-- **别用货运电梯推断**：`has_freight_elevator` 与 `is_auto_load` 有 **132 处反例**（电梯=1 却不能自动装载，如 ArcCorp Mining Area、Shepherd's Rest），它不是"能否自动装载"的证据。终端的实际装卸方式以用户实测为准（`loading_overrides` 覆盖）。
+- **装货（自动装载）以 `is_auto_load` 为准**（2026-10-29 用户定案）：UEX 该字段是权威判据，缺失时才回退"有机库（`id_space_station / id_city`）"推导。两者在 115 个货运终端上差 7 个——`Locker Room - CRU-L4`、`Maintenance Room - CRU-L5`、星门 `Admin - * Gateway` 这类**有库但不提供装载服务**的终端，机库判据会误判成自动。自动装载依托空间站/城市的机库，地表前哨站没有。
+- **卖货（卸货）没有 UEX 判据，以用户实测为准**：UEX **没有**"能否自动卖出"的字段（`is_auto_load` 只管装货——前哨站实测照样能一键卖；`has_loading_dock` / `has_docking_port` / `is_cargo_center` 在货运终端上全是 0，无区分度）。因此默认按"卖货不用手动搬箱"计（`sell_unload_min`，当前 0）；你实测发现某站卖货要手动搬时，在 `profile.unload_overrides` 里按名称子串标 `"manual"`（例：`{"Rustville": "manual"}`），该站就改按搬箱模型算。
+- **别用货运电梯推断**：`has_freight_elevator` 与 `is_auto_load` 有 **132 处反例**（电梯=1 却不能自动装载，如 ArcCorp Mining Area、Shepherd's Rest），不是"能否自动装载"的证据。
 - **组合语义**：推荐的是一组路线而非单条——利润最高者为**首选**，其余为**备选**；同一供货源（同商品+同买点）最多 2 条（同源价格完全联动，没有对冲价值）。用户问"跑哪条"按首选回答，首选因价格波动劣化时按收益榜改推新首选。
 - **预算与库存的关系**：数量 = min(货舱, 预算可买, 买点库存)。**预算加大不一定增产**——货源库存卡死时 500k 和 300k 结果一致是正常现象，如实说明即可，不要当作故障。
 

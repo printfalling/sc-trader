@@ -147,7 +147,10 @@ def main() -> int:
                              f"（需 {spend:,}，手头 {cash:,} + 本站卖得 {income:,}）")
         cash += income - spend
         hangar = bool(getattr(t, "id_space_station", 0) or getattr(t, "id_city", 0))
-        auto = ship.get("auto_loading_capable") and hangar
+        # 权威判据是 UEX 的 is_auto_load（用户定案）；缺失时回退机库判据
+        ial = getattr(t, "is_auto_load", None)
+        can_auto_load = bool(ial) if ial is not None else hangar
+        auto = ship.get("auto_loading_capable") and can_auto_load
         handling = crates * (ac if auto else mc) + (ae if auto else me)
         stops_out.append({
             "terminal": {"id": t.id, "name": t.name,

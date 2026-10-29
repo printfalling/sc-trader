@@ -552,9 +552,15 @@ def route_time_min(profile: dict, legs: list[dict], extra_min: float = 0.0) -> f
 
         selling=True 表示这是**卖端（卸货）**：用户校准——卖货不用手动搬箱，
         因此搬运按 `sell_unload_min` 固定值计（默认 0），不再套用装货那套搬箱模型。
+        UEX 没有"能否自动卖出"的字段（is_auto_load 只管装货，且前哨站实测也能一键卖），
+        所以判据只能是用户实测：profile.unload_overrides 里标 "manual" 的终端才按搬箱算。
         """
         if selling:
-            return base + float(tm.get("sell_unload_min", 0.0))
+            name = (term.get("name") or "").lower()
+            ov = next((v for k, v in (profile.get("unload_overrides") or {}).items()
+                       if k.lower() in name), None)
+            if ov is None or str(ov).lower() != "manual":
+                return base + float(tm.get("sell_unload_min", 0.0))
         if "auto" in term:
             auto = ship_auto and bool(term["auto"])
         else:
