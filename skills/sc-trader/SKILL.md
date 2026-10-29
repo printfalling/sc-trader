@@ -52,6 +52,7 @@ description: Star Citizen 跑商助手。按飞船/预算推荐并记录跑商�
 
 两边一致 → 放心按 UEX 跑；不一致 → 以 UEX 为准并在转述时标注"进游戏核实"，用户实测仍是最终裁决。
 
+- **判断货源稳不稳用 `stt_stock_range`**（MCP）：UEX 只给 1–7 的离散库存状态，给不出"这个货源会不会枯竭"；sc-trade.tools 的众包数据是**多批次上报**（带 `timestamp`），能看出量随时间的变化并给出 stable / refilling / draining 判定。例：RMC @ Seraphim 三次上报恒在 11,992~12,000（stable）；Titanium @ Baijini Point 5,917→5,782→5,000（draining）。**注意它是社区上报、不是实时**，上游自己声明无法知道实时库存。
 - **交叉验证通道**：`mcp/sc-trade-tools-mcp`（工具前缀 `stt_*`，已注册在 `.mcp.json`）可直接查它的**众包价**与只读数据（商品/地点/船/成交记录）。它的三个算路端点需要 `SC_TRADE_TOOLS_TOKEN`（上游只发给 Patreon 支持者），没有 token 时用只读工具即可。**它的数据与 UEX 不同源**（玩家众包），只用于交叉核对 UEX，不覆盖用户实测，也不并入 watchlist。
 
 

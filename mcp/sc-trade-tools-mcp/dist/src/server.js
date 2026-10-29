@@ -1,5 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerReferenceTools } from './tools/reference.js';
+import { registerCrowdsourceTools } from './tools/crowdsource.js';
 import { registerPlanningTools } from './tools/planning.js';
 import { hasToken } from './client.js';
 export function createServer() {
@@ -17,6 +18,7 @@ export function createServer() {
         ].join('\n'),
     });
     registerReferenceTools(server);
+    registerCrowdsourceTools(server);
     registerPlanningTools(server);
     return server;
 }

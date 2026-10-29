@@ -21,6 +21,7 @@ const EXPECTED = [
   'stt_find_best_buyers',
   'stt_plan_itinerary',
   'stt_build_circuit',
+  'stt_stock_range',
 ];
 
 let failures = 0;
@@ -62,6 +63,16 @@ try {
   } else {
     check(gatedText.includes('SC_TRADE_TOOLS_TOKEN is not set'), 'stt_find_best_buyers explains missing token');
   }
+
+  // 货源范围：用 sc-trade.tools 众包的多批次上报看稳定性
+  const range = await client.callTool({
+    name: 'stt_stock_range',
+    arguments: { commodity: 'titanium', location: 'baijini', maxPages: 6 },
+  });
+  const rangeText = range?.content?.[0]?.text ?? '';
+  let rj = {};
+  try { rj = JSON.parse(rangeText); } catch {}
+  check(Boolean(rj.found), 'stt_stock_range finds submissions', `${rj.submissions ?? 0} 条, trend=${rj.trend ?? '?'}`);
 
   await client.close();
 } catch (err) {

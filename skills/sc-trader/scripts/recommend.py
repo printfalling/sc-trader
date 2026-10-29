@@ -34,17 +34,38 @@ def fetch_routes(client, id_planet: int, budget: int) -> list[dict]:
     return rows or []
 
 
+_AUTO_LOAD_CACHE: dict = {}
+
+
+def auto_load_by_id(ctx) -> dict:
+    """终端 id -> 是否提供自动装载服务（UEX is_auto_load）；ctx 为 None 时返回空表。"""
+    if ctx is None:
+        return {}
+    if not _AUTO_LOAD_CACHE:
+        for t in getattr(ctx.cache, "terminals", []) or []:
+            _AUTO_LOAD_CACHE[t.id] = bool(getattr(t, "is_auto_load", 0))
+    return _AUTO_LOAD_CACHE
+
+
 def filter_legs(rows: list[dict], budget: int, profile: dict,
-                include_pyro: bool, ctx=None) -> list[dict]:
+                include_pyro: bool, ctx=None,
+                require_auto_load: bool = False) -> list[dict]:
     """原始路线行 → 合法航腿（带数量/利润/箱体/风险注记）。
 
     ctx 用于可交易性过滤（is_buyable & is_sellable）；为 None 时该过滤自动跳过，
     不会误杀商品（见 common.is_tradeable）。
+
+    require_auto_load: 只保留**买点支持自动装载**（UEX `is_auto_load`）的航腿——
+    大船（如 576 SCU 的 Caterpillar）在前哨站手动搬整舱不现实。
+    ctx 为 None 时无法判定，跳过该过滤（fail-open，避免误杀全部）。
     """
+    auto_load = auto_load_by_id(ctx) if require_auto_load else {}
     scu_total = profile["ship"]["scu_total"]
     origin_planet = profile["origin"]["id_planet"]
     legs = []
     for r in rows:
+        if auto_load and not auto_load.get(r.get("id_terminal_origin")):
+            continue      # 买点不提供自动装载服务，大船装不了
         try:
             buy = float(r["price_origin"])
             sell = float(r["price_destination"])
@@ -120,7 +141,8 @@ TOP_SELLS = 5  # 候选卖点数
 
 def computed_legs_from_prices(client, ctx, budget: int, profile: dict,
                               have_triples: set,
-                              system_id="auto") -> list[dict]:
+                              system_id="auto",
+                              require_auto_load: bool = False) -> list[dict]:
     """本地算路引擎（与 sc-trade.tools 同方法）：一次拉全市场价格，本地配对。
 
     覆盖 routes 配对接口遗漏的航腿：精炼矿物、卖端饱和下架、跨行星货源。
@@ -157,6 +179,8 @@ def computed_legs_from_prices(client, ctx, budget: int, profile: dict,
             except (TypeError, ValueError):
                 continue
             if pb > 0:      # 起点不绑定：全星系找最优货源
+                if require_auto_load and not getattr(t, "is_auto_load", 0):
+                    continue      # 买点不提供自动装载服务，大船装不了
                 buys.append((pb, r, t))
             if ps > 0:
                 sells.append((ps, r, t))
@@ -331,7 +355,8 @@ def annotate_terminals(legs: list[dict], ctx, freight_by_id: dict | None = None,
 
 def build_routes(legs: list[dict], budget: int, profile: dict,
                  client, max_calls: int, ship_key: str = "",
-                 max_routes: int = 6) -> list[dict]:
+                 max_routes: int = 6, ctx=None,
+                 require_auto_load: bool = False) -> list[dict]:
     """组装简单循环并生成 watchlist route 结构。
 
     组合多样性：同一供货源（同商品+同买点）最多 2 条路线——同源价格完全联动，
@@ -371,6 +396,11 @@ def build_routes(legs: list[dict], budget: int, profile: dict,
                     budget, leg["id_planet_destination"],
                     prefer_terminal_id=leg["buy_terminal"]["id"])
                 back = make_return_leg(row, budget, profile) if row else None
+                if back is not None and require_auto_load:
+                    # 回程买点也必须能自动装载，否则大船装不了
+                    if auto_load_by_id(ctx) and not auto_load_by_id(ctx).get(
+                            back["buy_terminal"]["id"]):
+                        back = None
                 if back is not None:
                     back["closed_terminal"] = closed_terminal
                 legs_pair = [leg] + ([back] if back else [])
@@ -563,6 +593,9 @@ def main() -> int:
     parser.add_argument("--auto-loading", action="store_true",
                         help="按自动装载估算时间（0.5min/次固定开销）；"
                              "不给则按 profile.time_model.auto_loading（默认手动 1min/SCU）")
+    parser.add_argument("--auto-load-only", action="store_true",
+                        help="只保留买点支持自动装载（UEX is_auto_load）的航腿。"
+                             "大船（如 576 SCU）在前哨站手动搬整舱不现实时用")
     parser.add_argument("--max-calls", type=int, default=6,
                         help="本次最多 UEX API 调用数（限速保护）")
     args = parser.parse_args()
@@ -603,7 +636,8 @@ def main() -> int:
         ctx = common.build_ctx()
     except Exception:
         pass
-    legs = filter_legs(rows or [], budget, profile, profile["include_pyro"], ctx)
+    legs = filter_legs(rows or [], budget, profile, profile["include_pyro"], ctx,
+                      require_auto_load=args.auto_load_only)
     have_triples = {(l["id_commodity"], l["buy_terminal"]["id"], l["sell_terminal"]["id"])
                     for l in legs}
     want_system = None if (args.system or "").lower() == "all" else (
@@ -612,7 +646,8 @@ def main() -> int:
     api_error = False
     try:
         computed = computed_legs_from_prices(client, ctx, budget, profile,
-                                             have_triples, system_id=want_system)
+                                             have_triples, system_id=want_system,
+                                             require_auto_load=args.auto_load_only)
     except Exception as e:
         api_error = True
         print(f"WARN: 本地算路失败（{str(e)[:120]}）", file=sys.stderr)
@@ -631,6 +666,7 @@ def main() -> int:
         return 1
 
     new_routes = build_routes(legs, budget, profile, client, args.max_calls,
+                              ctx=ctx, require_auto_load=args.auto_load_only,
                               ship_key=ship_key, max_routes=max(1, args.top))
     watchlist, added = merge_watchlist(watchlist, new_routes)
     # 登记跟踪商品：下次即使被 routes 接口下架，也能走部分装载补充路径

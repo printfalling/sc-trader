@@ -88,6 +88,18 @@
         }
       ],
       "auto_loading_capable": false
+    },
+    "caterpillar": {
+      "name": "Drake Caterpillar (576 SCU, 最大箱 24 SCU)",
+      "scu_total": 576,
+      "max_box": 24,
+      "slots": [
+        {
+          "size": 24,
+          "count": 24
+        }
+      ],
+      "auto_loading_capable": true
     }
   },
   "budget_default": 100000,

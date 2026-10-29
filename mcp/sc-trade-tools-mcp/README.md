@@ -70,7 +70,11 @@ Read-only (no token):
 - `stt_list_security_levels`, `stt_list_factions`
 - `stt_get_commodity_transactions` — buy/sell listings for one commodity
 - `stt_get_shop_transactions` — listings at one shop
-- `stt_get_crowdsource_listings` — community-submitted prices (paginated)
+- `stt_get_crowdsource_listings` — community-submitted prices (paginated, raw)
+- `stt_stock_range` — **supply range & trend** for a commodity at a location: quantity range,
+  saturation range, submission window and a stable / refilling / draining verdict.
+  This is the one thing UEX cannot do (UEX only exposes a discrete 1–7 status).
+  Example: `titanium @ baijini` reads 5,917 → 5,782 → 5,000 over three submissions = *draining*.
 - `stt_get_trade_alternatives` — alternative commodities for a trade edge
 
 Planning (token required):
