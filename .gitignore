@@ -26,4 +26,4 @@ skills/sc-trader/data/secrets.json
 skills/sc-trader/web/.cache/
 
 # 卖端库存上限缓存（按游戏版本失效，运行时生成）
-skills/sc-trader/data/.sell_cap_cache.json
+skills/sc-trader/data/.stock_cap_cache.json

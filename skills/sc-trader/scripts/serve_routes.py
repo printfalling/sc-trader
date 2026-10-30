@@ -10,9 +10,9 @@
 
 接口：
   GET /api/ships                      → 船型清单（含货舱/箱型/默认船/默认预算/星系选项）
-  GET /api/routes?ship=&budget=&stops=3,5&system=68&top=1&mixed=1&auto=1&scale=4
-       → {ok, results:[{stops, idx, title, png, md}], params}
-       stops 可多选（逗号分隔），每个角数出 top 条路线，逐条单独出图
+  GET /api/search?ship=&budget=...    → 起一个后台检索任务，立刻返回 {job}
+  GET /api/progress?job=              → 轮询进度 {state,step,total,pct,label,result}
+  GET /api/routes?ship=&budget=...    → 同步版（一次性拿结果，兼容旧调用）
   GET /img/<file>.png                → 生成的图片
 """
 from __future__ import annotations
@@ -24,7 +24,10 @@ import re
 import pathlib
 import subprocess
 import sys
+import threading
+import time
 import urllib.parse
+import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
@@ -39,8 +42,10 @@ DEFAULT_PORT = 8765
 SYSTEM_CHOICES = {"68": "Stanton", "64": "Pyro", "all": "不限（跨星系）"}
 STOPS_CHOICES = (2, 3, 4, 5, 6)
 
-RECOMMEND_TIMEOUT_SEC = 180      # 单次搜索上限，超时不再干等
+RECOMMEND_TIMEOUT_SEC = 300      # 单次搜索上限，超时不再干等
 CACHE_MAX_FILES = 120            # .cache 里最多保留多少个文件（按 mtime 淘汰）
+TOP_MAX = 20                     # 「每个角数出几条」上限（放宽自 3）
+JOB_MAX = 20                     # 最多保留多少个检索任务
 
 
 def load_profile() -> dict:
@@ -86,7 +91,9 @@ def metrics_of(title: str) -> dict:
     return m
 
 
-def run_recommend(ship, budget, stops, system, top, mixed, auto, sort="hour") -> str:
+def run_recommend(ship, budget, stops, system, top, mixed, auto, sort="hour",
+                  on_progress=None) -> str:
+    """跑一次 recommend，并把它 stderr 里的 [progress] 行实时转给 on_progress。"""
     cmd = [
         sys.executable, str(RECOMMEND),
         "--ship", ship, "--budget", str(budget),
@@ -97,21 +104,53 @@ def run_recommend(ship, budget, stops, system, top, mixed, auto, sort="hour") ->
         cmd.append("--mixed")
     if auto:
         cmd.append("--auto-load-only")
-    proc = None
+
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                            text=True, bufsize=1)
+    err_lines: list = []
+
+    def pump_err():
+        try:
+            for line in proc.stderr:
+                line = line.rstrip()
+                if not line:
+                    continue
+                m = re.match(r"\[progress\]\s*(.*)", line)
+                if m:
+                    if on_progress:
+                        on_progress(m.group(1))
+                    continue          # 进度标记不进错误文本
+                err_lines.append(line)
+        except (ValueError, OSError):
+            pass
+
+    t = threading.Thread(target=pump_err, daemon=True)
+    t.start()
+    out = proc.stdout.read()
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True,
-                              timeout=RECOMMEND_TIMEOUT_SEC)
+        rc = proc.wait(timeout=RECOMMEND_TIMEOUT_SEC)
     except subprocess.TimeoutExpired:
+        proc.kill()
+        out = proc.stdout.read()
         raise RuntimeError(
             f"recommend.py 超过 {RECOMMEND_TIMEOUT_SEC}s 未返回"
             f"（角数 {stops} 搜索太慢或 UEX 无响应），已放弃本次检索")
-    if proc.returncode != 0:
-        raise RuntimeError(proc.stderr[-1200:] or "recommend.py 失败")
-    return proc.stdout
+    t.join(timeout=5)
+    if rc != 0:
+        raise RuntimeError("\n".join(err_lines)[-1200:] or "recommend.py 失败")
+    return out
 
 
-def build_routes(params: dict) -> dict:
-    """跑搜索并把每条路线的 Markdown 落盘，返回 key；图片由 /api/png 按需生成。"""
+def build_routes(params: dict, on_progress=None) -> dict:
+    """跑搜索并把每条路线的 Markdown 落盘，返回 key；图片由 /api/png 按需生成。
+
+    on_progress(done, total, label)：检索很慢（一次几十秒到几分钟），
+    不回传进度前端就只能干等。
+    """
+    def prog(done, total, label):
+        if on_progress:
+            on_progress(done, total, label)
+
     prof = load_profile()
     ship = params.get("ship") or prof.get("default_ship")
     if ship not in prof.get("ships", {}):
@@ -121,7 +160,7 @@ def build_routes(params: dict) -> dict:
     system = params.get("system") or "all"
     if system not in SYSTEM_CHOICES:
         system = "all"
-    top = max(1, min(3, int(params.get("top") or 1)))
+    top = max(1, min(TOP_MAX, int(params.get("top") or 1)))
     mixed = bool(params.get("mixed"))
     auto = bool(params.get("auto"))
     sort = params.get("sort") or "hourly"
@@ -141,8 +180,22 @@ def build_routes(params: dict) -> dict:
 
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     results = []
-    for stops in sorted(stops_list):
-        md = run_recommend(ship, budget, stops, system, top, mixed, auto, rec_sort)
+    ordered = sorted(stops_list)
+    ntot = len(ordered)
+    for si, stops in enumerate(ordered, 1):
+        prog(si - 1, ntot, f"搜索 {stops} 角闭环（第 {si}/{ntot} 个）")
+
+        def sub(label, _s=stops, _i=si):
+            # 子进程里的阶段进度（如「补拉库存上限 3/10」）折算成本步内的小数，
+            # 否则单个角数时进度条会一直停在 0%（这一阶段能占去几十秒）。
+            frac = 0.0
+            m = re.search(r"(\d+)\s*/\s*(\d+)", label)
+            if m and int(m.group(2)):
+                frac = min(1.0, int(m.group(1)) / int(m.group(2)))
+            prog(_i - 1 + frac, ntot, f"{_s} 角 · {label}")
+
+        md = run_recommend(ship, budget, stops, system, top, mixed, auto, rec_sort,
+                           on_progress=sub)
         if "未找到闭环" in md:
             results.append({"stops": stops, "idx": 0, "title": "未找到闭环", "key": None,
                             "md": md, "route": "", "profit": 0, "time": 0, "hourly": 0})
@@ -165,6 +218,7 @@ def build_routes(params: dict) -> dict:
                             "profit": metrics["profit"], "time": metrics["time"],
                             "hourly": metrics["hourly"]})
 
+    prog(ntot, ntot, "整理结果")
     # 排序：默认按时薪降序
     def sort_key(r):
         return r["stops"] if sort == "stops" else metrics_of(r["title"])[sort]
@@ -220,6 +274,54 @@ def prune_cache(max_files: int | None = None) -> int:
     return removed
 
 
+# ── 异步检索任务（前端轮询进度，避免长时间干等）────────────────────────────
+_JOBS: dict = {}
+_JOBS_LOCK = threading.Lock()
+
+
+def _job_update(jid: str, **kw) -> None:
+    with _JOBS_LOCK:
+        if jid in _JOBS:
+            _JOBS[jid].update(kw)
+
+
+def job_start(params: dict) -> str:
+    """起一个后台检索任务，立刻返回 job id；进度用 /api/progress 轮询。"""
+    jid = uuid.uuid4().hex[:12]
+    with _JOBS_LOCK:
+        _JOBS[jid] = {"state": "running", "step": 0, "total": 1, "label": "准备中",
+                      "result": None, "error": None, "ts": time.time()}
+        # 只留最近 JOB_MAX 个，别让任务表无限长
+        for old in sorted(_JOBS, key=lambda k: _JOBS[k]["ts"])[:-JOB_MAX]:
+            if old != jid:
+                _JOBS.pop(old, None)
+
+    def work():
+        try:
+            res = build_routes(
+                params,
+                on_progress=lambda d, t, l: _job_update(jid, step=d, total=t, label=l))
+            _job_update(jid, state="done", label="完成", result=res)
+        except Exception as e:                                  # noqa: BLE001
+            _job_update(jid, state="error", label="失败",
+                        error=f"{type(e).__name__}: {e}")
+
+    threading.Thread(target=work, daemon=True).start()
+    return jid
+
+
+def job_snapshot(jid: str) -> dict:
+    with _JOBS_LOCK:
+        j = _JOBS.get(jid)
+    if not j:
+        return {"ok": False, "error": "任务不存在或已过期，请重新检索"}
+    total = j["total"] or 1
+    return {"ok": True, "state": j["state"], "step": j["step"], "total": total,
+            "pct": int(min(100, round(j["step"] / total * 100)))
+                   if j["state"] != "done" else 100,
+            "label": j["label"], "result": j["result"], "error": j["error"]}
+
+
 class Handler(BaseHTTPRequestHandler):
     def _send(self, code: int, body: bytes, ctype: str) -> None:
         self.send_response(code)
@@ -257,11 +359,24 @@ class Handler(BaseHTTPRequestHandler):
                 self._json({"ok": False, "error": f"{type(e).__name__}: {e}"}, 500)
             return
 
+        if path == "/api/search":
+            params = {k: v[0] for k, v in qs.items()}
+            try:
+                self._json({"ok": True, "job": job_start(params)})
+            except Exception as e:                              # noqa: BLE001
+                self._json({"ok": False, "error": f"{type(e).__name__}: {e}"}, 500)
+            return
+
+        if path == "/api/progress":
+            params = {k: v[0] for k, v in qs.items()}
+            self._json(job_snapshot(params.get("job", "")))
+            return
+
         if path == "/api/routes" or path == "/api/route":
             params = {k: v[0] for k, v in qs.items()}
             try:
                 self._json(build_routes(params))
-            except Exception as e:
+            except Exception as e:                              # noqa: BLE001
                 self._json({"ok": False, "error": f"{type(e).__name__}: {e}"}, 500)
             return
 

@@ -20,40 +20,46 @@ UEXINFO_DIR = REPO_ROOT / "tools" / "uexinfo"
 
 PROFILE_PATH = SKILL_DIR / "data" / "profile.json"
 WATCHLIST_PATH = SKILL_DIR / "data" / "watchlist.json"
-SELL_CAP_CACHE_PATH = SKILL_DIR / "data" / ".sell_cap_cache.json"
+STOCK_CAP_CACHE_PATH = SKILL_DIR / "data" / ".stock_cap_cache.json"
 
 
-# ── 卖端库存上限（scu_sell_max）──────────────────────────────────────────────
-# commodities_prices_all 不带 scu_sell_max（只有 scu_sell / scu_sell_stock），
-# 而「存量/上限」需要它 —— 只能按商品查 commodities_prices。全局节流 6.5s/次，
-# 所以结果落盘缓存，重复检索不再付调用。
-SELL_CAP_TTL_SEC = 7 * 24 * 3600
+# ── 买卖两端库存上限（scu_buy_max / scu_sell_max）────────────────────────────
+# commodities_prices_all 不带 *_max（只有 scu_buy / scu_sell / scu_sell_stock），
+# 而「现货/上限」「存量/上限」都需要它 —— 只能按商品查 commodities_prices。
+# 全局节流 6.5s/次，所以结果落盘缓存，重复检索不再付调用。
+STOCK_CAP_TTL_SEC = 7 * 24 * 3600
 
 
-def _load_sell_cap_cache() -> dict:
+def _load_stock_cap_cache() -> dict:
     try:
-        with open(SELL_CAP_CACHE_PATH, encoding="utf-8") as f:
+        with open(STOCK_CAP_CACHE_PATH, encoding="utf-8") as f:
             return json.load(f)
     except (OSError, ValueError):
         return {}
 
 
-def fetch_sell_caps(client, commodity_ids, max_calls: int = 8,
-                    ttl: int = SELL_CAP_TTL_SEC) -> dict:
-    """(id_commodity, id_terminal) -> (scu_sell_stock, scu_sell_max)。
+def fetch_stock_caps(client, commodity_ids, max_calls: int = 12,
+                    ttl: int = STOCK_CAP_TTL_SEC, on_progress=None) -> dict:
+    """(id_commodity, id_terminal) -> (scu_buy, scu_buy_max, scu_sell_stock, scu_sell_max)。
 
-    总库存（容量）是静态属性：版本不变就不会轻易变，所以按**游戏版本**失效，
+    四个数都只有 commodities_prices 端点有（_all 缺两个 *_max），按商品查一次
+    就能拿回该商品全部终端的买卖两端数据。
+
+    容量（*_max）是静态属性：版本不变就不会轻易变，所以按**游戏版本**失效，
     TTL 只是兜底（7 天，用于感知版本更新和 UEX 数据订正）。
-    超预算或查不到的品种直接缺失，调用方降级为只显示存量，不阻塞出结果。
+    超预算或查不到的品种直接缺失，调用方降级为只显示现货/存量，不阻塞出结果。
+
+    on_progress(i, n)：补拉阶段每次调用前回调一次——这一步受 6.5s 全局节流
+    限制，是最长的一段静默等待，不报进度会让前端看起来卡死。
     """
-    cache = _load_sell_cap_cache()
+    cache = _load_stock_cap_cache()
     now = time.time()
     out, todo = {}, []
 
     def replay(cid):
         ent = cache.get("items", {}).get(str(cid)) or {}
-        for tid, pair in ent.get("rows", {}).items():
-            out[(cid, int(tid))] = tuple(pair)
+        for tid, quad in ent.get("rows", {}).items():
+            out[(cid, int(tid))] = tuple(quad)
 
     for cid in dict.fromkeys(int(c) for c in commodity_ids if c is not None):
         ent = cache.get("items", {}).get(str(cid)) or {}
@@ -63,7 +69,10 @@ def fetch_sell_caps(client, commodity_ids, max_calls: int = 8,
             todo.append(cid)
 
     fetched_gv = None
-    for cid in todo[:max_calls]:
+    ntodo = len(todo[:max_calls])
+    for ci, cid in enumerate(todo[:max_calls], 1):
+        if on_progress:
+            on_progress(ci, ntodo)
         rows = throttled_get(client, "commodities_prices", {"id_commodity": cid}) or []
         gv = next((r.get("game_version") for r in rows if r.get("game_version")), None)
         if gv:
@@ -73,9 +82,10 @@ def fetch_sell_caps(client, commodity_ids, max_calls: int = 8,
             tid = r.get("id_terminal")
             if tid is None:
                 continue
-            pair = (r.get("scu_sell_stock"), r.get("scu_sell_max"))
-            rows_map[str(int(tid))] = pair
-            out[(cid, int(tid))] = pair
+            quad = [r.get("scu_buy"), r.get("scu_buy_max"),
+                    r.get("scu_sell_stock"), r.get("scu_sell_max")]
+            rows_map[str(int(tid))] = quad
+            out[(cid, int(tid))] = tuple(quad)
         cache.setdefault("items", {})[str(cid)] = {
             "ts": now, "gv": gv, "rows": rows_map}
 
@@ -89,7 +99,7 @@ def fetch_sell_caps(client, commodity_ids, max_calls: int = 8,
         try:
             items = {k: v for k, v in cache.get("items", {}).items()
                      if now - v.get("ts", 0) < ttl}
-            with open(SELL_CAP_CACHE_PATH, "w", encoding="utf-8") as f:
+            with open(STOCK_CAP_CACHE_PATH, "w", encoding="utf-8") as f:
                 json.dump({"game_version": cache.get("game_version"), "items": items},
                           f, ensure_ascii=False)
         except OSError:

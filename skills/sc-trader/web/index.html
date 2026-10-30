@@ -22,8 +22,10 @@
   button:disabled { opacity:.6; cursor:default; }
   .hint { font-size:11px; color:#6b7a8c; margin-top:8px; line-height:1.6; }
   main { flex:1; min-width:0; }
-  .status { font-size:13px; color:#9fb0c3; margin-bottom:12px; }
+  .status { font-size:13px; color:#9fb0c3; margin-bottom:8px; }
   .status.err { color:#f85149; }
+  .bar { height:6px; background:#1c2430; border-radius:4px; overflow:hidden; margin-bottom:12px; }
+  .bar > i { display:block; height:100%; width:0; background:#f0b429; transition:width .25s ease; }
 
   table.rtable { border-collapse:collapse; width:100%; font-size:12.5px; background:#151b23;
                  border:1px solid #232c38; border-radius:10px; overflow:hidden; }
@@ -75,7 +77,10 @@
     </div>
     <div class="row">
       <label class="lbl" for="top">每个角数出几条</label>
-      <select id="top"><option>1</option><option selected>2</option><option>3</option></select>
+      <select id="top">
+        <option>1</option><option>2</option><option selected>3</option>
+        <option>5</option><option>10</option><option>20</option>
+      </select>
     </div>
     <div class="row checks">
       <label><input type="checkbox" id="mixed" checked> 混装填满货舱</label>
@@ -96,6 +101,7 @@
 
   <main>
     <div class="status" id="status">载入船型…</div>
+    <div class="bar" id="bar" style="display:none"><i id="barfill"></i></div>
     <div id="results"></div>
   </main>
 </div>
@@ -105,6 +111,7 @@ const $ = id => document.getElementById(id);
 let DEFAULTS = null;
 let ROWS = [];                       // 当前结果集（排序只改渲染顺序，不重新查询）
 let SORT = { key: 'hourly', dir: -1 };   // -1 降序 / 1 升序
+let POLL = null;                     // 进度轮询定时器
 
 const COLS = [
   { key: 'stops',  label: '角数',   num: true },
@@ -304,7 +311,7 @@ async function init() {
       '<label><input type="checkbox" class="stops" value="' + n + '"' +
       (n === 3 || n === 5 ? ' checked' : '') + '> ' + n + ' 角</label>').join('');
     DEFAULTS = { ship: $('ship').value, budget: $('budget').value, system: $('system').value,
-                 top: '2', mixed: true, auto: true, scale: '4', stops: [3, 5] };
+                 top: '3', mixed: true, auto: true, scale: '4', stops: [3, 5] };
     $('status').textContent = '选好参数点「检索路线」；想重来点 Reset。';
   } catch (e) {
     $('status').className = 'status err';
@@ -324,14 +331,88 @@ $('reset').addEventListener('click', () => {
   $('mixed').checked = DEFAULTS.mixed;
   $('auto').checked = DEFAULTS.auto;
   document.querySelectorAll('.stops').forEach(c => { c.checked = DEFAULTS.stops.includes(+c.value); });
+  if (POLL) {
+    clearInterval(POLL);
+    POLL = null;
+  }
   ROWS = [];
   $('results').innerHTML = '';
+  $('bar').style.display = 'none';
   $('status').className = 'status';
-  $('status').textContent = '已重置为默认参数（3 角 + 5 角，各 2 条），可以重新检索。';
+  $('status').textContent = '已重置为默认参数（3 角 + 5 角，各 3 条），可以重新检索。';
 });
+
+function setBar(pct, label) {
+  $('barfill').style.width = pct + '%';
+  $('status').className = 'status';
+  $('status').textContent = '检索中… ' + (label || '') + '（' + pct + '%）';
+}
+
+function fail(msg) {
+  if (POLL) {
+    clearInterval(POLL);
+    POLL = null;
+  }
+  $('go').disabled = false;
+  $('bar').style.display = 'none';
+  $('status').className = 'status err';
+  $('status').textContent = '失败：' + (msg || '未知');
+}
+
+function startPoll(job) {
+  if (POLL) {
+    clearInterval(POLL);
+  }
+  POLL = setInterval(async () => {
+    let d;
+    try {
+      d = await (await fetch('/api/progress?job=' + encodeURIComponent(job))).json();
+    } catch (e) {
+      return;   // 网络抖动，下一轮再试
+    }
+    if (!d.ok) {
+      fail(d.error);
+      return;
+    }
+    if (d.state === 'running') {
+      setBar(d.pct, d.label);
+      return;
+    }
+    if (POLL) {
+      clearInterval(POLL);
+      POLL = null;
+    }
+    $('go').disabled = false;
+    if (d.state === 'error') {
+      fail(d.error);
+      return;
+    }
+    const r = d.result;
+    if (!r || !r.ok) {
+      fail((r && r.error) || '未知');
+      return;
+    }
+    const p = r.params;
+    ROWS = r.results.map(x => ({
+      stops: x.stops, idx: x.idx, title: x.title, key: x.key, md: x.md,
+      route: x.route, profit: x.profit, time: x.time, hourly: x.hourly,
+      open: false, showPng: false, mdHtml: null, pngHtml: null,
+    }));
+    $('bar').style.display = 'none';
+    renderTable();
+    $('status').className = 'status';
+    $('status').textContent = '完成：' + ROWS.length + ' 条候选（' + p.ship + ' · '
+      + Number(p.budget).toLocaleString() + ' · 角数 ' + p.stops.join('/')
+      + '）· 点表头改排序';
+  }, 600);
+}
 
 $('f').addEventListener('submit', async ev => {
   ev.preventDefault();
+  if (POLL) {
+    clearInterval(POLL);
+    POLL = null;
+  }
   const stops = [...document.querySelectorAll('.stops:checked')].map(c => c.value);
   if (!stops.length) {
     $('status').className = 'status err';
@@ -344,31 +425,19 @@ $('f').addEventListener('submit', async ev => {
     mixed: $('mixed').checked ? 1 : 0, auto: $('auto').checked ? 1 : 0,
   });
   $('go').disabled = true;
-  $('status').className = 'status';
-  $('status').textContent = '检索中…（角数 ' + stops.join('/') + '，每个 ' + $('top').value + ' 条）';
+  ROWS = [];
   $('results').innerHTML = '';
+  $('bar').style.display = 'block';
+  setBar(0, '准备中');
   try {
-    const d = await (await fetch('/api/routes?' + q)).json();
-    $('go').disabled = false;
-    if (!d.ok) {
-      $('status').className = 'status err';
-      $('status').textContent = '失败：' + (d.error || '未知');
+    const s = await (await fetch('/api/search?' + q)).json();
+    if (!s.ok) {
+      fail(s.error);
       return;
     }
-    const p = d.params;
-    ROWS = d.results.map(r => ({
-      stops: r.stops, idx: r.idx, title: r.title, key: r.key, md: r.md,
-      route: r.route, profit: r.profit, time: r.time, hourly: r.hourly,
-      open: false, showPng: false, mdHtml: null, pngHtml: null,
-    }));
-    renderTable();
-    $('status').className = 'status';
-    $('status').textContent = '完成：' + ROWS.length + ' 条候选（' + p.ship + ' · '
-      + Number(p.budget).toLocaleString() + ' · 角数 ' + p.stops.join('/') + '）· 点表头改排序';
+    startPoll(s.job);
   } catch (e) {
-    $('go').disabled = false;
-    $('status').className = 'status err';
-    $('status').textContent = '请求失败：' + e;
+    fail(e);
   }
 });
 

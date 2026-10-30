@@ -1242,7 +1242,12 @@ def run_loop_search(args) -> int:
             for _c in (_lg.get("cands") or [_lg]):
                 if _c.get("id_commodity") is not None:
                     cap_ids.append(_c["id_commodity"])
-    sell_caps = C.fetch_sell_caps(client, cap_ids) if cap_ids else {}
+    def _cap_progress(i, n):
+        # 子进程里没法回调父进程，用带标记的 stderr 行让 serve_routes 读进度
+        print(f"[progress] 补拉库存上限 {i}/{n}", file=sys.stderr, flush=True)
+
+    stock_caps = (C.fetch_stock_caps(client, cap_ids, on_progress=_cap_progress)
+                 if cap_ids else {})
     def sell_stock_of(sell_row):
         """卖端 (当前库存, 库存上限)。
 
@@ -1257,13 +1262,11 @@ def run_loop_search(args) -> int:
             return None, None
         return sell_row.get("scu_sell_stock"), sell_row.get("scu_sell_max")
 
-    def stock_txt(stock_now, cap):
-        """存量/上限；上限缺失（0/None，= 无数据）时只显示存量。"""
+    def pair_txt(cur, cap):
+        """~现货/上限（或 ~存量/上限）；上限缺失（0/None = 无数据）时只显示前者。"""
         if cap:
-            return f"{fmt_num(stock_now)}/{fmt_num(cap)}"
-        if stock_now is not None:
-            return fmt_num(stock_now)
-        return "-"
+            return f"{fmt_num(cur)}/{fmt_num(cap)}"
+        return fmt_num(cur)
 
     def fmt_num(v):
         return str(int(v)) if isinstance(v, (int, float)) else "-"
@@ -1296,16 +1299,24 @@ def run_loop_search(args) -> int:
                      or {lg["commodity"]: lg["qty"]})
             rows_out = []
             for c in cands:
-                stock_now, cap = sell_stock_of(c.get("sell_row") or {})
-                # 补拉的上限优先（来自带 scu_sell_max 的全量端点）
-                got = sell_caps.get((c.get("id_commodity"), lg.get("sell_terminal")))
-                if got is not None:
-                    stock_now, cap = got
+                cid = c.get("id_commodity")
+                # 卖端：存量/上限
+                s_now, s_cap = sell_stock_of(c.get("sell_row") or {})
+                got_s = stock_caps.get((cid, lg.get("sell_terminal")))
+                if got_s is not None:
+                    s_now, s_cap = got_s[2], got_s[3]
+                # 买端：现货/上限
+                b_now, b_cap = c.get("scu_stock"), None
+                got_b = stock_caps.get((cid, lg.get("buy_terminal")))
+                if got_b is not None:
+                    b_now, b_cap = got_b[0], got_b[1]
                 q = taken.get(c["commodity"], 0)
                 qty_txt = str(q) if q else "候补"
+                # 形如：Scrap 192(~2100/3000 - ~43/2661)
+                #      买端现货/上限 - 卖端存量/上限
                 rows_out.append(f"{c['commodity']} {qty_txt}"
-                                f"(供{fmt_num(c.get('scu_stock'))}"
-                                f"/囤{stock_txt(stock_now, cap)})")
+                                f"(~{pair_txt(b_now, b_cap)}"
+                                f" - ~{pair_txt(s_now, s_cap)})")
             goods = "<br>".join(rows_out)
             print(f"| {n} | {goods} | "
                   f"{bn}[{sys_a}] {lg['price_buy']:,} \u2192 {sn}[{sys_b}] {lg['price_sell']:,} | "
@@ -1333,10 +1344,10 @@ def run_loop_search(args) -> int:
               f"\u88c5\u8f7d=\u81ea\u52a8 \u7bb1\u6570\u00d7{crate_min:g}+{extra:g}min\uff0c"
               f"\u624b\u52a8 \u7bb1\u6570\u00d7{manual_crate:g}+{manual_extra:g}min\uff1b"
               f"\u5378\u8d27=sell_unload_min({float(tm.get('sell_unload_min', 0.0)):g})")
-            print("  \u4f9b N=\u4e70\u70b9 scu_buy\uff08\u73b0\u8d27\uff09\uff1b"
-                  "\u56e4 \u5b58\u91cf/\u4e0a\u9650=\u5356\u70b9 scu_sell_stock / scu_sell_max"
-                  "\uff08\u4e0a\u9650\u53ea commodities_prices \u7aef\u70b9\u6709\uff0c\u6309\u6e38\u620f\u7248\u672c\u7f13\u5b58\uff1b"
-                  "\u62ff\u4e0d\u5230\u65f6\u53ea\u663e\u793a\u5b58\u91cf\uff09\uff1b"
+            print("  \u5546\u54c1 N(~\u73b0\u8d27/\u4e0a\u9650 - ~\u5b58\u91cf/\u4e0a\u9650)\uff1a\u4e70\u7aef scu_buy/scu_buy_max\uff0c"
+                  "\u5356\u7aef scu_sell_stock/scu_sell_max\uff1b"
+                  "\u4e0a\u9650\u53ea commodities_prices \u7aef\u70b9\u6709\uff0c\u6309\u6e38\u620f\u7248\u672c\u7f13\u5b58\uff0c"
+                  "\u62ff\u4e0d\u5230\u65f6\u53ea\u663e\u793a\u524d\u8005\uff1b"
                   "\u72b6\u6001 1=Out\u2026 7=Max\uff08\u5356\u7aef\u8d8a\u7a7a\u8d8a\u80fd\u5438\u6536\uff09")
         print()
     if args.save:
