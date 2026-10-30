@@ -649,14 +649,18 @@ def merge_watchlist(watchlist: dict, new_routes: list[dict]) -> tuple[dict, int]
 def render_watchlist_md(watchlist: dict, budget: int) -> str:
     """展示规范（SKILL.md 展示规范节）：结构化块、终端全名、位置路径、不缩写。"""
     active = [r for r in watchlist["routes"] if r["status"] != "retired"]
-    best_id = max(active, key=lambda r: r["loop_profit"])["id"] if active else None
+    best_id = max(active, key=lambda r: int(r.get("loop_profit") or 0))["id"] if active else None
     lines = [f"**预算 {budget:,} aUEC · 生成于 {watchlist['updated_at']}**", ""]
     for r in active:
         role = "★首选" if r["id"] == best_id else "备选"
         time_txt = f"{r['loop_time_min']:.0f}min" if r.get("loop_time_min") else "n/a"
         hour_txt = f"{r['profit_per_hour']:,}/h" if r.get("profit_per_hour") else "n/a"
-        lines.append(f"### {r['id']} {role} · {r['type']} · 风险 {r['risk']}")
-        lines.append(f"圈利润 **+{r['loop_profit']:,}** · 圈时间 {time_txt} · 时薪 {hour_txt}")
+        # 容错：不同来源写入的 route 字段可能不齐（如早期闭环搜索没写 risk）
+        rid = r.get("id") or "-"
+        rtype = r.get("type") or "-"
+        rprof = int(r.get("loop_profit") or 0)
+        lines.append(f"### {rid} {role} · {rtype} · 风险 {r.get('risk', 'normal')}")
+        lines.append(f"圈利润 **+{rprof:,}** · 圈时间 {time_txt} · 时薪 {hour_txt}")
         for i, l in enumerate(r["legs"]):
             bp = l["buy_terminal"].get("path") or ""
             sp = l["sell_terminal"].get("path") or ""
@@ -716,6 +720,8 @@ def main() -> int:
     parser.add_argument("--min-supply-ratio", type=float, default=1.0,
                         help="闭环搜索：买点现货至少够跑几圈")
     parser.add_argument("--sort", choices=["profit", "hour"], default="profit")
+    parser.add_argument("--save", action="store_true",
+                        help="闭环搜索：把搜到的环写入 watchlist")
     parser.add_argument("--detail", action="store_true",
                         help="闭环搜索时展开逐段耗时/供应/需求")
     parser.add_argument("--auto-load-only", action="store_true",
@@ -1271,11 +1277,15 @@ def run_loop_search(args) -> int:
                 "pyro": getattr(term_by_id[lg["sell_terminal"]],
                                 "star_system_name", "").lower() == "pyro",
             } for lg in r["legs"]]
+            risk = ("pyro" if any((lg["sell_terminal"].get("system") or "") == "Pyro"
+                                  for lg in legs) else "normal")
             out.append({
-                "type": "loop", "status": "candidate",
+                "type": "loop", "status": "candidate", "risk": risk,
                 "ship": ship_key, "legs": legs,
                 "loop_profit": r["profit"],
-                "created_at": C.datetime.now(C.timezone.utc).isoformat(timespec="seconds"),
+                "loop_time_min": r.get("loop_time_min"),
+                "profit_per_hour": r.get("per_hour"),
+                "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             })
         wl = C.load_watchlist()
         for route in out:
