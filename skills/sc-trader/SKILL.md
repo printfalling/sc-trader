@@ -202,6 +202,10 @@ tools/uexinfo/venv/bin/python skills/sc-trader/scripts/recommend.py \
   实测（Freelancer MAX / 3M / autoload / 混装）：2 角 480,926/h（3 种商品、37min），
   **5 角 479,550/h（9 种商品、102min）**——时薪几乎相同（差 0.3%），但利润 2.7 倍、
   风险更分散、补货窗口更长。想稳健就往多角走；6 角以上时薪开始明显下滑（444,267/h）。
+- **出图**（不需要浏览器，PIL 渲染）：
+  `tools/uexinfo/venv/bin/python skills/sc-trader/scripts/route_png.py --ship raft --budget 3000000 --max-stops 5 --system 68 --mixed --auto-load-only --out docs/routes/raft_5leg_stanton.png`
+  内部调 recommend --detail 拿 Markdown 再画成 PNG；参数与闭环搜索一致，
+  未找到闭环时跳过出图。
 - 数据取自本地算路引擎的全市场价，
   **环搜索过程不再调 API**；量子时间走本地交通图（带缓存）。
 - `--sort hour` 按时薪排序（默认 `profit`）；`--save` 写入 watchlist。
