@@ -67,12 +67,14 @@ def build_indexes(price_rows, term_by_id, system_filter=None, require_auto_load=
 
 
 def leg_for(buy_at, sell_at, sell_price, tid_a, tid_b, cn, budget, profile,
-            min_supply_ratio: float = 1.0):
+            min_supply_ratio: float = 1.0, ctx=None):
     """计算 A 买 cn、B 卖 cn 的可实现数量与利润；不可行返回 None。"""
     entry = buy_at.get(tid_a, {}).get(cn)
     if not entry:
         return None
     pb, stock, sizes, cid, _, status_buy = entry
+    if ctx is not None and not C.is_tradeable(ctx, cid):
+        return None      # 只可卖不可买的脏数据（如 Audio-Visual Equipment）买不到
     if sell_price <= pb:
         return None
     scu_total = profile["ship"]["scu_total"]
@@ -141,8 +143,12 @@ def main() -> int:
     term_by_id = {t.id: t for t in ctx.cache.terminals}
     price_rows = C.throttled_get(client, "commodities_prices_all")
 
-    system_id = int(args.system) if (args.system or "").isdigit() else (
-        profile["origin"].get("id_star_system") or 68)
+    if (args.system or "").lower() == "all":
+        system_id = None            # 不限星系
+    elif (args.system or "").isdigit():
+        system_id = int(args.system)
+    else:
+        system_id = profile["origin"].get("id_star_system") or 68
     buy_at, sell_at, sell_index = build_indexes(
         price_rows, term_by_id, system_filter=system_id,
         require_auto_load=args.auto_load_only)
@@ -179,7 +185,7 @@ def main() -> int:
                         if tid_b == cur or tid_b in path:
                             continue
                         lg = leg_for(buy_at, sell_at, ps, cur, tid_b, cn, budget, profile,
-                                min_supply_ratio=args.min_supply_ratio)
+                                min_supply_ratio=args.min_supply_ratio, ctx=ctx)
                         if not lg:
                             continue
                         if args.auto_load_only and not auto_load_ok(cur):
@@ -188,7 +194,7 @@ def main() -> int:
                 # 收口：从 cur 买货卖回起点（闭环）
                 for cn, (ps, _r) in sell_at.get(start, {}).items():
                     lg = leg_for(buy_at, sell_at, ps, cur, start, cn, budget, profile,
-                                min_supply_ratio=args.min_supply_ratio)
+                                min_supply_ratio=args.min_supply_ratio, ctx=ctx)
                     if not lg:
                         continue
                     if args.auto_load_only and not auto_load_ok(cur):
