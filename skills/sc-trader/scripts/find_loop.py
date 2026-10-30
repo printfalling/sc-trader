@@ -294,40 +294,54 @@ def main() -> int:
         results.sort(key=lambda r: -r["profit"])
     print(f"\n找到 {len(results)} 个闭环，按圈利润取前 {args.top}：\n")
     shown = results[:args.top]
+    def st_name(v):
+        return C.UEX_STATUS_NAMES.get(v, "-")
+
     for i, r in enumerate(shown, 1):
-        stops = " → ".join(term_by_id[t].name for t in r["stops"])
-        ph = f"{r['per_hour']:,}/h" if r.get("per_hour") else "—"
-        print(f"### 环 {i}  · 圈利润 +{r['profit']:,} · 圈时间 {r['loop_time_min']}min · 时薪 {ph}")
+        stops = " \u2192 ".join(term_by_id[t].name for t in r["stops"])
+        ph = f"{r['per_hour']:,}/h" if r.get("per_hour") else "\u2014"
+        print(f"### \u73af {i} \u00b7 \u5708\u5229\u6da6 +{r['profit']:,} \u00b7 "
+              f"\u5708\u65f6\u95f4 {r['loop_time_min']}min \u00b7 \u65f6\u85aa {ph}")
         print(f"    {stops}")
-        for lg in r["legs"]:
-            print(f"    - {lg['commodity']} ×{lg['qty']} "
-                  f"{term_by_id[lg['buy_terminal']].name[:28]} → "
-                  f"{term_by_id[lg['sell_terminal']].name[:28]} "
-                  f"（{lg['price_buy']:,}→{lg['price_sell']:,}，+{lg['leg_profit']:,}）")
+        print()
+        print("| \u6bb5 | \u5546\u54c1 | \u4e70 \u2192 \u5356 | \u5229\u6da6 | \u98de\u884c |")
+        print("|---|---|---|---|---|")
+        for n, (lg, d) in enumerate(zip(r["legs"], r["detail"]), 1):
+            bn = term_by_id[lg["buy_terminal"]].name
+            sn = term_by_id[lg["sell_terminal"]].name
+            print(f"| {n} | {lg['commodity']} {lg['qty']} SCU | "
+                  f"{bn} {lg['price_buy']:,} \u2192 {sn} {lg['price_sell']:,} | "
+                  f"+{lg['leg_profit']:,} | {d['qt_min']}min |")
+        qt = sum(d["qt_min"] for d in r["detail"])
+        print(f"| | | **\u5408\u8ba1** | **+{r['profit']:,}** | **{qt}min** |")
+        print()
+        parts = []
+        for n, d in enumerate(r["detail"], 1):
+            sup = d.get("supply")
+            dst = d.get("demand_stock")
+            parts.append(
+                f"\u6bb5{n} \u4f9b\u5e94 {sup if sup is not None else '-'}"
+                f"({st_name(d.get('buy_status'))}) / \u5356\u7aef\u56e4 "
+                f"{dst if dst is not None else '-'}({st_name(d.get('sell_status'))})")
+        print("- \u8865\u7ed9/\u9700\u6c42\uff1a" + "\uff1b".join(parts))
+        print()
         if args.detail:
-            print(f"\n    {'商品':<20s}{'装货':>5s}{'供应':>8s}{'买端态':>8s}"
-                  f"{'需求(囤)':>9s}{'卖端态':>8s}{'量子':>6s}{'买端':>6s}{'卖端':>6s}{'小计':>7s}")
-            for d in r["detail"]:
-                sup = d.get("supply")
-                dst = d.get("demand_stock")
-                print(f"    {d['commodity'][:20]:<20s}{d['qty']:>5d}"
-                      f"{(sup if sup is not None else '-'):>8}"
-                      f"{C.UEX_STATUS_NAMES.get(d.get('buy_status'), '-')[:7]:>8s}"
-                      f"{(dst if dst is not None else '-'):>9}"
-                      f"{C.UEX_STATUS_NAMES.get(d.get('sell_status'), '-')[:7]:>8s}"
-                      f"{d['qt_min']:>6.1f}{d['buy_stop']:>6.1f}{d['sell_stop']:>6.1f}"
-                      f"{d['leg_min']:>7.1f}")
-            qt = sum(d["qt_min"] for d in r["detail"])
+            print("| \u6bb5 | \u7bb1\u578b | \u7bb1\u6570 | \u4e70\u7aef | \u5356\u7aef | \u5c0f\u8ba1 |")
+            print("|---|---|---|---|---|---|")
+            for n, d in enumerate(r["detail"], 1):
+                print(f"| {n} | {d['box']} SCU | {d['crates']} | {d['buy_stop']}min | "
+                      f"{d['sell_stop']}min | {d['leg_min']}min |")
             bs = sum(d["buy_stop"] for d in r["detail"])
             ss = sum(d["sell_stop"] for d in r["detail"])
-            print(f"    {'合计':<22s}{'':>6s}{'':>4s}{'':>5s}{qt:>7.1f}{bs:>7.1f}{ss:>7.1f}"
-                  f"{r['loop_time_min']:>8.1f}")
-            print("    口径：买端=起降/交易 4 + 搬运（自动 5/次，手动 箱数×1+3）；"
-                  "卖端=4 + sell_unload_min(0)")
-            print("    供应=买点 scu_buy（现货）；需求(囤)=卖点 scu_sell_stock（它已囤多少）；"
-                  "状态 1=Out…7=Max（卖端越空越能吸收）")
+            print(f"| | | | **{bs}min** | **{ss}min** | **{r['loop_time_min']}min** |")
+            print()
+            print("  \u53e3\u5f84\uff1a\u4e70\u7aef=\u8d77\u964d/\u4ea4\u6613 4 + \u642c\u8fd0"
+                  "\uff08\u81ea\u52a8 5/\u6b21\uff0c\u624b\u52a8 \u7bb1\u6570\u00d71+3\uff09\uff1b"
+                  "\u5356\u7aef=4 + sell_unload_min(0)")
+            print("  \u4f9b\u5e94=\u4e70\u70b9 scu_buy\uff08\u73b0\u8d27\uff09\uff1b"
+                  "\u9700\u6c42(\u56e4)=\u5356\u70b9 scu_sell_stock\uff1b"
+                  "\u72b6\u6001 1=Out\u2026 7=Max\uff08\u5356\u7aef\u8d8a\u7a7a\u8d8a\u80fd\u5438\u6536\uff09")
         print()
-
     if args.save:
         out = []
         for r in shown:
