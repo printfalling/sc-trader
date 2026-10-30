@@ -925,6 +925,27 @@ def leg_for(buy_at, sell_at, sell_price, tid_a, tid_b, cn, budget, profile,
     }
 
 
+def _fill_crates(limit: int, box_sizes, max_box: int) -> int:
+    """在 limit 内用可用箱型的组合装到最多（大箱优先，余量再用小箱补）。
+
+    snap_to_crate 只按最大箱向下取整，会留下装不掉的零头（如剩 18 SCU 却只能
+    按 16-SCU 箱装 16）。混装要"尽可能装满"，所以这里逐档往下补。
+    """
+    avail = sorted([b for b in (box_sizes or [])
+                    if isinstance(b, int) and 0 < b <= max_box], reverse=True)
+    if not avail:
+        return int(limit)
+    left, total = int(limit), 0
+    for b in avail:
+        n = left // b
+        if n:
+            total += n * b
+            left -= n * b
+        if left == 0:
+            break
+    return total
+
+
 def mixed_leg_for(buy_at, sell_at, tid_a, tid_b, budget: int, profile: dict,
                   ctx=None, min_supply_ratio: float = 1.0,
                   require_auto_load: bool = False) -> dict | None:
@@ -956,7 +977,7 @@ def mixed_leg_for(buy_at, sell_at, tid_a, tid_b, budget: int, profile: dict,
         if remaining <= 0:
             break
         take = min(g["qty"], remaining, cash // g["price_buy"] if g["price_buy"] else 0)
-        take = C.snap_to_crate(take, g["box_sizes"], max_box)
+        take = _fill_crates(take, g["box_sizes"], max_box)
         if take <= 0:
             continue
         items.append({**g, "qty": take,
@@ -1227,11 +1248,25 @@ def run_loop_search(args) -> int:
             sn = term_by_id[lg["sell_terminal"]].name
             sup = d.get("supply")
             dst = d.get("demand_stock")
+            items = lg.get("items") or []
+            if items:
+                # 混装腿：逐商品列出供应/需求，只显示第一种会让人误以为总量超了库存
+                sup_s = "/".join(str(i.get("scu_stock")) if i.get("scu_stock") is not None else "-"
+                                 for i in items)
+                buy_st = "/".join(st_name(i.get("status_buy")) for i in items)
+                dem_s = "/".join(str(((i.get("sell_row") or {}).get("scu_sell_stock"))
+                                     if (i.get("sell_row") or {}).get("scu_sell_stock") is not None
+                                     else "-") for i in items)
+                sell_st = "/".join(st_name((i.get("sell_row") or {}).get("status_sell"))
+                                   for i in items)
+            else:
+                sup_s = str(sup) if sup is not None else "-"
+                buy_st = st_name(d.get("buy_status"))
+                dem_s = str(dst) if dst is not None else "-"
+                sell_st = st_name(d.get("sell_status"))
             print(f"| {n} | {lg['commodity']} {lg['qty']} SCU | "
                   f"{bn} {lg['price_buy']:,} \u2192 {sn} {lg['price_sell']:,} | "
-                  f"+{lg['leg_profit']:,} | "
-                  f"{sup if sup is not None else '-'}({st_name(d.get('buy_status'))}) | "
-                  f"{dst if dst is not None else '-'}({st_name(d.get('sell_status'))}) |")
+                  f"+{lg['leg_profit']:,} | {sup_s}({buy_st}) | {dem_s}({sell_st}) |")
         print(f"| | | **\u5408\u8ba1** | **+{r['profit']:,}** | | |")
         print()
         if args.detail:

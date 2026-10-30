@@ -116,6 +116,30 @@
         }
       ],
       "auto_loading_capable": true
+    },
+    "hermes": {
+      "name": "Hermes (288 SCU, 最大箱 32 SCU)",
+      "scu_total": 288,
+      "max_box": 32,
+      "slots": [
+        {
+          "size": 32,
+          "count": 9
+        }
+      ],
+      "auto_loading_capable": true
+    },
+    "hull_c": {
+      "name": "Hull C (4608 SCU, 最大箱 32 SCU)",
+      "scu_total": 4608,
+      "max_box": 32,
+      "slots": [
+        {
+          "size": 32,
+          "count": 144
+        }
+      ],
+      "auto_loading_capable": true
     }
   },
   "budget_default": 100000,
