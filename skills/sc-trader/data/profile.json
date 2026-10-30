@@ -102,16 +102,16 @@
       "auto_loading_capable": true
     },
     "freelancer_max": {
-      "name": "MISC Freelancer MAX (120 SCU, 最大箱 32 SCU)",
+      "name": "MISC Freelancer MAX (120 SCU, 最大箱 16 SCU)",
       "scu_total": 120,
-      "max_box": 32,
+      "max_box": 16,
       "slots": [
         {
-          "size": 32,
-          "count": 3
+          "size": 16,
+          "count": 7
         },
         {
-          "size": 24,
+          "size": 8,
           "count": 1
         }
       ],
