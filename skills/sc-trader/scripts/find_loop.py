@@ -84,6 +84,10 @@ def leg_for(buy_at, sell_at, sell_price, tid_a, tid_b, cn, budget, profile,
             return None
         capacity = scu_total
     qty = min(scu_total, capacity, budget // int(pb), int(stock) if stock else scu_total)
+    # 与 recommend 一致：按买卖两端库存状态系数收口（买端越满越能买、卖端越空越能吸收）。
+    # 少了这一步会按现货数虚估可装量——实测 Medium(4) 只能买到 60%（470 现货只放 67 SCU）。
+    srow = (sell_at.get(tid_b, {}).get(cn) or (None, None))[1] or {}
+    qty = C.stock_capped_qty(scu_total, qty, status_buy, srow.get("status_sell"))
     qty = C.snap_to_crate(qty, sizes, max_box)
     if qty <= 0:
         return None
@@ -273,17 +277,18 @@ def main() -> int:
                    "buy": term_by_id[lg["buy_terminal"]].name,
                    "sell": term_by_id[lg["sell_terminal"]].name,
                    "qt_min": round((lf["qt_sec"] or 0) / 60, 1)}
-            for side, term in (("buy_stop", lf["buy_terminal"]),
-                               ("sell_stop", lf["sell_terminal"])):
-                if side == "sell_stop":
-                    row[side] = round(base + float(tm.get("sell_unload_min", 0.0)), 1)
-                    continue
-                auto = ship_auto and (bool(term.get("auto"))
-                                      or C.terminal_loading_mode(term["name"], profile))
-                handling = (crates * crate_min + extra) if auto else (
-                    crates * manual_crate + manual_extra)
-                row[side] = round(base + handling, 1)
-                row["auto_load"] = auto
+            # 卖端：停船(base) + 卸货(sell_unload_min，按用户校准为 0)
+            row["sell_stop"] = round(base + float(tm.get("sell_unload_min", 0.0)), 1)
+            row["sell_unload"] = round(float(tm.get("sell_unload_min", 0.0)), 1)
+            # 买端：停船(base) + 装载(搬运)
+            term = lf["buy_terminal"]
+            auto = ship_auto and (bool(term.get("auto"))
+                                  or C.terminal_loading_mode(term["name"], profile))
+            handling = (crates * crate_min + extra) if auto else (
+                crates * manual_crate + manual_extra)
+            row["buy_stop"] = round(base + handling, 1)
+            row["load"] = round(handling, 1)
+            row["auto_load"] = auto
             row["leg_min"] = round(row["qt_min"] + row["buy_stop"] + row["sell_stop"], 1)
             detail.append(row)
         r["detail"] = detail
@@ -326,18 +331,25 @@ def main() -> int:
         print("- \u8865\u7ed9/\u9700\u6c42\uff1a" + "\uff1b".join(parts))
         print()
         if args.detail:
-            print("| \u6bb5 | \u7bb1\u578b | \u7bb1\u6570 | \u4e70\u7aef | \u5356\u7aef | \u5c0f\u8ba1 |")
-            print("|---|---|---|---|---|---|")
+            print("| \u6bb5 | \u7bb1\u578b | \u7bb1\u6570 | \u91cf\u5b50 | \u505c\u8239 | "
+                  "\u88c5\u8f7d | \u5378\u8d27 | \u4e70\u7aef | \u5356\u7aef | \u5c0f\u8ba1 |")
+            print("|---|---|---|---|---|---|---|---|---|---|")
             for n, d in enumerate(r["detail"], 1):
-                print(f"| {n} | {d['box']} SCU | {d['crates']} | {d['buy_stop']}min | "
-                      f"{d['sell_stop']}min | {d['leg_min']}min |")
-            bs = sum(d["buy_stop"] for d in r["detail"])
-            ss = sum(d["sell_stop"] for d in r["detail"])
-            print(f"| | | | **{bs}min** | **{ss}min** | **{r['loop_time_min']}min** |")
+                print(f"| {n} | {d['box']} SCU | {d['crates']} | {d['qt_min']}min | "
+                      f"{base}min | {d.get('load', 0)}min | {d.get('sell_unload', 0)}min | "
+                      f"{d['buy_stop']}min | {d['sell_stop']}min | {d['leg_min']}min |")
+            qts = round(sum(d["qt_min"] for d in r["detail"]), 1)
+            bs = round(sum(d["buy_stop"] for d in r["detail"]), 1)
+            ss = round(sum(d["sell_stop"] for d in r["detail"]), 1)
+            print(f"| | | | **{qts}min** | **{len(r['detail']) * base}min** | "
+                  f"**{round(sum(d.get('load', 0) for d in r['detail']), 1)}min** | "
+                  f"**{round(sum(d.get('sell_unload', 0) for d in r['detail']), 1)}min** | "
+                  f"**{bs}min** | **{ss}min** | **{r['loop_time_min']}min** |")
             print()
-            print("  \u53e3\u5f84\uff1a\u4e70\u7aef=\u8d77\u964d/\u4ea4\u6613 4 + \u642c\u8fd0"
-                  "\uff08\u81ea\u52a8 5/\u6b21\uff0c\u624b\u52a8 \u7bb1\u6570\u00d71+3\uff09\uff1b"
-                  "\u5356\u7aef=4 + sell_unload_min(0)")
+            print(f"  \u53e3\u5f84\uff1a\u505c\u8239={base}min/\u7ad9\uff08\u8d77\u964d\u00b7"
+              "\u7535\u68af\u00b7\u7ec8\u7aef\u4ea4\u6613\uff0c\u4e70\u5356\u5404\u4e00\u6b21\uff09\uff1b"
+              "\u88c5\u8f7d=\u81ea\u52a8 5min/\u6b21\uff0c\u624b\u52a8 \u7bb1\u6570\u00d71+3\uff1b"
+              "\u5378\u8d27=sell_unload_min(0)")
             print("  \u4f9b\u5e94=\u4e70\u70b9 scu_buy\uff08\u73b0\u8d27\uff09\uff1b"
                   "\u9700\u6c42(\u56e4)=\u5356\u70b9 scu_sell_stock\uff1b"
                   "\u72b6\u6001 1=Out\u2026 7=Max\uff08\u5356\u7aef\u8d8a\u7a7a\u8d8a\u80fd\u5438\u6536\uff09")
