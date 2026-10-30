@@ -106,6 +106,27 @@ def parse_tables(md: str) -> list:
     return out
 
 
+def split_sections(md: str) -> list:
+    """把 recommend --top N 的输出按 "### 环 i" 切成多段，每段单独渲染一张图。
+
+    不切的话 render() 会把 N 条路线的表格全画在同一张图里、只挂第一个标题，
+    那是错的。口径说明行只出现在末尾，这里给每段都补上。
+    """
+    lines = md.split("\n")
+    idxs = [i for i, l in enumerate(lines) if l.startswith("### ")]
+    if not idxs:
+        return [md]
+    note = next((l.strip() for l in lines if "口径" in l), "")
+    chunks = []
+    for k, i in enumerate(idxs):
+        j = idxs[k + 1] if k + 1 < len(idxs) else len(lines)
+        chunk = "\n".join(l for l in lines[i:j] if "口径" not in l)
+        if note:
+            chunk += "\n" + note
+        chunks.append(chunk)
+    return chunks
+
+
 def draw_table(draw, rows, x, y, font, bold_font, m: Metrics) -> tuple:
     ncol = len(rows[0])
     wrapped, col_w = [], [0] * ncol

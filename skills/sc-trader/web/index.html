@@ -8,136 +8,175 @@
   header h1 { margin:0; font-size:18px; color:#f0b429; font-weight:600; }
   header p { margin:6px 0 0; font-size:12.5px; color:#7d8b9b; }
   .wrap { display:flex; gap:24px; padding:24px 28px 40px; align-items:flex-start; }
-  form { width:330px; flex:none; background:#151b23; border:1px solid #232c38; border-radius:10px; padding:18px; }
+  form { width:340px; flex:none; background:#151b23; border:1px solid #232c38; border-radius:10px; padding:18px; }
   .row { margin-bottom:14px; }
-  label { display:block; font-size:12px; color:#9fb0c3; margin-bottom:5px; }
+  label.lbl { display:block; font-size:12px; color:#9fb0c3; margin-bottom:5px; }
   select, input[type=number] { width:100%; box-sizing:border-box; background:#0e1116; color:#e6edf3; border:1px solid #2a3441; border-radius:6px; padding:8px 10px; font-size:13px; }
-  .checks { display:flex; flex-direction:column; gap:8px; }
-  .checks label { display:flex; align-items:center; gap:7px; color:#c9d6e3; font-size:12.5px; margin:0; cursor:pointer; }
+  .checks { display:flex; flex-wrap:wrap; gap:8px 14px; }
+  .checks label { display:flex; align-items:center; gap:6px; color:#c9d6e3; font-size:12.5px; margin:0; cursor:pointer; }
   input[type=checkbox] { width:15px; height:15px; accent-color:#f0b429; }
-  button { width:100%; margin-top:6px; background:#f0b429; color:#1a1206; border:0; border-radius:6px; padding:10px; font-size:13.5px; font-weight:600; cursor:pointer; }
+  .btns { display:flex; gap:10px; margin-top:6px; }
+  button { flex:1; border:0; border-radius:6px; padding:10px; font-size:13.5px; font-weight:600; cursor:pointer; }
+  #go { background:#f0b429; color:#1a1206; }
+  #reset { background:#2a3441; color:#c9d6e3; font-weight:500; }
   button:disabled { opacity:.6; cursor:default; }
   .hint { font-size:11px; color:#6b7a8c; margin-top:8px; line-height:1.6; }
   main { flex:1; min-width:0; }
   .status { font-size:13px; color:#9fb0c3; margin-bottom:12px; }
   .status.err { color:#f85149; }
-  .card { background:#151b23; border:1px solid #232c38; border-radius:10px; padding:14px; }
+  .card { background:#151b23; border:1px solid #232c38; border-radius:10px; padding:14px; margin-bottom:16px; }
+  .meta { font-size:12.5px; color:#c9d6e3; margin-bottom:10px; }
+  .meta .tag { display:inline-block; background:#1f2937; border:1px solid #2a3441; border-radius:5px; padding:2px 8px; margin-right:8px; font-size:11.5px; color:#9fb0c3; }
   img { max-width:100%; height:auto; border-radius:8px; display:block; }
-  .meta { font-size:12px; color:#7d8b9b; margin-bottom:10px; }
-  .md { display:none; margin-top:14px; white-space:pre-wrap; font-size:11.5px; color:#9fb0c3; background:#0e1116; border:1px solid #232c38; border-radius:8px; padding:12px; max-height:320px; overflow:auto; }
+  .md { display:none; margin-top:12px; white-space:pre-wrap; font-size:11.5px; color:#9fb0c3; background:#0e1116; border:1px solid #232c38; border-radius:8px; padding:12px; max-height:300px; overflow:auto; }
   .toggle { margin-top:10px; font-size:12px; color:#58a6ff; cursor:pointer; }
 </style>
 <header>
   <h1>SC 跑商路线 · 多角闭环检索</h1>
-  <p>选船 / 预算 / 角数 → 搜 Stanton 等星系的空间站闭环，输出带耗时分解的路线图</p>
+  <p>选船 / 预算 / 多个角数 → 每个角数出多条候选路线，逐条单独出图（带耗时分解）</p>
 </header>
 <div class="wrap">
   <form id="f">
     <div class="row">
-      <label for="ship">船型</label>
+      <label class="lbl" for="ship">船型</label>
       <select id="ship"></select>
     </div>
     <div class="row">
-      <label for="budget">预算 (aUEC)</label>
+      <label class="lbl" for="budget">预算 (aUEC)</label>
       <input type="number" id="budget" step="100000" min="0">
     </div>
     <div class="row">
-      <label for="stops">角数（2=来回，3=三角…）</label>
-      <select id="stops">
-        <option>2</option><option>3</option><option selected>5</option><option>6</option>
-      </select>
+      <label class="lbl">角数（可多选）</label>
+      <div class="checks" id="stops"></div>
     </div>
     <div class="row">
-      <label for="system">星系</label>
+      <label class="lbl" for="system">星系</label>
       <select id="system"></select>
+    </div>
+    <div class="row">
+      <label class="lbl" for="top">每个角数出几条</label>
+      <select id="top"><option>1</option><option selected>2</option><option>3</option></select>
     </div>
     <div class="row checks">
       <label><input type="checkbox" id="mixed" checked> 混装填满货舱</label>
       <label><input type="checkbox" id="auto" checked> 仅自动装载站点</label>
     </div>
     <div class="row">
-      <label for="scale">图片分辨率</label>
+      <label class="lbl" for="scale">图片分辨率</label>
       <select id="scale">
-        <option value="2">2x</option>
-        <option value="3">3x</option>
-        <option value="4" selected>4x</option>
+        <option value="2">2x</option><option value="3">3x</option><option value="4" selected>4x</option>
       </select>
     </div>
-    <button id="go" type="submit">检索路线</button>
-    <div class="hint">首次检索要拉一次全市场价（约 20 秒）；相同参数会命中缓存。</div>
+    <div class="btns">
+      <button id="go" type="submit">检索路线</button>
+      <button id="reset" type="button">Reset</button>
+    </div>
+    <div class="hint">首次检索要拉一次全市场价（之后走本地缓存，约 2 秒）；相同参数命中缓存直接返回。</div>
   </form>
 
   <main>
     <div class="status" id="status">载入船型…</div>
-    <div class="card" id="card" style="display:none">
-      <div class="meta" id="meta"></div>
-      <img id="img" alt="路线图">
-      <div class="toggle" id="toggle">显示 Markdown 表格</div>
-      <pre class="md" id="md"></pre>
-    </div>
+    <div id="results"></div>
   </main>
 </div>
 
 <script>
 const $ = id => document.getElementById(id);
+let DEFAULTS = null;
 
 async function init() {
   try {
-    const r = await fetch('/api/ships');
-    const d = await r.json();
-    $('ship').innerHTML = d.ships.map(s => `<option value="${s.key}">${s.name}（${s.scu} SCU / 箱${s.max_box}）</option>`).join('');
+    const d = await (await fetch('/api/ships')).json();
+    $('ship').innerHTML = d.ships.map(s =>
+      `<option value="${s.key}">${s.name}（${s.scu} SCU / 箱${s.max_box}）</option>`).join('');
     $('ship').value = d.default_ship;
     $('budget').value = d.budget_default;
-    $('system').innerHTML = d.systems.map(s => `<option value="${s.id}"${s.id==='68'?' selected':''}>${s.name}</option>`).join('');
-    $('status').textContent = '选好参数点「检索路线」。';
+    $('system').innerHTML = d.systems.map(s =>
+      `<option value="${s.id}"${s.id === '68' ? ' selected' : ''}>${s.name}</option>`).join('');
+    $('stops').innerHTML = d.stops.map(n =>
+      `<label><input type="checkbox" class="stops" value="${n}"${n === 3 || n === 5 ? ' checked' : ''}> ${n} 角</label>`).join('');
+    DEFAULTS = { ship: $('ship').value, budget: $('budget').value, system: $('system').value,
+                 top: '2', mixed: true, auto: true, scale: '4', stops: [3, 5] };
+    $('status').textContent = '选好参数点「检索路线」；想重来就点 Reset。';
   } catch (e) {
     $('status').className = 'status err';
     $('status').textContent = '船型载入失败：' + e;
   }
 }
 
+function clearResults() {
+  $('results').innerHTML = '';
+}
+
+$('reset').addEventListener('click', () => {
+  if (!DEFAULTS) return;
+  $('ship').value = DEFAULTS.ship;
+  $('budget').value = DEFAULTS.budget;
+  $('system').value = DEFAULTS.system;
+  $('top').value = DEFAULTS.top;
+  $('scale').value = DEFAULTS.scale;
+  $('mixed').checked = DEFAULTS.mixed;
+  $('auto').checked = DEFAULTS.auto;
+  document.querySelectorAll('.stops').forEach(c => { c.checked = DEFAULTS.stops.includes(+c.value); });
+  clearResults();
+  $('status').className = 'status';
+  $('status').textContent = '已重置为默认参数（3 角 + 5 角，各 2 条），可以重新检索。';
+});
+
 $('f').addEventListener('submit', async ev => {
   ev.preventDefault();
+  const stops = [...document.querySelectorAll('.stops:checked')].map(c => c.value);
+  if (!stops.length) {
+    $('status').className = 'status err';
+    $('status').textContent = '至少选一个角数。';
+    return;
+  }
   const q = new URLSearchParams({
-    ship: $('ship').value,
-    budget: $('budget').value,
-    stops: $('stops').value,
-    system: $('system').value,
-    scale: $('scale').value,
-    mixed: $('mixed').checked ? 1 : 0,
-    auto: $('auto').checked ? 1 : 0,
+    ship: $('ship').value, budget: $('budget').value, stops: stops.join(','),
+    system: $('system').value, top: $('top').value, scale: $('scale').value,
+    mixed: $('mixed').checked ? 1 : 0, auto: $('auto').checked ? 1 : 0,
   });
   $('go').disabled = true;
   $('status').className = 'status';
-  $('status').textContent = '检索中…（拉全市场价 + 搜索闭环 + 渲染，约 20–40 秒）';
-  $('card').style.display = 'none';
+  $('status').textContent = `检索中…（角数 ${stops.join('/')}，每个 ${$('top').value} 条）`;
+  clearResults();
   try {
-    const r = await fetch('/api/route?' + q);
-    const d = await r.json();
+    const d = await (await fetch('/api/routes?' + q)).json();
     if (!d.ok) {
       $('status').className = 'status err';
       $('status').textContent = '失败：' + (d.error || '未知');
       return;
     }
     const p = d.params;
-    $('meta').textContent = `船 ${p.ship} · 预算 ${p.budget.toLocaleString()} · ${p.stops} 角 · 星系 ${p.system}${p.mixed ? ' · 混装' : ''}${p.auto ? ' · 仅自动装载' : ''} · ${p.scale}x`;
-    $('img').src = d.png;
-    $('md').textContent = d.md || '';
-    $('card').style.display = 'block';
-    $('status').textContent = '完成。';
+    $('status').textContent = `完成：${d.results.length} 张路线图（${p.ship} · ${p.budget.toLocaleString()} · 角数 ${p.stops.join('/')}）`;
+    d.results.forEach((r, i) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="meta">
+          <span class="tag">${r.stops} 角</span><span class="tag">第 ${r.idx} 条</span>${r.title}
+        </div>
+        ${r.png ? `<img src="${r.png}" alt="路线图">` : '<div style="color:#f85149;font-size:13px">该角数未找到闭环</div>'}
+        ${r.md ? '<div class="toggle">显示 Markdown 表格</div><pre class="md"></pre>' : ''}
+      `;
+      $('results').appendChild(card);
+      const tg = card.querySelector('.toggle');
+      if (tg) {
+        const md = card.querySelector('.md');
+        md.textContent = r.md;
+        tg.addEventListener('click', () => {
+          const show = md.style.display !== 'block';
+          md.style.display = show ? 'block' : 'none';
+          tg.textContent = show ? '隐藏 Markdown 表格' : '显示 Markdown 表格';
+        });
+      }
+    });
   } catch (e) {
     $('status').className = 'status err';
     $('status').textContent = '请求失败：' + e;
   } finally {
     $('go').disabled = false;
   }
-});
-
-$('toggle').addEventListener('click', () => {
-  const m = $('md');
-  const show = m.style.display !== 'block';
-  m.style.display = show ? 'block' : 'none';
-  $('toggle').textContent = show ? '隐藏 Markdown 表格' : '显示 Markdown 表格';
 });
 
 init();
