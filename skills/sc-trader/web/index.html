@@ -16,24 +16,33 @@
   .checks label { display:flex; align-items:center; gap:6px; color:#c9d6e3; font-size:12.5px; margin:0; cursor:pointer; }
   input[type=checkbox] { width:15px; height:15px; accent-color:#f0b429; }
   .btns { display:flex; gap:10px; margin-top:6px; }
-  button { flex:1; border:0; border-radius:6px; padding:10px; font-size:13.5px; font-weight:600; cursor:pointer; }
-  #go { background:#f0b429; color:#1a1206; }
+  button { border:0; border-radius:6px; padding:10px; font-size:13.5px; font-weight:600; cursor:pointer; }
+  #go { flex:1; background:#f0b429; color:#1a1206; }
   #reset { background:#2a3441; color:#c9d6e3; font-weight:500; }
   button:disabled { opacity:.6; cursor:default; }
   .hint { font-size:11px; color:#6b7a8c; margin-top:8px; line-height:1.6; }
   main { flex:1; min-width:0; }
   .status { font-size:13px; color:#9fb0c3; margin-bottom:12px; }
   .status.err { color:#f85149; }
-  .card { background:#151b23; border:1px solid #232c38; border-radius:10px; padding:14px; margin-bottom:16px; }
+  .card { background:#151b23; border:1px solid #232c38; border-radius:10px; padding:14px; margin-bottom:14px; }
   .meta { font-size:12.5px; color:#c9d6e3; margin-bottom:10px; }
   .meta .tag { display:inline-block; background:#1f2937; border:1px solid #2a3441; border-radius:5px; padding:2px 8px; margin-right:8px; font-size:11.5px; color:#9fb0c3; }
-  img { max-width:100%; height:auto; border-radius:8px; display:block; }
-  .md { display:none; margin-top:12px; white-space:pre-wrap; font-size:11.5px; color:#9fb0c3; background:#0e1116; border:1px solid #232c38; border-radius:8px; padding:12px; max-height:300px; overflow:auto; }
-  .toggle { margin-top:10px; font-size:12px; color:#58a6ff; cursor:pointer; }
+  .rowbtns { display:flex; gap:8px; }
+  .rowbtns button { background:#1f2937; color:#c9d6e3; font-size:12.5px; font-weight:500; padding:7px 14px; }
+  .rowbtns button:hover { background:#26313f; }
+  .panel { display:none; margin-top:12px; }
+  .panel table { border-collapse:collapse; width:100%; font-size:12px; margin-bottom:14px; }
+  .panel th { background:#1c2430; color:#c9d6e3; text-align:left; padding:8px 9px; border:1px solid #2a3441; font-weight:600; }
+  .panel td { padding:7px 9px; border:1px solid #232c38; vertical-align:top; line-height:1.55; }
+  .panel h3 { font-size:14px; color:#f0b429; margin:0 0 8px; font-weight:600; }
+  .panel p { font-size:12px; color:#9fb0c3; margin:0 0 10px; line-height:1.6; }
+  .panel strong { color:#7ee787; }
+  .panel img { max-width:100%; height:auto; border-radius:8px; display:block; }
+  .dl { display:inline-block; margin-top:10px; background:#f0b429; color:#1a1206; border-radius:6px; padding:8px 14px; font-size:12.5px; font-weight:600; text-decoration:none; }
 </style>
 <header>
   <h1>SC 跑商路线 · 多角闭环检索</h1>
-  <p>选船 / 预算 / 多个角数 → 每个角数出多条候选路线，逐条单独出图（带耗时分解）</p>
+  <p>选船 / 预算 / 多个角数 → 列出候选路线；点 Detail 看表格，点「生成图片」才渲染 PNG 并可下载</p>
 </header>
 <div class="wrap">
   <form id="f">
@@ -62,7 +71,7 @@
       <label><input type="checkbox" id="auto" checked> 仅自动装载站点</label>
     </div>
     <div class="row">
-      <label class="lbl" for="scale">图片分辨率</label>
+      <label class="lbl" for="scale">图片分辨率（生成时生效）</label>
       <select id="scale">
         <option value="2">2x</option><option value="3">3x</option><option value="4" selected>4x</option>
       </select>
@@ -71,7 +80,7 @@
       <button id="go" type="submit">检索路线</button>
       <button id="reset" type="button">Reset</button>
     </div>
-    <div class="hint">首次检索要拉一次全市场价（之后走本地缓存，约 2 秒）；相同参数命中缓存直接返回。</div>
+    <div class="hint">检索只跑搜索、不渲染图片（快）；点「生成图片」才按需出图。</div>
   </form>
 
   <main>
@@ -83,6 +92,35 @@
 <script>
 const $ = id => document.getElementById(id);
 let DEFAULTS = null;
+
+function mdToHtml(md) {
+  const lines = md.split('\n');
+  const esc = s => s.replace(/&/g, '&amp;');
+  const cell = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  let out = '', i = 0;
+  while (i < lines.length) {
+    const l = lines[i];
+    if (l.startsWith('### ')) { out += `<h3>${cell(l.slice(4))}</h3>`; i++; continue; }
+    if (l.trim().startsWith('|')) {
+      const rows = [];
+      while (i < lines.length && lines[i].trim().startsWith('|')) {
+        rows.push(lines[i].trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim()));
+        i++;
+      }
+      const body = rows.filter((r, k) => !(k === 1 && r.every(c => /^[-: ]+$/.test(c))));
+      let t = '<table>';
+      body.forEach((r, ri) => {
+        const tag = ri === 0 ? 'th' : 'td';
+        t += '<tr>' + r.map(c => `<${tag}>${cell(c)}</${tag}>`).join('') + '</tr>';
+      });
+      out += t + '</table>';
+      continue;
+    }
+    if (l.trim()) out += `<p>${cell(l.trim())}</p>`;
+    i++;
+  }
+  return out;
+}
 
 async function init() {
   try {
@@ -97,15 +135,11 @@ async function init() {
       `<label><input type="checkbox" class="stops" value="${n}"${n === 3 || n === 5 ? ' checked' : ''}> ${n} 角</label>`).join('');
     DEFAULTS = { ship: $('ship').value, budget: $('budget').value, system: $('system').value,
                  top: '2', mixed: true, auto: true, scale: '4', stops: [3, 5] };
-    $('status').textContent = '选好参数点「检索路线」；想重来就点 Reset。';
+    $('status').textContent = '选好参数点「检索路线」；想重来点 Reset。';
   } catch (e) {
     $('status').className = 'status err';
     $('status').textContent = '船型载入失败：' + e;
   }
-}
-
-function clearResults() {
-  $('results').innerHTML = '';
 }
 
 $('reset').addEventListener('click', () => {
@@ -118,7 +152,7 @@ $('reset').addEventListener('click', () => {
   $('mixed').checked = DEFAULTS.mixed;
   $('auto').checked = DEFAULTS.auto;
   document.querySelectorAll('.stops').forEach(c => { c.checked = DEFAULTS.stops.includes(+c.value); });
-  clearResults();
+  $('results').innerHTML = '';
   $('status').className = 'status';
   $('status').textContent = '已重置为默认参数（3 角 + 5 角，各 2 条），可以重新检索。';
 });
@@ -133,13 +167,13 @@ $('f').addEventListener('submit', async ev => {
   }
   const q = new URLSearchParams({
     ship: $('ship').value, budget: $('budget').value, stops: stops.join(','),
-    system: $('system').value, top: $('top').value, scale: $('scale').value,
+    system: $('system').value, top: $('top').value,
     mixed: $('mixed').checked ? 1 : 0, auto: $('auto').checked ? 1 : 0,
   });
   $('go').disabled = true;
   $('status').className = 'status';
   $('status').textContent = `检索中…（角数 ${stops.join('/')}，每个 ${$('top').value} 条）`;
-  clearResults();
+  $('results').innerHTML = '';
   try {
     const d = await (await fetch('/api/routes?' + q)).json();
     if (!d.ok) {
@@ -148,28 +182,52 @@ $('f').addEventListener('submit', async ev => {
       return;
     }
     const p = d.params;
-    $('status').textContent = `完成：${d.results.length} 张路线图（${p.ship} · ${p.budget.toLocaleString()} · 角数 ${p.stops.join('/')}）`;
-    d.results.forEach((r, i) => {
+    $('status').textContent = `完成：${d.results.length} 条候选（${p.ship} · ${p.budget.toLocaleString()} · 角数 ${p.stops.join('/')}）`;
+    d.results.forEach(r => {
       const card = document.createElement('div');
       card.className = 'card';
       card.innerHTML = `
         <div class="meta">
           <span class="tag">${r.stops} 角</span><span class="tag">第 ${r.idx} 条</span>${r.title}
         </div>
-        ${r.png ? `<img src="${r.png}" alt="路线图">` : '<div style="color:#f85149;font-size:13px">该角数未找到闭环</div>'}
-        ${r.md ? '<div class="toggle">显示 Markdown 表格</div><pre class="md"></pre>' : ''}
+        <div class="rowbtns">
+          ${r.md ? '<button class="dbtn">Detail</button>' : ''}
+          ${r.key ? '<button class="pbtn">生成图片</button>' : ''}
+        </div>
+        <div class="panel dpanel"></div>
+        <div class="panel ppanel"></div>
       `;
       $('results').appendChild(card);
-      const tg = card.querySelector('.toggle');
-      if (tg) {
-        const md = card.querySelector('.md');
-        md.textContent = r.md;
-        tg.addEventListener('click', () => {
-          const show = md.style.display !== 'block';
-          md.style.display = show ? 'block' : 'none';
-          tg.textContent = show ? '隐藏 Markdown 表格' : '显示 Markdown 表格';
-        });
-      }
+
+      const dbtn = card.querySelector('.dbtn');
+      const dpanel = card.querySelector('.dpanel');
+      if (dbtn) dbtn.addEventListener('click', () => {
+        if (!dpanel.dataset.built) { dpanel.innerHTML = mdToHtml(r.md); dpanel.dataset.built = '1'; }
+        const show = dpanel.style.display !== 'block';
+        dpanel.style.display = show ? 'block' : 'none';
+        dbtn.textContent = show ? '收起 Detail' : 'Detail';
+      });
+
+      const pbtn = card.querySelector('.pbtn');
+      const ppanel = card.querySelector('.ppanel');
+      if (pbtn) pbtn.addEventListener('click', async () => {
+        if (ppanel.dataset.built) {
+          const on = ppanel.style.display !== 'block';
+          ppanel.style.display = on ? 'block' : 'none';
+          pbtn.textContent = on ? '收起图片' : '生成图片';
+          return;
+        }
+        pbtn.disabled = true;
+        pbtn.textContent = '生成中…';
+        try {
+          const g = await (await fetch(`/api/png?key=${r.key}&scale=${$('scale').value}`)).json();
+          if (!g.ok) { alert('生成失败：' + (g.error || '')); pbtn.textContent = '生成图片'; return; }
+          ppanel.innerHTML = `<img src="${g.png}" alt="路线图"><a class="dl" href="${g.png}" download="route_${r.stops}leg_${r.idx}.png">下载 PNG</a>`;
+          ppanel.dataset.built = '1';
+          ppanel.style.display = 'block';
+          pbtn.textContent = '收起图片';
+        } finally { pbtn.disabled = false; }
+      });
     });
   } catch (e) {
     $('status').className = 'status err';

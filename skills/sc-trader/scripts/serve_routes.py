@@ -82,6 +82,7 @@ def run_recommend(ship, budget, stops, system, top, mixed, auto) -> str:
 
 
 def build_routes(params: dict) -> dict:
+    """跑搜索并把每条路线的 Markdown 落盘，返回 key；图片由 /api/png 按需生成。"""
     prof = load_profile()
     ship = params.get("ship") or prof.get("default_ship")
     if ship not in prof.get("ships", {}):
@@ -91,14 +92,10 @@ def build_routes(params: dict) -> dict:
     system = params.get("system") or "all"
     if system not in SYSTEM_CHOICES:
         system = "all"
-    top = int(params.get("top") or 1)
-    top = max(1, min(3, top))
-    scale = int(params.get("scale") or 4)
-    scale = max(1, min(4, scale))
+    top = max(1, min(3, int(params.get("top") or 1)))
     mixed = bool(params.get("mixed"))
     auto = bool(params.get("auto"))
 
-    # 角数多选：默认 3,5
     raw = params.get("stops") or "3,5"
     stops_list = []
     for part in str(raw).split(","):
@@ -113,32 +110,36 @@ def build_routes(params: dict) -> dict:
     for stops in sorted(stops_list):
         md = run_recommend(ship, budget, stops, system, top, mixed, auto)
         if "未找到闭环" in md:
-            results.append({"stops": stops, "idx": 0, "title": "未找到闭环", "png": None, "md": md})
+            results.append({"stops": stops, "idx": 0, "title": "未找到闭环", "key": None, "md": md})
             continue
         for idx, chunk in enumerate(route_png.split_sections(md)):
             title = next((l.replace("###", "", 1).strip() for l in chunk.split("\n")
                           if l.startswith("### ")), f"{stops} 角 环 {idx + 1}")
-            key = f"{ship}-{budget}-{stops}-{system}-{int(mixed)}-{int(auto)}-{scale}-{top}-{idx}"
-            name = hashlib.sha1(key.encode()).hexdigest()[:16] + ".png"
-            png_path = CACHE_DIR / name
-            md_path = CACHE_DIR / (name[:-4] + ".md")
-            if not png_path.exists():
-                route_png.render(chunk, png_path, scale)
-                md_path.write_text(chunk, encoding="utf-8")
-            results.append({
-                "stops": stops,
-                "idx": idx + 1,
-                "title": title,
-                "png": f"/img/{name}",
-                "md": md_path.read_text(encoding="utf-8") if md_path.exists() else chunk,
-            })
+            key = hashlib.sha1(
+                f"{ship}-{budget}-{stops}-{system}-{int(mixed)}-{int(auto)}-{top}-{idx}".encode()
+            ).hexdigest()[:16]
+            (CACHE_DIR / (key + ".md")).write_text(chunk, encoding="utf-8")
+            results.append({"stops": stops, "idx": idx + 1, "title": title, "key": key, "md": chunk})
 
     return {
         "ok": True,
         "results": results,
         "params": {"ship": ship, "budget": budget, "stops": stops_list, "system": system,
-                   "top": top, "mixed": mixed, "auto": auto, "scale": scale},
+                   "top": top, "mixed": mixed, "auto": auto},
     }
+
+
+def make_png(key: str, scale: int) -> dict:
+    """按需渲染 PNG（同一 key+scale 只渲染一次）。"""
+    md_path = CACHE_DIR / (key + ".md")
+    if not md_path.exists():
+        return {"ok": False, "error": "该结果已失效，请重新检索"}
+    scale = max(1, min(4, scale))
+    name = f"{key}-{scale}.png"
+    png_path = CACHE_DIR / name
+    if not png_path.exists():
+        route_png.render(md_path.read_text(encoding="utf-8"), png_path, scale)
+    return {"ok": True, "png": f"/img/{name}", "name": name}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -164,6 +165,18 @@ class Handler(BaseHTTPRequestHandler):
 
         if path == "/api/ships":
             self._json(ships_payload())
+            return
+
+        if path == "/api/png":
+            params = {k: v[0] for k, v in qs.items()}
+            key = params.get("key", "")
+            if not key.replace("-", "").isalnum():
+                self._json({"ok": False, "error": "bad key"}, 400)
+                return
+            try:
+                self._json(make_png(key, int(params.get("scale") or 4)))
+            except Exception as e:
+                self._json({"ok": False, "error": f"{type(e).__name__}: {e}"}, 500)
             return
 
         if path == "/api/routes" or path == "/api/route":
