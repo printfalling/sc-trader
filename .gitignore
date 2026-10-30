@@ -21,3 +21,6 @@ node_modules/
 
 # UEXcorp token 等本机密钥（禁止入库）
 skills/sc-trader/data/secrets.json
+
+# 路线图生成缓存
+skills/sc-trader/web/.cache/
