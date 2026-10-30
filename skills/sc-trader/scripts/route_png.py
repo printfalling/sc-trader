@@ -66,16 +66,20 @@ def load_font(size: int):
 
 
 def wrap(text: str, font, max_w: int) -> list:
-    lines, cur = [], ""
-    for ch in text:
-        if cur and font.getlength(cur + ch) > max_w:
+    """按像素宽度折行；<br> 强制换行（表格里商品按优先级分行用）。"""
+    out = []
+    for seg in text.split("<br>"):
+        lines, cur = [], ""
+        for ch in seg:
+            if cur and font.getlength(cur + ch) > max_w:
+                lines.append(cur)
+                cur = ch
+            else:
+                cur += ch
+        if cur:
             lines.append(cur)
-            cur = ch
-        else:
-            cur += ch
-    if cur:
-        lines.append(cur)
-    return lines or [""]
+        out.extend(lines or [""])
+    return out or [""]
 
 
 def parse_tables(md: str) -> list:

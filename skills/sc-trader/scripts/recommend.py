@@ -1271,15 +1271,13 @@ def run_loop_search(args) -> int:
             cands = lg.get("cands") or []
             sel = {it["commodity"] for it in items}
 
-            def cell(it, with_qty):
-                sd = (it.get("sell_row") or {}).get("scu_sell_stock")
-                return (f"{it['commodity']}{it['qty']}" if with_qty else f"{it['commodity']}") \
-                    + f"(\u4f9b{it.get('scu_stock')}/\u9700{sd if sd is not None else '-'})"
-
-            goods = " + ".join(cell(it, True) for it in items)
-            alt = [cell(c, False) for c in cands if c["commodity"] not in sel]
-            if alt:
-                goods += " \uff5c\u5019\u8865: " + ", ".join(alt)
+            taken = {it["commodity"]: it["qty"] for it in items}
+            rows_out = []
+            for c in cands:
+                sd = (c.get("sell_row") or {}).get("scu_sell_stock")
+                q = taken.get(c["commodity"], 0)
+                rows_out.append(f"{c['commodity']}{q}(供{c.get('scu_stock')}/需{sd if sd is not None else '-'})")
+            goods = "<br>".join(rows_out)
             print(f"| {n} | {goods} | "
                   f"{bn}[{sys_a}] {lg['price_buy']:,} \u2192 {sn}[{sys_b}] {lg['price_sell']:,} | "
                   f"+{lg['leg_profit']:,} |")
