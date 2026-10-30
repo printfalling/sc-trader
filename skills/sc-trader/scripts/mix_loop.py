@@ -131,6 +131,8 @@ def main() -> int:
     ap.add_argument("--stops", required=True, help="逗号分隔的站点名，首尾自动成环")
     ap.add_argument("--auto-load-only", action="store_true")
     ap.add_argument("--min-supply-ratio", type=float, default=1.0)
+    ap.add_argument("--detail", action="store_true",
+                    help="逐航程展开耗时分解（量子/停船/装载/卸货）")
     ap.add_argument("--compare", action="store_true",
                     help="同时列出单商品（不混装）的结果做对比")
     args = ap.parse_args()
@@ -176,6 +178,51 @@ def main() -> int:
         print()
 
     print(f"混装后：总装载 {total_qty} SCU · 圈利润 +{total_profit:,}")
+
+    if args.detail and rows:
+        tm = profile.get("time_model", {})
+        base = tm.get("base_stop_min", 4)
+        unload = float(tm.get("sell_unload_min", 0.0))
+        manual_crate = float(tm.get("manual_crate_min", 1.0))
+        manual_extra = float(tm.get("manual_extra_min", 3.0))
+        auto_cost = float(tm.get("auto_load_extra_min", 5.0))
+        max_box = (profile.get("ship") or {}).get("max_box", 32)
+        print()
+        print("| 航程 | 商品 | 数量 | 箱型 | 箱数 | 量子 | 停船 | 装载 | 卸货 | 小计 |")
+        print("|---|---|---|---|---|---|---|---|---|---|")
+        grand_qt = grand_dock = grand_load = grand_unload = 0.0
+        for n, (a, b, items, qty, profit, qt) in enumerate(rows, 1):
+            auto = bool(profile["ship"].get("auto_loading_capable")
+                        and getattr(a, "is_auto_load", 0))
+            load_sum = 0.0
+            for it in items:
+                sizes = [x for x in (it.get("sizes") or []) if isinstance(x, int) and x > 0]
+                box = max([x for x in sizes if x <= max_box] or [1])
+                crates = -(-it["qty"] // box)
+                load_sum += auto_cost if auto else (crates * manual_crate + manual_extra)
+            dock = base * 2          # 买卖各停一次
+            unload_sum = unload * len(items)
+            leg_min = qt + dock + load_sum + unload_sum
+            grand_qt += qt; grand_dock += dock
+            grand_load += load_sum; grand_unload += unload_sum
+            names = " + ".join(i["commodity"] for i in items)
+            boxes = " / ".join(
+                str(max([x for x in (i.get("sizes") or []) if isinstance(x, int)
+                         and 0 < x <= max_box] or [1])) for i in items)
+            crates_s = " / ".join(
+                str(-(-i["qty"] // max([x for x in (i.get("sizes") or [])
+                                        if isinstance(x, int) and 0 < x <= max_box] or [1])))
+                for i in items)
+            print(f"| {n} | {names[:40]} | {qty} | {boxes} SCU | {crates_s} | "
+                  f"{qt:.1f}min | {dock}min | {load_sum:.1f}min | {unload_sum:.1f}min | {leg_min:.1f}min |")
+        total = grand_qt + grand_dock + grand_load + grand_unload
+        print(f"| | | | | | **{grand_qt:.1f}** | **{grand_dock:.0f}** | "
+              f"**{grand_load:.1f}** | **{grand_unload:.1f}** | **{total:.1f}min** |")
+        print()
+        print(f"圈时间 **{total:.1f}min** · 时薪 **{int(total_profit / total * 60):,}/h**")
+        print("口径：停船=4min×2（买卖各一次）；装载=自动 5min/种，手动 箱数×1+3；"
+              "卸货=sell_unload_min(0)")
+        print("      （若把混装当成一次装完，装载按 5min/航程计，圈时间会更短）")
     return 0
 
 
