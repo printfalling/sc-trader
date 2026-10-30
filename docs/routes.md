@@ -66,69 +66,48 @@ curl -s "https://api.uexcorp.space/2.0/commodities_prices?commodity_name=Medical
 <!-- sc-trader:auto-begin -->
 ### 监控中的路线
 
-**预算 2,000,000 aUEC · 生成于 2026-10-25T12:16:12+00:00**
+**预算 500,000 aUEC · 生成于 2026-10-30T04:12:34+00:00**
 
-### r453 备选 · intra · 风险 normal
-圈利润 **+674,560** · 圈时间 149min · 时薪 272,182/h
-- 航段1：买 Compboard 26,460/SCU × 64 SCU @ Rayari Kaltag Research Outpost
-  → 卖 37,000/SCU @ Shubin Mining Facility SM0-13
-  本段利润 +674,560（库存 72，量子 6min）
-
-### r454 备选 · there-back · 风险 normal
-圈利润 **+838,612** · 圈时间 186min · 时薪 270,084/h
-- 航段1：买 Compboard 26,460/SCU × 64 SCU @ Rayari Kaltag Research Outpost
-  → 卖 37,000/SCU @ HDMS-Perlman
-  本段利润 +674,560（库存 72，量子 3min）
-- 航段2：买 Taranite 21,924/SCU × 27 SCU @ HDMS-Woodruff
+### r560 备选 · there-back · 风险 normal
+圈利润 **+247,456** · 圈时间 40min · 时薪 369,337/h
+- 航段1：买 Taranite 18,792/SCU × 25 SCU @ Samson & Son's Salvage Center
   → 卖 28,000/SCU @ TDD - Trade and Development Division - Commons - New Babbage
-  本段利润 +164,052（库存 27，量子 3min）
+  本段利润 +230,200（库存 41，量子 5min）
+- 航段2：买 Medical Supplies 3,343/SCU × 8 SCU @ Rayari Anvik Research Outpost
+  → 卖 5,500/SCU @ TDD - Trade and Development Division - Area 18
+  本段利润 +17,256（库存 8，量子 5min）
 
-### r455 ★首选 · there-back · 风险 normal
-圈利润 **+1,207,720** · 圈时间 269min · 时薪 269,379/h
-- 航段1：买 Compboard 28,114/SCU × 60 SCU @ Admin - People's Service Station Delta [Nyx > People's Service Station Delta]
-  → 卖 37,000/SCU @ Shubin Mining Facility SM0-13 [Stanton > MicroTech]
-  本段利润 +533,160（库存 60，量子 27min）
-- 航段2：买 Compboard 26,460/SCU × 64 SCU @ Rayari Kaltag Research Outpost
-  → 卖 37,000/SCU @ Shubin Mining Facility SM0-10
-  本段利润 +674,560（库存 72，量子 6min）
+### r561 ★首选 · there-back · 风险 normal
+圈利润 **+364,024** · 圈时间 40min · 时薪 546,036/h
+- 航段1：买 Taranite 18,792/SCU × 25 SCU @ Samson & Son's Salvage Center
+  → 卖 28,000/SCU @ TDD - Trade and Development Division - Cloudview Center - Orison
+  本段利润 +230,200（库存 41，量子 4min）
+- 航段2：买 Medical Supplies 3,409/SCU × 64 SCU @ Hickes Research Outpost
+  → 卖 5,500/SCU @ TDD - Trade and Development Division - Area 18
+  本段利润 +133,824（库存 96，量子 4min）
 
-### r456 备选 · there-back · 风险 normal
-圈利润 **+697,212** · 圈时间 166min · 时薪 251,549/h
-- 航段1：买 Compboard 28,114/SCU × 60 SCU @ Admin - People's Service Station Delta [Nyx > People's Service Station Delta]
-  → 卖 37,000/SCU @ HDMS-Perlman [Stanton > Hurston > Magda]
-  本段利润 +533,160（库存 60，量子 27min）
-- 航段2：买 Taranite 21,924/SCU × 27 SCU @ HDMS-Woodruff
-  → 卖 28,000/SCU @ TDD - Trade and Development Division - Commons - New Babbage
-  本段利润 +164,052（库存 27，量子 3min）
+### r562 备选 · there-back · 风险 normal
+圈利润 **+250,551** · 圈时间 45min · 时薪 332,589/h
+- 航段1：买 Agricium 8,721/SCU × 57 SCU @ Shubin Mining Facility SMCa-8
+  → 卖 12,000/SCU @ Admin - ARC-L4
+  本段利润 +186,903（库存 500，量子 3min）
+- 航段2：买 Dymantium 21,011/SCU × 32 SCU @ Shubin Mining Facility SAL-5
+  → 卖 23,000/SCU @ TDD - Trade and Development Division - Commons - New Babbage
+  本段利润 +63,648（量子 5min）
 
-### r457 备选 · there-back · 风险 normal
-圈利润 **+911,296** · 圈时间 246min · 时薪 222,267/h
-- 航段1：买 Fresh Food 20,821/SCU × 64 SCU @ Shepherd's Rest [Pyro > Bloom]
-  → 卖 29,000/SCU @ HDMS-Stanhope [Stanton > Hurston]
-  本段利润 +523,456（库存 128，量子 13min）
-- 航段2：买 Bexalite 23,940/SCU × 64 SCU @ HDMS-Hadley
-  → 卖 30,000/SCU @ Admin - Patch City
-  本段利润 +387,840（库存 64，量子 8min）
+### r563 备选 · there-back · 风险 normal
+圈利润 **+250,551** · 圈时间 45min · 时薪 332,589/h
+- 航段1：买 Agricium 8,721/SCU × 57 SCU @ Shubin Mining Facility SMCa-6
+  → 卖 12,000/SCU @ Admin - ARC-L4
+  本段利润 +186,903（库存 500，量子 3min）
+- 航段2：买 Dymantium 21,011/SCU × 32 SCU @ Shubin Mining Facility SAL-5
+  → 卖 23,000/SCU @ TDD - Trade and Development Division - Commons - New Babbage
+  本段利润 +63,648（量子 5min）
 
-### r458 备选 · there-back · 风险 normal
-圈利润 **+911,296** · 圈时间 246min · 时薪 222,267/h
-- 航段1：买 Fresh Food 20,821/SCU × 64 SCU @ Shepherd's Rest [Pyro > Bloom]
-  → 卖 29,000/SCU @ HDMS-Thedus [Stanton > Hurston]
-  本段利润 +523,456（库存 128，量子 13min）
-- 航段2：买 Bexalite 23,940/SCU × 64 SCU @ HDMS-Hadley
-  → 卖 30,000/SCU @ Admin - Patch City
-  本段利润 +387,840（库存 64，量子 8min）
-
-### r459 备选 · one-way · 风险 pyro
-圈利润 **+515,150** · 圈时间 59min · 时薪 521,231/h
-- 航段1：买 Atlasium 73,394/SCU × 25 SCU @ Chawla's Beach
-  → 卖 94,000/SCU @ Seer's Canyon
-  本段利润 +515,150（库存 27，量子 1min）
-
-### r460 备选 · one-way · 风险 normal
-圈利润 **+493,101** · 圈时间 79min · 时薪 373,090/h
-- 航段1：买 Degnous Root 44,737/SCU × 27 SCU @ Admin - People's Service Station Theta [Nyx > People's Service Station Theta]
-  → 卖 63,000/SCU @ Admin - ARC-L2 [Stanton > ArcCorp > ArcCorp Lagrange Point 2]
-  本段利润 +493,101（库存 27，量子 28min）
+### r564 备选 · intra · 风险 normal
+圈利润 **+160,768** · 圈时间 15min · 时薪 630,462/h
+- 航段1：买 Thermalfoam 5,088/SCU × 64 SCU @ Deakins Research Outpost
+  → 卖 7,600/SCU @ Admin - CRU-L1
+  本段利润 +160,768（库存 1050，量子 0min）
 
 <!-- sc-trader:auto-end -->
