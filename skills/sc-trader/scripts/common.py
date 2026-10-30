@@ -535,7 +535,7 @@ def route_time_min(profile: dict, legs: list[dict], extra_min: float = 0.0) -> f
     箱规格取自终端可售箱型（container_sizes），不是固定值。
     """
     tm = profile.get("time_model", {})
-    base = tm.get("base_stop_min", 4)
+    base_stop = tm.get("base_stop_min", 4)
     crate_min = tm.get("auto_crate_min", 1.0)
     extra = tm.get("auto_load_extra_min", 3.0)
     manual_per_scu = tm.get("manual_load_min_per_scu", 1.0)
@@ -547,6 +547,10 @@ def route_time_min(profile: dict, legs: list[dict], extra_min: float = 0.0) -> f
     manual_crate = float(tm.get("manual_crate_min", 1.0))
     manual_extra = float(tm.get("manual_extra_min", 3.0))
 
+    # 地面城市（id_city != 0，如 Lorville / Area 18 / New Babbage / Levski）停靠更慢：
+    # 交易点在城里、要先请求停船、离场也要爬出重力井，按用户校准每次停靠额外加时。
+    city_extra = float(tm.get("surface_city_extra_min", 0.0))
+
     def stop_minutes(term: dict, qty: int, box_sizes, selling: bool = False) -> float:
         """单次停靠 = base + 搬运；搬运按【箱数】计 = ceil(数量/该箱规格)。
 
@@ -554,7 +558,10 @@ def route_time_min(profile: dict, legs: list[dict], extra_min: float = 0.0) -> f
         因此搬运按 `sell_unload_min` 固定值计（默认 0），不再套用装货那套搬箱模型。
         UEX 没有"能否自动卖出"的字段（is_auto_load 只管装货，且前哨站实测也能一键卖），
         所以判据只能是用户实测：profile.unload_overrides 里标 "manual" 的终端才按搬箱算。
+
+        地面城市（term.is_city）额外加 `surface_city_extra_min` 分钟。
         """
+        base = base_stop + (city_extra if term.get("is_city") else 0.0)
         if selling:
             name = (term.get("name") or "").lower()
             ov = next((v for k, v in (profile.get("unload_overrides") or {}).items()

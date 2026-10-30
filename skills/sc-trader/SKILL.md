@@ -148,6 +148,19 @@ tools/uexinfo/venv/bin/python skills/sc-trader/scripts/stock.py \
 **用户问"某商品库存/某站能收多少"时用这个**，不要靠推算或旧数据口头回答；
 `--terminals` 支持逗号分隔子串过滤，可只查关心的站点。
 
+### 6a. 地面城市停靠更慢（+10min/次）
+
+地面城市（UEX `id_city != 0`：Lorville / Area 18 / New Babbage / Levski 等）每次停靠
+额外加 `time_model.surface_city_extra_min`（当前 **10min**）——交易点在城里、要先请求
+停船、离场还要爬出重力井。空间站（`id_space_station != 0`，如 Port Tressler、Everus
+Harbor、Baijini Point、ARC-Ln、Seraphim）不加。
+
+判据用 `id_city` 而不是名字，别靠终端名猜（"Pyro Gateway (Stanton)" 是空间站，
+"Conscientious Objects - Levski" 是地面城市）。
+
+加这条之后，跨 Nyx 且经停 Levski 的环会被**纯空间站环**反超（实测 Freelancer MAX：
+跨 Nyx 环 408,000/h vs 纯 Stanton 环 480,926/h）。
+
 ### 6b. 星门穿越（跨星系必读）
 
 跨星系的航段 = 飞到本星系星门 → 穿越（`jump_gate_min`，当前 5min）→ 从对方星系门飞到目的地。

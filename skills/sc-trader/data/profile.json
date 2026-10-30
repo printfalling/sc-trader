@@ -142,7 +142,8 @@
     "manual_crate_min": 1.0,
     "manual_extra_min": 3.0,
     "intra_system_min": 1.0,
-    "sell_unload_min": 0.0
+    "sell_unload_min": 0.0,
+    "surface_city_extra_min": 10.0
   },
   "loading_overrides": {
     "Rayari Anvik": "manual",

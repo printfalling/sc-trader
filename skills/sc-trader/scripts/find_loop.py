@@ -335,10 +335,12 @@ def main() -> int:
                 "qty": lg["qty"], "box_sizes": lg["box_sizes"],
                 "buy_terminal": {"name": ta.name,
                                  "system": getattr(ta, "star_system_name", ""),
-                                 "auto": bool(getattr(ta, "is_auto_load", 0))},
+                                 "auto": bool(getattr(ta, "is_auto_load", 0)),
+                                 "is_city": bool(getattr(ta, "id_city", 0))},
                 "sell_terminal": {"name": tb.name,
                                   "system": getattr(tb, "star_system_name", ""),
-                                  "auto": bool(getattr(tb, "is_auto_load", 0))},
+                                  "auto": bool(getattr(tb, "is_auto_load", 0)),
+                                  "is_city": bool(getattr(tb, "id_city", 0))},
             })
         r["loop_time_min"] = C.route_time_min(profile, legs_full)
         r["per_hour"] = int(r["profit"] / r["loop_time_min"] * 60) if r["loop_time_min"] else None
