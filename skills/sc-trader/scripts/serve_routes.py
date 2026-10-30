@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import pathlib
 import subprocess
 import sys
@@ -64,12 +65,30 @@ def ships_payload() -> dict:
     }
 
 
-def run_recommend(ship, budget, stops, system, top, mixed, auto) -> str:
+SORT_FIELDS = ("hourly", "profit", "time", "stops")
+
+
+def metrics_of(title: str) -> dict:
+    """从 "环 1 · 圈利润 +X · 圈时间 Ymin · 时薪 Z/h" 里抽出可排序的数值。"""
+    m = {"profit": 0, "time": 0.0, "hourly": 0}
+    mp = re.search(r"\u5708\u5229\u6da6 \+([\d,]+)", title)
+    if mp:
+        m["profit"] = int(mp.group(1).replace(",", ""))
+    mt = re.search(r"\u5708\u65f6\u95f4 ([\d.]+)min", title)
+    if mt:
+        m["time"] = float(mt.group(1))
+    mh = re.search(r"\u65f6\u85aa ([\d,]+)/h", title)
+    if mh:
+        m["hourly"] = int(mh.group(1).replace(",", ""))
+    return m
+
+
+def run_recommend(ship, budget, stops, system, top, mixed, auto, sort="hour") -> str:
     cmd = [
         sys.executable, str(RECOMMEND),
         "--ship", ship, "--budget", str(budget),
         "--max-stops", str(stops), "--system", system,
-        "--sort", "hour", "--top", str(top), "--detail",
+        "--sort", sort, "--top", str(top), "--detail",
     ]
     if mixed:
         cmd.append("--mixed")
@@ -95,6 +114,11 @@ def build_routes(params: dict) -> dict:
     top = max(1, min(3, int(params.get("top") or 1)))
     mixed = bool(params.get("mixed"))
     auto = bool(params.get("auto"))
+    sort = params.get("sort") or "hourly"
+    if sort not in SORT_FIELDS:
+        sort = "hourly"
+    order = params.get("order") or "desc"
+    rec_sort = "profit" if sort == "profit" else "hour"      # recommend 只认这两个
 
     raw = params.get("stops") or "3,5"
     stops_list = []
@@ -108,7 +132,7 @@ def build_routes(params: dict) -> dict:
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     results = []
     for stops in sorted(stops_list):
-        md = run_recommend(ship, budget, stops, system, top, mixed, auto)
+        md = run_recommend(ship, budget, stops, system, top, mixed, auto, rec_sort)
         if "未找到闭环" in md:
             results.append({"stops": stops, "idx": 0, "title": "未找到闭环", "key": None, "md": md})
             continue
@@ -121,11 +145,17 @@ def build_routes(params: dict) -> dict:
             (CACHE_DIR / (key + ".md")).write_text(chunk, encoding="utf-8")
             results.append({"stops": stops, "idx": idx + 1, "title": title, "key": key, "md": chunk})
 
+    # 排序：默认按时薪降序
+    def sort_key(r):
+        return r["stops"] if sort == "stops" else metrics_of(r["title"])[sort]
+
+    results.sort(key=sort_key, reverse=(order != "asc"))
+
     return {
         "ok": True,
         "results": results,
         "params": {"ship": ship, "budget": budget, "stops": stops_list, "system": system,
-                   "top": top, "mixed": mixed, "auto": auto},
+                   "top": top, "mixed": mixed, "auto": auto, "sort": sort, "order": order},
     }
 
 

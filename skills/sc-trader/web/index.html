@@ -71,6 +71,22 @@
       <label><input type="checkbox" id="auto" checked> 仅自动装载站点</label>
     </div>
     <div class="row">
+      <label class="lbl" for="sort">排序依据</label>
+      <select id="sort">
+        <option value="hourly" selected>时薪</option>
+        <option value="profit">圈利润</option>
+        <option value="time">圈时间</option>
+        <option value="stops">角数</option>
+      </select>
+    </div>
+    <div class="row">
+      <label class="lbl" for="order">顺序</label>
+      <select id="order">
+        <option value="desc" selected>降序（大→小）</option>
+        <option value="asc">升序（小→大）</option>
+      </select>
+    </div>
+    <div class="row">
       <label class="lbl" for="scale">图片分辨率（生成时生效）</label>
       <select id="scale">
         <option value="2">2x</option><option value="3">3x</option><option value="4" selected>4x</option>
@@ -134,7 +150,8 @@ async function init() {
     $('stops').innerHTML = d.stops.map(n =>
       `<label><input type="checkbox" class="stops" value="${n}"${n === 3 || n === 5 ? ' checked' : ''}> ${n} 角</label>`).join('');
     DEFAULTS = { ship: $('ship').value, budget: $('budget').value, system: $('system').value,
-                 top: '2', mixed: true, auto: true, scale: '4', stops: [3, 5] };
+                 top: '2', mixed: true, auto: true, scale: '4', stops: [3, 5],
+                 sort: 'hourly', order: 'desc' };
     $('status').textContent = '选好参数点「检索路线」；想重来点 Reset。';
   } catch (e) {
     $('status').className = 'status err';
@@ -151,6 +168,8 @@ $('reset').addEventListener('click', () => {
   $('scale').value = DEFAULTS.scale;
   $('mixed').checked = DEFAULTS.mixed;
   $('auto').checked = DEFAULTS.auto;
+  $('sort').value = DEFAULTS.sort;
+  $('order').value = DEFAULTS.order;
   document.querySelectorAll('.stops').forEach(c => { c.checked = DEFAULTS.stops.includes(+c.value); });
   $('results').innerHTML = '';
   $('status').className = 'status';
@@ -168,6 +187,7 @@ $('f').addEventListener('submit', async ev => {
   const q = new URLSearchParams({
     ship: $('ship').value, budget: $('budget').value, stops: stops.join(','),
     system: $('system').value, top: $('top').value,
+    sort: $('sort').value, order: $('order').value,
     mixed: $('mixed').checked ? 1 : 0, auto: $('auto').checked ? 1 : 0,
   });
   $('go').disabled = true;
@@ -182,7 +202,8 @@ $('f').addEventListener('submit', async ev => {
       return;
     }
     const p = d.params;
-    $('status').textContent = `完成：${d.results.length} 条候选（${p.ship} · ${p.budget.toLocaleString()} · 角数 ${p.stops.join('/')}）`;
+    const sortName = { hourly: '时薪', profit: '圈利润', time: '圈时间', stops: '角数' }[p.sort] || p.sort;
+    $('status').textContent = `完成：${d.results.length} 条候选（${p.ship} · ${p.budget.toLocaleString()} · 角数 ${p.stops.join('/')} · 按${sortName}${p.order === 'asc' ? '升序' : '降序'}`);
     d.results.forEach(r => {
       const card = document.createElement('div');
       card.className = 'card';

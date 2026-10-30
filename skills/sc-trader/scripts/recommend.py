@@ -1274,9 +1274,14 @@ def run_loop_search(args) -> int:
             taken = {it["commodity"]: it["qty"] for it in items}
             rows_out = []
             for c in cands:
-                sd = (c.get("sell_row") or {}).get("scu_sell_stock")
+                sr = c.get("sell_row") or {}
+                # 需求 = 总量(预测需求 scu_sell) - 存量(现有库存 scu_sell_stock)
+                total, stock_now = sr.get("scu_sell"), sr.get("scu_sell_stock")
+                demand = None
+                if total is not None and stock_now is not None:
+                    demand = max(0, int(total) - int(stock_now))
                 q = taken.get(c["commodity"], 0)
-                rows_out.append(f"{c['commodity']}{q}(供{c.get('scu_stock')}/需{sd if sd is not None else '-'})")
+                rows_out.append(f"{c['commodity']}{q}(供{c.get('scu_stock')}/需{demand if demand is not None else '-'})")
             goods = "<br>".join(rows_out)
             print(f"| {n} | {goods} | "
                   f"{bn}[{sys_a}] {lg['price_buy']:,} \u2192 {sn}[{sys_b}] {lg['price_sell']:,} | "
