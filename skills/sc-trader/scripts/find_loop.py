@@ -108,6 +108,59 @@ def leg_for(buy_at, sell_at, sell_price, tid_a, tid_b, cn, budget, profile,
     }
 
 
+def mixed_leg_for(buy_at, sell_at, tid_a, tid_b, budget: int, profile: dict,
+                  ctx=None, min_supply_ratio: float = 1.0,
+                  require_auto_load: bool = False) -> dict | None:
+    """混装：在 A 买**多种**商品、B 卖，按单位利润贪心把货舱填满。
+
+    单商品腿（leg_for）在库存不足时会空舱飞（Cobalt 只剩 57 SCU 而货舱 120）。
+    混装把剩余舱位用次优商品补上。返回结构与单商品腿一致，另带 items 列表。
+    """
+    ta = {t.id: t for t in ctx.cache.terminals}.get(tid_a) if ctx is not None else None
+    if require_auto_load and ta is not None and not getattr(ta, "is_auto_load", 0):
+        return None
+    scu_total = profile["ship"]["scu_total"]
+    max_box = (profile.get("ship") or {}).get("max_box", 32)
+    cands = []
+    for cn in buy_at.get(tid_a, {}):
+        got = sell_at.get(tid_b, {}).get(cn)
+        if not got:
+            continue
+        one = leg_for(buy_at, sell_at, got[0], tid_a, tid_b, cn, budget, profile,
+                      min_supply_ratio=min_supply_ratio, ctx=ctx)
+        if one:
+            cands.append(one)
+    if not cands:
+        return None
+    cands.sort(key=lambda g: -(g["price_sell"] - g["price_buy"]))
+    remaining, cash = scu_total, budget
+    items = []
+    for g in cands:
+        if remaining <= 0:
+            break
+        take = min(g["qty"], remaining, cash // g["price_buy"] if g["price_buy"] else 0)
+        take = C.snap_to_crate(take, g["box_sizes"], max_box)
+        if take <= 0:
+            continue
+        items.append({**g, "qty": take,
+                      "leg_profit": take * (g["price_sell"] - g["price_buy"])})
+        remaining -= take
+        cash -= take * g["price_buy"]
+    if not items:
+        return None
+    head = items[0]
+    return {
+        **head,
+        "commodity": " + ".join(i["commodity"] for i in items) if len(items) > 1
+                     else head["commodity"],
+        "qty": sum(i["qty"] for i in items),
+        "leg_profit": sum(i["leg_profit"] for i in items),
+        "items": items,
+        "mixed": len(items) > 1,
+    }
+
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="搜索多角贸易闭环")
     ap.add_argument("--ship", default=None)
@@ -117,6 +170,8 @@ def main() -> int:
     ap.add_argument("--top", type=int, default=5)
     ap.add_argument("--min-supply-ratio", type=float, default=1.0,
                     help="买点现货至少要够跑几圈（默认 1；2=至少两圈的量）")
+    ap.add_argument("--mixed", action="store_true",
+                    help="允许每段混装多种商品填满货舱（默认每段只装一种）")
     ap.add_argument("--detail", action="store_true",
                     help="逐站展开耗时分解（量子 / 买端停靠 / 卖端停靠）")
     ap.add_argument("--sort", choices=["profit", "hour"], default="profit",
@@ -156,9 +211,13 @@ def main() -> int:
     qt_cache: dict = {}
 
     def qt(a, b):
+        """航程秒数。跨星系必须走 travel_seconds（飞到星门 → 穿越 → 对方星门飞出），
+        qt_seconds 只在同一张交通图里找路，会把跨星系算成直达、漏掉星门耗时。"""
         if (a, b) not in qt_cache:
-            qt_cache[(a, b)] = C.qt_seconds(
-                ctx, term_by_id[a].name, term_by_id[b].name) or 0
+            ta, tb = term_by_id[a], term_by_id[b]
+            qt_cache[(a, b)] = C.travel_seconds(
+                ctx, ta.name, getattr(ta, "star_system_name", ""),
+                tb.name, getattr(tb, "star_system_name", "")) or 0
         return qt_cache[(a, b)]
 
     def auto_load_ok(tid):
@@ -171,6 +230,7 @@ def main() -> int:
           file=sys.stderr)
 
     results = []
+    mixed = args.mixed
     for start in starts:
         # beam: (profit, time_sec, path_tids, legs)
         beam = [(0, 0, [start], [])]
@@ -179,22 +239,46 @@ def main() -> int:
             for profit, secs, path, legs in beam:
                 cur = path[-1]
                 cands = []
-                # 向前：从 cur 买货卖到某站
-                for cn, entry in buy_at.get(cur, {}).items():
-                    for tid_b, ps in sell_index.get(cn, []):
-                        if tid_b == cur or tid_b in path:
-                            continue
-                        lg = leg_for(buy_at, sell_at, ps, cur, tid_b, cn, budget, profile,
-                                min_supply_ratio=args.min_supply_ratio, ctx=ctx)
-                        if not lg:
-                            continue
+                cands = []
+                if mixed:
+                    # 混装：按目的站聚合，每个目的站一次算出最优商品组合
+                    dests = set()
+                    for cn in buy_at.get(cur, {}):
+                        for tid_b, ps in sell_index.get(cn, []):
+                            if tid_b == cur or tid_b in path:
+                                continue
+                            dests.add(tid_b)
+                    for tid_b in dests:
                         if args.auto_load_only and not auto_load_ok(cur):
                             continue
-                        cands.append((lg["leg_profit"], tid_b, lg))
+                        lg = mixed_leg_for(buy_at, sell_at, cur, tid_b, budget, profile,
+                                           ctx, args.min_supply_ratio, args.auto_load_only)
+                        if lg:
+                            cands.append((lg["leg_profit"], tid_b, lg))
+                else:
+                    for cn, entry in buy_at.get(cur, {}).items():
+                        for tid_b, ps in sell_index.get(cn, []):
+                            if tid_b == cur or tid_b in path:
+                                continue
+                            lg = leg_for(buy_at, sell_at, ps, cur, tid_b, cn, budget, profile,
+                                    min_supply_ratio=args.min_supply_ratio, ctx=ctx)
+                            if not lg:
+                                continue
+                            if args.auto_load_only and not auto_load_ok(cur):
+                                continue
+                            cands.append((lg["leg_profit"], tid_b, lg))
                 # 收口：从 cur 买货卖回起点（闭环）
-                for cn, (ps, _r) in sell_at.get(start, {}).items():
-                    lg = leg_for(buy_at, sell_at, ps, cur, start, cn, budget, profile,
-                                min_supply_ratio=args.min_supply_ratio, ctx=ctx)
+                if mixed:
+                    close_legs = [mixed_leg_for(buy_at, sell_at, cur, start, budget, profile,
+                                                ctx, args.min_supply_ratio,
+                                                args.auto_load_only)]
+                else:
+                    close_legs = []
+                    for cn, (ps, _r) in sell_at.get(start, {}).items():
+                        close_legs.append(
+                            leg_for(buy_at, sell_at, ps, cur, start, cn, budget, profile,
+                                    min_supply_ratio=args.min_supply_ratio, ctx=ctx))
+                for lg in close_legs:
                     if not lg:
                         continue
                     if args.auto_load_only and not auto_load_ok(cur):

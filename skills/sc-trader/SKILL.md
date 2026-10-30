@@ -148,12 +148,22 @@ tools/uexinfo/venv/bin/python skills/sc-trader/scripts/stock.py \
 **用户问"某商品库存/某站能收多少"时用这个**，不要靠推算或旧数据口头回答；
 `--terminals` 支持逗号分隔子串过滤，可只查关心的站点。
 
+### 6b. 星门穿越（跨星系必读）
+
+跨星系的航段 = 飞到本星系星门 → 穿越（`jump_gate_min`，当前 5min）→ 从对方星系门飞到目的地。
+**算飞行时间必须用 `common.travel_seconds()`，不能只调 `qt_seconds()`** ——后者只在同一张
+交通图里找路，会把 Stanton ⇄ Nyx 算成直达、漏掉星门耗时。`find_loop` 早期版本就踩了这个坑
+（跨 Nyx 环的时薪因此虚高约 30%）。
+
+往返一趟跨星系大约多花 15~18 分钟。是否划算要看那段货的利润密度：实测 Freelancer MAX 上
+跨 Nyx 环 515,613/h vs 纯 Stanton 环 480,926/h——只高 7%，风险（过门、Pyro 区）却多不少。
+
 ### 7. find_loop — 多角闭环搜索（来回 / 三角 / 最多 5 角）
 
 ```bash
 tools/uexinfo/venv/bin/python skills/sc-trader/scripts/find_loop.py \
   --ship <ship_key> --budget <aUEC> [--max-stops 3] [--auto-load-only] \
-  [--sort profit|hour] [--top 5] [--save]
+  [--mixed] [--sort profit|hour] [--top 5] [--save]
 ```
 
 - **与 recommend 的差别**：recommend 先挑单段利润最高的腿再补一段回程，选出来的卖点
@@ -163,6 +173,9 @@ tools/uexinfo/venv/bin/python skills/sc-trader/scripts/find_loop.py \
   **环搜索过程不再调 API**；量子时间走本地交通图（带缓存）。
 - `--sort hour` 按时薪排序（默认 `profit`）；`--save` 写入 watchlist。
 - `--auto-load-only` 只从支持自动装载（`is_auto_load`）的站点买货——大船必开。
+- `--mixed` **允许每段混装多种商品**填满货舱（默认每段只装一种）。库存不足时空舱飞很浪费
+  ——Cobalt 只剩 57 SCU 而货舱 120，混装塞进 Stims 后那段多赚 9 万。注意：混装的装载按
+  **每种商品一次**计（自动 5min/种），若实际一次装完则更划算，这个口径待实测校准。
 - **实测结论（Caterpillar 576 SCU / 5M）**：3 角是甜点
   （Seraphim → Everus Harbor → ARC-L3 → Seraphim，+2,045,376 / 46.5min / 263 万/h，
   三段各 576 SCU 满载）；5 角利润更高（+3,209,472）但时薪降到 235 万/h。

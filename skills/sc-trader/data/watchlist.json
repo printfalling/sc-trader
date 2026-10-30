@@ -1,14 +1,14 @@
 {
   "version": 1,
-  "updated_at": "2026-10-29T07:37:11+00:00",
+  "updated_at": "2026-10-29T08:53:20+00:00",
   "routes": [
     {
-      "id": "r515",
+      "id": "r525",
       "type": "intra",
       "status": "candidate",
       "risk": "normal",
       "ship": "caterpillar",
-      "created_at": "2026-10-29T07:36:52+00:00",
+      "created_at": "2026-10-29T08:53:01+00:00",
       "legs": [
         {
           "commodity": "Titanium",
@@ -64,7 +64,7 @@
       "profit_per_hour": 2333184,
       "snapshots": [
         {
-          "ts": "2026-10-29T07:36:52+00:00",
+          "ts": "2026-10-29T08:53:01+00:00",
           "price_buy": 7681,
           "price_sell": 9200,
           "scu_stock": 6000,
@@ -73,12 +73,12 @@
       ]
     },
     {
-      "id": "r516",
+      "id": "r526",
       "type": "there-back",
       "status": "candidate",
       "risk": "normal",
       "ship": "caterpillar",
-      "created_at": "2026-10-29T07:36:58+00:00",
+      "created_at": "2026-10-29T08:53:07+00:00",
       "legs": [
         {
           "commodity": "Recycled Material Composite",
@@ -169,14 +169,14 @@
       "profit_per_hour": 1489256,
       "snapshots": [
         {
-          "ts": "2026-10-29T07:36:58+00:00",
+          "ts": "2026-10-29T08:53:07+00:00",
           "price_buy": 7587,
           "price_sell": 8900,
           "scu_stock": 12000,
           "source": "uex"
         },
         {
-          "ts": "2026-10-29T07:36:58+00:00",
+          "ts": "2026-10-29T08:53:07+00:00",
           "price_buy": 26492,
           "price_sell": 31000,
           "scu_stock": 31,
@@ -185,12 +185,12 @@
       ]
     },
     {
-      "id": "r517",
+      "id": "r527",
       "type": "one-way",
       "status": "candidate",
       "risk": "normal",
       "ship": "caterpillar",
-      "created_at": "2026-10-29T07:37:05+00:00",
+      "created_at": "2026-10-29T08:53:14+00:00",
       "legs": [
         {
           "commodity": "Recycled Material Composite",
@@ -249,7 +249,7 @@
       "profit_per_hour": 2479632,
       "snapshots": [
         {
-          "ts": "2026-10-29T07:37:05+00:00",
+          "ts": "2026-10-29T08:53:14+00:00",
           "price_buy": 7587,
           "price_sell": 8900,
           "scu_stock": 12000,
@@ -258,12 +258,12 @@
       ]
     },
     {
-      "id": "r518",
+      "id": "r528",
       "type": "intra",
       "status": "candidate",
       "risk": "normal",
       "ship": "caterpillar",
-      "created_at": "2026-10-29T07:37:05+00:00",
+      "created_at": "2026-10-29T08:53:14+00:00",
       "legs": [
         {
           "commodity": "Recycled Material Composite",
@@ -322,7 +322,7 @@
       "profit_per_hour": 3312210,
       "snapshots": [
         {
-          "ts": "2026-10-29T07:37:05+00:00",
+          "ts": "2026-10-29T08:53:14+00:00",
           "price_buy": 7587,
           "price_sell": 8900,
           "scu_stock": 12000,
@@ -331,12 +331,12 @@
       ]
     },
     {
-      "id": "r519",
+      "id": "r529",
       "type": "one-way",
       "status": "candidate",
       "risk": "normal",
       "ship": "caterpillar",
-      "created_at": "2026-10-29T07:37:11+00:00",
+      "created_at": "2026-10-29T08:53:20+00:00",
       "legs": [
         {
           "commodity": "Recycled Material Composite",
@@ -395,7 +395,7 @@
       "profit_per_hour": 2016768,
       "snapshots": [
         {
-          "ts": "2026-10-29T07:37:11+00:00",
+          "ts": "2026-10-29T08:53:20+00:00",
           "price_buy": 7587,
           "price_sell": 8900,
           "scu_stock": 11536,
@@ -404,7 +404,7 @@
       ]
     }
   ],
-  "next_id": 520,
+  "next_id": 530,
   "tracked_commodities": {
     "51": "Medical Supplies",
     "44": "Iron",
@@ -435,10 +435,10 @@
     "70": "Stims"
   },
   "ranking_prev": [
-    "r516",
-    "r515",
-    "r517",
-    "r518",
-    "r519"
+    "r526",
+    "r525",
+    "r527",
+    "r528",
+    "r529"
   ]
 }
