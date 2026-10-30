@@ -115,11 +115,12 @@ let SORT = { key: 'hourly', dir: -1 };   // -1 降序 / 1 升序
 let POLL = null;                     // 进度轮询定时器
 
 const COLS = [
-  { key: 'stops',  label: '角数',   num: true },
-  { key: 'profit', label: '圈利润', num: true },
-  { key: 'time',   label: '圈时间', num: true },
-  { key: 'hourly', label: '时薪',   num: true },
-  { key: 'route',  label: '路线',   num: false },
+  { key: 'stops',   label: '角数',     num: true },
+  { key: 'capital', label: '起始资金', num: true },
+  { key: 'profit',  label: '圈利润',   num: true },
+  { key: 'time',    label: '圈时间',   num: true },
+  { key: 'hourly',  label: '时薪',     num: true },
+  { key: 'route',   label: '路线',     num: false },
 ];
 
 function mdToHtml(md) {
@@ -197,7 +198,9 @@ function renderTable() {
           SORT.dir = -SORT.dir;
         } else {
           SORT.key = col.key;
-          SORT.dir = (col.key === 'time' || col.key === 'stops') ? 1 : -1;
+          // 越小越好的列（圈时间/角数/起始资金）首次点击用升序
+          SORT.dir = (col.key === 'time' || col.key === 'stops' || col.key === 'capital')
+            ? 1 : -1;
         }
         renderTable();
       });
@@ -420,6 +423,7 @@ function startPoll(job) {
     ROWS = r.results.map(x => ({
       stops: x.stops, idx: x.idx, title: x.title, key: x.key, md: x.md,
       route: x.route, profit: x.profit, time: x.time, hourly: x.hourly,
+      capital: x.capital,
       open: false, showPng: false, mdHtml: null, pngHtml: null,
     }));
     $('bar').style.display = 'none';

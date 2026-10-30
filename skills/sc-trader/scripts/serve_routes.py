@@ -79,7 +79,7 @@ SORT_FIELDS = ("hourly", "profit", "time", "stops")
 
 def metrics_of(title: str) -> dict:
     """从 "环 1 · 圈利润 +X · 圈时间 Ymin · 时薪 Z/h" 里抽出可排序的数值。"""
-    m = {"profit": 0, "time": 0.0, "hourly": 0}
+    m = {"profit": 0, "time": 0.0, "hourly": 0, "capital": 0}
     mp = re.search(r"\u5708\u5229\u6da6 \+([\d,]+)", title)
     if mp:
         m["profit"] = int(mp.group(1).replace(",", ""))
@@ -89,6 +89,9 @@ def metrics_of(title: str) -> dict:
     mh = re.search(r"\u65f6\u85aa ([\d,]+)/h", title)
     if mh:
         m["hourly"] = int(mh.group(1).replace(",", ""))
+    mk = re.search(r"\u8d77\u59cb\u8d44\u91d1 ([\d,]+)", title)
+    if mk:
+        m["capital"] = int(mk.group(1).replace(",", ""))
     return m
 
 
@@ -199,7 +202,8 @@ def build_routes(params: dict, on_progress=None) -> dict:
                            on_progress=sub)
         if "未找到闭环" in md:
             results.append({"stops": stops, "idx": 0, "title": "未找到闭环", "key": None,
-                            "md": md, "route": "", "profit": 0, "time": 0, "hourly": 0})
+                            "md": md, "route": "", "profit": 0, "time": 0, "hourly": 0,
+                            "capital": 0})
             continue
         for idx, chunk in enumerate(route_png.split_sections(md)):
             # 路线串（md 里标题下那行缩进的 A → B → C）
@@ -217,7 +221,7 @@ def build_routes(params: dict, on_progress=None) -> dict:
             results.append({"stops": stops, "idx": idx + 1, "title": title, "key": key,
                             "md": chunk, "route": route,
                             "profit": metrics["profit"], "time": metrics["time"],
-                            "hourly": metrics["hourly"]})
+                            "hourly": metrics["hourly"], "capital": metrics["capital"]})
 
     prog(ntot, ntot, "整理结果")
     # 排序：默认按时薪降序

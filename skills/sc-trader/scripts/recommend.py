@@ -1000,6 +1000,26 @@ def mixed_leg_for(buy_at, sell_at, tid_a, tid_b, budget: int, profile: dict,
 
 
 
+def start_capital_of(legs) -> int:
+    """跑这一圈最少要先有多少钱。
+
+    航段是串行的：买第 i 段时手上得有 cost_i，而已回款的是前 i-1 段的利润。
+    所以 起始资金 = max_i( cost_i - Σ_{j<i} 利润_j )，下限 0。
+    混装腿要按逐商品的买价×数量加总，不能拿均价×总量。
+    """
+    need, acc = 0, 0
+    for lg in legs or []:
+        items = lg.get("items") or []
+        if items:
+            cost = sum(int(it.get("price_buy") or 0) * int(it.get("qty") or 0)
+                       for it in items)
+        else:
+            cost = int(lg.get("price_buy") or 0) * int(lg.get("qty") or 0)
+        need = max(need, cost - acc)
+        acc += int(lg.get("leg_profit") or 0)
+    return max(0, need)
+
+
 def run_loop_search(args) -> int:
     ap = argparse.ArgumentParser(description="搜索多角贸易闭环")
     ap.add_argument("--ship", default=None)
@@ -1274,8 +1294,10 @@ def run_loop_search(args) -> int:
     for i, r in enumerate(shown, 1):
         stops = " \u2192 ".join(term_by_id[t].name for t in r["stops"])
         ph = f"{r['per_hour']:,}/h" if r.get("per_hour") else "\u2014"
+        cap_need = start_capital_of(r["legs"])
         print(f"### \u73af {i} \u00b7 \u5708\u5229\u6da6 +{r['profit']:,} \u00b7 "
-              f"\u5708\u65f6\u95f4 {r['loop_time_min']}min \u00b7 \u65f6\u85aa {ph}")
+              f"\u5708\u65f6\u95f4 {r['loop_time_min']}min \u00b7 \u65f6\u85aa {ph} \u00b7 "
+              f"\u8d77\u59cb\u8d44\u91d1 {cap_need:,}")
         print(f"    {stops}")
         print()
         print("| \u6bb5 | \u5546\u54c1 | \u4e70 \u2192 \u5356 | \u5229\u6da6 |")
