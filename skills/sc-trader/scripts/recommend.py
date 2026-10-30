@@ -1096,7 +1096,9 @@ def run_loop_search(args) -> int:
                         continue
                     total_profit = profit + lg["leg_profit"]
                     total_sec = secs + qt(cur, start)
-                    if len(path) >= 2:      # 至少两角才叫环
+                    # 指定 N 角就只收 N 角的环（此前 len(path)>=2 会在任意深度收口，
+                    # 导致 --max-stops 5 时直接给出 2 角环、看上去像'收敛'）
+                    if len(path) == args.max_stops:
                         stops = path + [start]
                         # 旋转归一化：同一个环从不同起点出发只算一条
                         ring = stops[:-1]
