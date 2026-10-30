@@ -625,3 +625,33 @@ def parse_box_sizes(raw) -> list[int]:
         int(tok) for tok in str(raw).replace(";", ",").split(",")
         if tok.strip().lstrip("-").isdigit()
     })
+
+
+def pick_terminal(ctx, name: str):
+    """终端名模糊匹配：精确优先，其次最短唯一匹配；多义报错列出候选。"""
+    q = name.strip().lower()
+    cands = [t for t in ctx.cache.terminals if q in t.name.lower()]
+    if not cands:
+        raise SystemExit(f"ERROR: 未找到终端 '{name}'")
+    exact = [t for t in cands if t.name.lower() == q]
+    if exact:
+        return exact[0]
+    cands.sort(key=lambda t: len(t.name))
+    top = [t for t in cands if len(t.name) == len(cands[0].name)]
+    if len(top) > 1:
+        raise SystemExit(
+            f"ERROR: 终端 '{name}' 有多个匹配：{', '.join(t.name for t in top[:6])}")
+    return cands[0]
+
+
+def pick_commodity(ctx, name: str):
+    """商品名匹配：精确优先，其次最短子串。"""
+    q = name.strip().lower()
+    for c in ctx.cache.commodities:
+        if c.name.lower() == q:
+            return c
+    subs = [c for c in ctx.cache.commodities if q in c.name.lower()]
+    if not subs:
+        raise SystemExit(f"ERROR: 未找到商品 '{name}'")
+    subs.sort(key=lambda c: len(c.name))
+    return subs[0]

@@ -25,19 +25,46 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPT_DIR))
 
 import common  # noqa: E402
-from add_route import pick_commodity, pick_terminal  # noqa: E402
+from common import pick_commodity, pick_terminal  # noqa: E402
+
+
+def legs_to_stops(legs_spec: list) -> list:
+    """把"一段一商品"的录入转成停靠序列。
+
+    相邻两段若落同一终端则合并进同一个停靠，否则会被算成两次起降。
+    """
+    stops: list = []
+
+    def ensure(term, kind, item):
+        if stops and stops[-1]["terminal"] == term:
+            stops[-1].setdefault(kind, []).append(item)
+        else:
+            stops.append({"terminal": term, kind: [item]})
+
+    for lg in legs_spec:
+        item = {"commodity": lg["commodity"], "qty": lg.get("qty")}
+        ensure(lg["buy"], "buy", item)
+        ensure(lg["sell"], "sell", dict(item))
+    return stops
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--itinerary", required=True, help="JSON（含 stops 数组）")
+    parser.add_argument("--itinerary", help="JSON（含 stops 数组，推荐）")
+    parser.add_argument("--legs", help="JSON 数组，兼容按段录入："
+                                      '[{"commodity","buy","sell","qty"}, ...]')
     parser.add_argument("--ship", default=None)
     parser.add_argument("--budget", type=int, default=None)
     args = parser.parse_args()
 
-    spec = json.loads(args.itinerary)
-    stops_spec = spec["stops"]
+    if args.itinerary:
+        stops_spec = json.loads(args.itinerary)["stops"]
+    elif args.legs:
+        stops_spec = legs_to_stops(json.loads(args.legs))
+    else:
+        parser.error("需要 --itinerary 或 --legs")
+
     profile = common.load_profile()
     ship_key = args.ship or profile.get("default_ship")
     profile["ship"] = profile["ships"][ship_key]
@@ -154,7 +181,8 @@ def main() -> int:
         handling = crates * (ac if auto else mc) + (ae if auto else me)
         stops_out.append({
             "terminal": {"id": t.id, "name": t.name,
-                         "system": getattr(t, "star_system_name", ""), "auto": hangar},
+                         "system": getattr(t, "star_system_name", ""), "auto": hangar,
+                         "is_city": bool(getattr(t, "id_city", 0))},
             "buy": buys, "sell": sells, "crates": crates,
             "stop_min": round(base + handling, 1), "loading": "auto" if auto else "manual",
             "cash_after": cash,

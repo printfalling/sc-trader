@@ -148,6 +148,16 @@ tools/uexinfo/venv/bin/python skills/sc-trader/scripts/stock.py \
 **用户问"某商品库存/某站能收多少"时用这个**，不要靠推算或旧数据口头回答；
 `--terminals` 支持逗号分隔子串过滤，可只查关心的站点。
 
+### 5b. add_loop — 手工录入路线（外部工具发现的路线）
+
+```bash
+tools/uexinfo/venv/bin/python skills/sc-trader/scripts/add_loop.py \
+  --ship <key> --budget <aUEC> --itinerary '{"stops":[{"terminal":"X","buy":[{"commodity":"Y","qty":72}]}, ...]}'
+```
+也接受 `--legs '[{"commodity":..,"buy":..,"sell":..,"qty":..}]'`（旧式按段录入，会自动
+合并相邻同站的停靠）。**优先用 `--itinerary`**：按停靠序列建模才符合实际跑法，按段建模
+会把同一航程里的多个商品算成多次往返、高估行程。
+
 ### 6a. 地面城市停靠更慢（+10min/次）
 
 地面城市（UEX `id_city != 0`：Lorville / Area 18 / New Babbage / Levski 等）每次停靠
