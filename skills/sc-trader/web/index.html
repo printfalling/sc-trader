@@ -111,8 +111,11 @@ let DEFAULTS = null;
 
 function mdToHtml(md) {
   const lines = md.split('\n');
-  const esc = s => s.replace(/&/g, '&amp;');
-  const cell = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // 转义 < > 防止地名里的尖括号破格；商品列靠裸 <br> 分行，转义后再还原
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const cell = s => esc(s)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/&lt;br\s*\/?&gt;/g, '<br>');
   let out = '', i = 0;
   while (i < lines.length) {
     const l = lines[i];

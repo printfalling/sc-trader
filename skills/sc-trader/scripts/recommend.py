@@ -1230,10 +1230,43 @@ def run_loop_search(args) -> int:
         results.sort(key=lambda r: -(r["per_hour"] or 0))
     else:
         results.sort(key=lambda r: -r["profit"])
-    print(f"\n找到 {len(results)} 个闭环，按圈利润取前 {args.top}：\n")
+    sort_label = "时薪" if args.sort == "hour" else "圈利润"
+    print(f"\n找到 {len(results)} 个闭环，按{sort_label}取前 {args.top}：\n")
     shown = results[:args.top]
-    def st_name(v):
-        return C.UEX_STATUS_NAMES.get(v, "-")
+
+    # 卖端「上限」只有 commodities_prices 端点有（_all 不带 scu_sell_max）。
+    # 只为最终展示的这几条路线补拉，并按游戏版本落盘缓存（容量是静态属性）。
+    cap_ids = []
+    for _r in shown:
+        for _lg in _r["legs"]:
+            for _c in (_lg.get("cands") or [_lg]):
+                if _c.get("id_commodity") is not None:
+                    cap_ids.append(_c["id_commodity"])
+    sell_caps = C.fetch_sell_caps(client, cap_ids) if cap_ids else {}
+    def sell_stock_of(sell_row):
+        """卖端 (当前库存, 库存上限)。
+
+        UEX 字段语义（据 uexinfo scan_prices 注释 + 实测核对）：
+          scu_sell_stock = 当前库存（observation courante）
+          scu_sell_max   = 容量上限（capacité）
+          scu_sell       = 「当前愿收购量」，与上面两个不同量纲，常为 0
+        早期版本算「需求 = scu_sell - scu_sell_stock」是拿两个不同量纲的数相减，
+        减出负数被截 0，于是满屏「需0」——语义错误，改为直接展示 存量/上限。
+        """
+        if not sell_row:
+            return None, None
+        return sell_row.get("scu_sell_stock"), sell_row.get("scu_sell_max")
+
+    def stock_txt(stock_now, cap):
+        """存量/上限；上限缺失（0/None，= 无数据）时只显示存量。"""
+        if cap:
+            return f"{fmt_num(stock_now)}/{fmt_num(cap)}"
+        if stock_now is not None:
+            return fmt_num(stock_now)
+        return "-"
+
+    def fmt_num(v):
+        return str(int(v)) if isinstance(v, (int, float)) else "-"
 
     for i, r in enumerate(shown, 1):
         stops = " \u2192 ".join(term_by_id[t].name for t in r["stops"])
@@ -1247,41 +1280,32 @@ def run_loop_search(args) -> int:
         for n, (lg, d) in enumerate(zip(r["legs"], r["detail"]), 1):
             bn = term_by_id[lg["buy_terminal"]].name
             sn = term_by_id[lg["sell_terminal"]].name
-            sup = d.get("supply")
-            dst = d.get("demand_stock")
-            items = lg.get("items") or []
-            if items:
-                # 混装腿：逐商品列出供应/需求，只显示第一种会让人误以为总量超了库存
-                sup_s = "/".join(str(i.get("scu_stock")) if i.get("scu_stock") is not None else "-"
-                                 for i in items)
-                buy_st = "/".join(st_name(i.get("status_buy")) for i in items)
-                dem_s = "/".join(str(((i.get("sell_row") or {}).get("scu_sell_stock"))
-                                     if (i.get("sell_row") or {}).get("scu_sell_stock") is not None
-                                     else "-") for i in items)
-                sell_st = "/".join(st_name((i.get("sell_row") or {}).get("status_sell"))
-                                   for i in items)
-            else:
-                sup_s = str(sup) if sup is not None else "-"
-                buy_st = st_name(d.get("buy_status"))
-                dem_s = str(dst) if dst is not None else "-"
-                sell_st = st_name(d.get("sell_status"))
             sys_a = getattr(term_by_id[lg["buy_terminal"]], "star_system_name", "")
             sys_b = getattr(term_by_id[lg["sell_terminal"]], "star_system_name", "")
             items = lg.get("items") or []
-            cands = lg.get("cands") or []
-            sel = {it["commodity"] for it in items}
-
-            taken = {it["commodity"]: it["qty"] for it in items}
+            # cands 只有混装腿（mixed_leg）会填；非混装腿拿到空列表会让商品列整列空白，
+            # 这里用本腿自身合成一条候选补齐。
+            cands = lg.get("cands") or [{
+                "commodity": lg["commodity"], "qty": lg["qty"],
+                "id_commodity": lg.get("id_commodity"),
+                "scu_stock": lg.get("scu_stock"),
+                "sell_row": lg.get("sell_row") or {},
+            }]
+            # 混装腿按 items 记录实际买到的量；非混装腿用本腿 qty
+            taken = ({it["commodity"]: it["qty"] for it in items}
+                     or {lg["commodity"]: lg["qty"]})
             rows_out = []
             for c in cands:
-                sr = c.get("sell_row") or {}
-                # 需求 = 总量(预测需求 scu_sell) - 存量(现有库存 scu_sell_stock)
-                total, stock_now = sr.get("scu_sell"), sr.get("scu_sell_stock")
-                demand = None
-                if total is not None and stock_now is not None:
-                    demand = max(0, int(total) - int(stock_now))
+                stock_now, cap = sell_stock_of(c.get("sell_row") or {})
+                # 补拉的上限优先（来自带 scu_sell_max 的全量端点）
+                got = sell_caps.get((c.get("id_commodity"), lg.get("sell_terminal")))
+                if got is not None:
+                    stock_now, cap = got
                 q = taken.get(c["commodity"], 0)
-                rows_out.append(f"{c['commodity']}{q}(供{c.get('scu_stock')}/需{demand if demand is not None else '-'})")
+                qty_txt = str(q) if q else "候补"
+                rows_out.append(f"{c['commodity']} {qty_txt}"
+                                f"(供{fmt_num(c.get('scu_stock'))}"
+                                f"/囤{stock_txt(stock_now, cap)})")
             goods = "<br>".join(rows_out)
             print(f"| {n} | {goods} | "
                   f"{bn}[{sys_a}] {lg['price_buy']:,} \u2192 {sn}[{sys_b}] {lg['price_sell']:,} | "
@@ -1306,10 +1330,13 @@ def run_loop_search(args) -> int:
             print()
             print(f"  \u53e3\u5f84\uff1a\u505c\u8239={base}min/\u7ad9\uff08\u8d77\u964d\u00b7"
               "\u7535\u68af\u00b7\u7ec8\u7aef\u4ea4\u6613\uff0c\u4e70\u5356\u5404\u4e00\u6b21\uff09\uff1b"
-              "\u88c5\u8f7d=\u81ea\u52a8 5min/\u6b21\uff0c\u624b\u52a8 \u7bb1\u6570\u00d71+3\uff1b"
-              "\u5378\u8d27=sell_unload_min(0)")
-            print("  \u4f9b\u5e94=\u4e70\u70b9 scu_buy\uff08\u73b0\u8d27\uff09\uff1b"
-                  "\u9700\u6c42(\u56e4)=\u5356\u70b9 scu_sell_stock\uff1b"
+              f"\u88c5\u8f7d=\u81ea\u52a8 \u7bb1\u6570\u00d7{crate_min:g}+{extra:g}min\uff0c"
+              f"\u624b\u52a8 \u7bb1\u6570\u00d7{manual_crate:g}+{manual_extra:g}min\uff1b"
+              f"\u5378\u8d27=sell_unload_min({float(tm.get('sell_unload_min', 0.0)):g})")
+            print("  \u4f9b N=\u4e70\u70b9 scu_buy\uff08\u73b0\u8d27\uff09\uff1b"
+                  "\u56e4 \u5b58\u91cf/\u4e0a\u9650=\u5356\u70b9 scu_sell_stock / scu_sell_max"
+                  "\uff08\u4e0a\u9650\u53ea commodities_prices \u7aef\u70b9\u6709\uff0c\u6309\u6e38\u620f\u7248\u672c\u7f13\u5b58\uff1b"
+                  "\u62ff\u4e0d\u5230\u65f6\u53ea\u663e\u793a\u5b58\u91cf\uff09\uff1b"
                   "\u72b6\u6001 1=Out\u2026 7=Max\uff08\u5356\u7aef\u8d8a\u7a7a\u8d8a\u80fd\u5438\u6536\uff09")
         print()
     if args.save:

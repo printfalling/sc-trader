@@ -20,6 +20,81 @@ UEXINFO_DIR = REPO_ROOT / "tools" / "uexinfo"
 
 PROFILE_PATH = SKILL_DIR / "data" / "profile.json"
 WATCHLIST_PATH = SKILL_DIR / "data" / "watchlist.json"
+SELL_CAP_CACHE_PATH = SKILL_DIR / "data" / ".sell_cap_cache.json"
+
+
+# ── 卖端库存上限（scu_sell_max）──────────────────────────────────────────────
+# commodities_prices_all 不带 scu_sell_max（只有 scu_sell / scu_sell_stock），
+# 而「存量/上限」需要它 —— 只能按商品查 commodities_prices。全局节流 6.5s/次，
+# 所以结果落盘缓存，重复检索不再付调用。
+SELL_CAP_TTL_SEC = 7 * 24 * 3600
+
+
+def _load_sell_cap_cache() -> dict:
+    try:
+        with open(SELL_CAP_CACHE_PATH, encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {}
+
+
+def fetch_sell_caps(client, commodity_ids, max_calls: int = 8,
+                    ttl: int = SELL_CAP_TTL_SEC) -> dict:
+    """(id_commodity, id_terminal) -> (scu_sell_stock, scu_sell_max)。
+
+    总库存（容量）是静态属性：版本不变就不会轻易变，所以按**游戏版本**失效，
+    TTL 只是兜底（7 天，用于感知版本更新和 UEX 数据订正）。
+    超预算或查不到的品种直接缺失，调用方降级为只显示存量，不阻塞出结果。
+    """
+    cache = _load_sell_cap_cache()
+    now = time.time()
+    out, todo = {}, []
+
+    def replay(cid):
+        ent = cache.get("items", {}).get(str(cid)) or {}
+        for tid, pair in ent.get("rows", {}).items():
+            out[(cid, int(tid))] = tuple(pair)
+
+    for cid in dict.fromkeys(int(c) for c in commodity_ids if c is not None):
+        ent = cache.get("items", {}).get(str(cid)) or {}
+        if ent and now - ent.get("ts", 0) < ttl:
+            replay(cid)
+        else:
+            todo.append(cid)
+
+    fetched_gv = None
+    for cid in todo[:max_calls]:
+        rows = throttled_get(client, "commodities_prices", {"id_commodity": cid}) or []
+        gv = next((r.get("game_version") for r in rows if r.get("game_version")), None)
+        if gv:
+            fetched_gv = gv
+        rows_map = {}
+        for r in rows:
+            tid = r.get("id_terminal")
+            if tid is None:
+                continue
+            pair = (r.get("scu_sell_stock"), r.get("scu_sell_max"))
+            rows_map[str(int(tid))] = pair
+            out[(cid, int(tid))] = pair
+        cache.setdefault("items", {})[str(cid)] = {
+            "ts": now, "gv": gv, "rows": rows_map}
+
+    # 版本变了 → 容量可能整体改过，整份缓存作废
+    if fetched_gv and cache.get("game_version") and fetched_gv != cache["game_version"]:
+        cache = {"game_version": fetched_gv, "items": {}}
+    elif fetched_gv:
+        cache["game_version"] = fetched_gv
+
+    if todo[:max_calls]:
+        try:
+            items = {k: v for k, v in cache.get("items", {}).items()
+                     if now - v.get("ts", 0) < ttl}
+            with open(SELL_CAP_CACHE_PATH, "w", encoding="utf-8") as f:
+                json.dump({"game_version": cache.get("game_version"), "items": items},
+                          f, ensure_ascii=False)
+        except OSError:
+            pass
+    return out
 
 
 # ── Windows 兼容 ─────────────────────────────────────────────────────────────

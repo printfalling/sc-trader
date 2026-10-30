@@ -39,6 +39,9 @@ DEFAULT_PORT = 8765
 SYSTEM_CHOICES = {"68": "Stanton", "64": "Pyro", "all": "不限（跨星系）"}
 STOPS_CHOICES = (2, 3, 4, 5, 6)
 
+RECOMMEND_TIMEOUT_SEC = 180      # 单次搜索上限，超时不再干等
+CACHE_MAX_FILES = 120            # .cache 里最多保留多少个文件（按 mtime 淘汰）
+
 
 def load_profile() -> dict:
     return json.loads((SCRIPT_DIR.parent / "data" / "profile.json").read_text(encoding="utf-8"))
@@ -94,7 +97,14 @@ def run_recommend(ship, budget, stops, system, top, mixed, auto, sort="hour") ->
         cmd.append("--mixed")
     if auto:
         cmd.append("--auto-load-only")
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    proc = None
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True,
+                              timeout=RECOMMEND_TIMEOUT_SEC)
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(
+            f"recommend.py 超过 {RECOMMEND_TIMEOUT_SEC}s 未返回"
+            f"（角数 {stops} 搜索太慢或 UEX 无响应），已放弃本次检索")
     if proc.returncode != 0:
         raise RuntimeError(proc.stderr[-1200:] or "recommend.py 失败")
     return proc.stdout
@@ -139,8 +149,10 @@ def build_routes(params: dict) -> dict:
         for idx, chunk in enumerate(route_png.split_sections(md)):
             title = next((l.replace("###", "", 1).strip() for l in chunk.split("\n")
                           if l.startswith("### ")), f"{stops} 角 环 {idx + 1}")
+            # rec_sort 进了 key：换排序会产生不同的候选集，不能复用同一份 md
             key = hashlib.sha1(
-                f"{ship}-{budget}-{stops}-{system}-{int(mixed)}-{int(auto)}-{top}-{idx}".encode()
+                f"{ship}-{budget}-{stops}-{system}-{int(mixed)}-{int(auto)}-{top}"
+                f"-{rec_sort}-{idx}".encode()
             ).hexdigest()[:16]
             (CACHE_DIR / (key + ".md")).write_text(chunk, encoding="utf-8")
             results.append({"stops": stops, "idx": idx + 1, "title": title, "key": key, "md": chunk})
@@ -150,6 +162,7 @@ def build_routes(params: dict) -> dict:
         return r["stops"] if sort == "stops" else metrics_of(r["title"])[sort]
 
     results.sort(key=sort_key, reverse=(order != "asc"))
+    prune_cache()
 
     return {
         "ok": True,
@@ -160,16 +173,43 @@ def build_routes(params: dict) -> dict:
 
 
 def make_png(key: str, scale: int) -> dict:
-    """按需渲染 PNG（同一 key+scale 只渲染一次）。"""
+    """按需渲染 PNG。
+
+    文件名带上 md 内容摘要：同一 key 的路线内容变了（UEX 数据刷新、参数微调）
+    就一定会重出图，不会再拿旧图冒充新结果。
+    """
     md_path = CACHE_DIR / (key + ".md")
     if not md_path.exists():
         return {"ok": False, "error": "该结果已失效，请重新检索"}
     scale = max(1, min(4, scale))
-    name = f"{key}-{scale}.png"
+    md_text = md_path.read_text(encoding="utf-8")
+    digest = hashlib.sha1(md_text.encode("utf-8")).hexdigest()[:8]
+    name = f"{key}-{scale}-{digest}.png"
     png_path = CACHE_DIR / name
     if not png_path.exists():
-        route_png.render(md_path.read_text(encoding="utf-8"), png_path, scale)
+        route_png.render(md_text, png_path, scale)
     return {"ok": True, "png": f"/img/{name}", "name": name}
+
+
+def prune_cache(max_files: int | None = None) -> int:
+    """按 mtime 淘汰最旧的文件，避免 .cache 无限增长。返回删除个数。
+
+    max_files 在调用时读常量，不能写成默认参数值——那样会在 import 时绑定，
+    之后改 CACHE_MAX_FILES 不生效。
+    """
+    keep = CACHE_MAX_FILES if max_files is None else max_files
+    if not CACHE_DIR.exists():
+        return 0
+    files = sorted((p for p in CACHE_DIR.iterdir() if p.is_file()),
+                   key=lambda p: p.stat().st_mtime, reverse=True)
+    removed = 0
+    for p in files[keep:]:
+        try:
+            p.unlink()
+            removed += 1
+        except OSError:
+            pass
+    return removed
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -218,10 +258,13 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         if path.startswith("/img/"):
-            f = CACHE_DIR / pathlib.Path(path).name
-            if f.exists():
-                self._send(200, f.read_bytes(), "image/png")
-                return
+            fname = pathlib.Path(path).name
+            # 只接受我们自己生成的 <key>-<scale>-<digest>.png，挡掉 ../ 之类的路径穿越
+            if re.fullmatch(r"[A-Za-z0-9_-]+\.png", fname):
+                f = CACHE_DIR / fname
+                if f.exists():
+                    self._send(200, f.read_bytes(), "image/png")
+                    return
             self._send(404, b"not found", "text/plain")
             return
 
@@ -241,6 +284,11 @@ def main() -> int:
     if not (WEB_DIR / "index.html").exists():
         print(f"ERROR: 缺少 {WEB_DIR / 'index.html'}", file=sys.stderr)
         return 1
+
+    if CACHE_DIR.exists():
+        n = prune_cache()
+        if n:
+            print(f"已清理 {n} 个过期缓存文件（保留最新 {CACHE_MAX_FILES} 个）")
 
     srv = ThreadingHTTPServer((args.host, args.port), Handler)
     print(f"serving on http://{args.host}:{args.port}/  (Ctrl-C 停止)")
