@@ -24,14 +24,25 @@
   main { flex:1; min-width:0; }
   .status { font-size:13px; color:#9fb0c3; margin-bottom:12px; }
   .status.err { color:#f85149; }
-  .card { background:#151b23; border:1px solid #232c38; border-radius:10px; padding:14px; margin-bottom:14px; }
-  .meta { font-size:12.5px; color:#c9d6e3; margin-bottom:10px; }
-  .meta .tag { display:inline-block; background:#1f2937; border:1px solid #2a3441; border-radius:5px; padding:2px 8px; margin-right:8px; font-size:11.5px; color:#9fb0c3; }
-  .rowbtns { display:flex; gap:8px; }
-  .rowbtns button { background:#1f2937; color:#c9d6e3; font-size:12.5px; font-weight:500; padding:7px 14px; }
-  .rowbtns button:hover { background:#26313f; }
-  .panel { display:none; margin-top:12px; }
-  .panel table { border-collapse:collapse; width:100%; font-size:12px; margin-bottom:14px; }
+
+  table.rtable { border-collapse:collapse; width:100%; font-size:12.5px; background:#151b23;
+                 border:1px solid #232c38; border-radius:10px; overflow:hidden; }
+  table.rtable th { background:#1c2430; color:#9fb0c3; text-align:left; padding:9px 10px;
+                    border-bottom:1px solid #2a3441; font-weight:600; white-space:nowrap; }
+  table.rtable th.sortable { cursor:pointer; user-select:none; }
+  table.rtable th.sortable:hover { color:#f0b429; }
+  table.rtable th .arrow { color:#f0b429; font-size:10px; margin-left:3px; }
+  table.rtable td { padding:8px 10px; border-bottom:1px solid #1c2430; vertical-align:top; }
+  table.rtable tr:last-child td { border-bottom:0; }
+  table.rtable td.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  table.rtable td.route { color:#7d8b9b; line-height:1.5; }
+  table.rtable td.acts { white-space:nowrap; }
+  table.rtable td.acts button { background:#1f2937; color:#c9d6e3; font-size:12px; font-weight:500;
+                                padding:6px 10px; margin-right:6px; }
+  table.rtable td.acts button:hover { background:#26313f; }
+  tr.detail > td { background:#10161d; padding:0 12px 14px; }
+  .panel { margin-top:8px; }
+  .panel table { border-collapse:collapse; width:100%; font-size:12px; margin-bottom:12px; }
   .panel th { background:#1c2430; color:#c9d6e3; text-align:left; padding:8px 9px; border:1px solid #2a3441; font-weight:600; }
   .panel td { padding:7px 9px; border:1px solid #232c38; vertical-align:top; line-height:1.55; }
   .panel h3 { font-size:14px; color:#f0b429; margin:0 0 8px; font-weight:600; }
@@ -42,7 +53,7 @@
 </style>
 <header>
   <h1>SC 跑商路线 · 多角闭环检索</h1>
-  <p>选船 / 预算 / 多个角数 → 列出候选路线；点 Detail 看表格，点「生成图片」才渲染 PNG 并可下载</p>
+  <p>选船 / 预算 / 角数 → 出表格；点表头可随时改排序，点 Detail 看明细，点「生成图片」出 PNG</p>
 </header>
 <div class="wrap">
   <form id="f">
@@ -71,22 +82,6 @@
       <label><input type="checkbox" id="auto" checked> 仅自动装载站点</label>
     </div>
     <div class="row">
-      <label class="lbl" for="sort">排序依据</label>
-      <select id="sort">
-        <option value="hourly" selected>时薪</option>
-        <option value="profit">圈利润</option>
-        <option value="time">圈时间</option>
-        <option value="stops">角数</option>
-      </select>
-    </div>
-    <div class="row">
-      <label class="lbl" for="order">顺序</label>
-      <select id="order">
-        <option value="desc" selected>降序（大→小）</option>
-        <option value="asc">升序（小→大）</option>
-      </select>
-    </div>
-    <div class="row">
       <label class="lbl" for="scale">图片分辨率（生成时生效）</label>
       <select id="scale">
         <option value="2">2x</option><option value="3">3x</option><option value="4" selected>4x</option>
@@ -96,7 +91,7 @@
       <button id="go" type="submit">检索路线</button>
       <button id="reset" type="button">Reset</button>
     </div>
-    <div class="hint">检索只跑搜索、不渲染图片（快）；点「生成图片」才按需出图。</div>
+    <div class="hint">排序不在这里选 —— 结果出来后点表头随时改。检索只跑搜索、不渲染图片；点「生成图片」才按需出图。</div>
   </form>
 
   <main>
@@ -108,6 +103,16 @@
 <script>
 const $ = id => document.getElementById(id);
 let DEFAULTS = null;
+let ROWS = [];                       // 当前结果集（排序只改渲染顺序，不重新查询）
+let SORT = { key: 'hourly', dir: -1 };   // -1 降序 / 1 升序
+
+const COLS = [
+  { key: 'stops',  label: '角数',   num: true },
+  { key: 'profit', label: '圈利润', num: true },
+  { key: 'time',   label: '圈时间', num: true },
+  { key: 'hourly', label: '时薪',   num: true },
+  { key: 'route',  label: '路线',   num: false },
+];
 
 function mdToHtml(md) {
   const lines = md.split('\n');
@@ -116,10 +121,15 @@ function mdToHtml(md) {
   const cell = s => esc(s)
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/&lt;br\s*\/?&gt;/g, '<br>');
-  let out = '', i = 0;
+  let out = '';
+  let i = 0;
   while (i < lines.length) {
     const l = lines[i];
-    if (l.startsWith('### ')) { out += `<h3>${cell(l.slice(4))}</h3>`; i++; continue; }
+    if (l.startsWith('### ')) {
+      out += '<h3>' + cell(l.slice(4)) + '</h3>';
+      i++;
+      continue;
+    }
     if (l.trim().startsWith('|')) {
       const rows = [];
       while (i < lines.length && lines[i].trim().startsWith('|')) {
@@ -130,31 +140,171 @@ function mdToHtml(md) {
       let t = '<table>';
       body.forEach((r, ri) => {
         const tag = ri === 0 ? 'th' : 'td';
-        t += '<tr>' + r.map(c => `<${tag}>${cell(c)}</${tag}>`).join('') + '</tr>';
+        t += '<tr>' + r.map(c => '<' + tag + '>' + cell(c) + '</' + tag + '>').join('') + '</tr>';
       });
       out += t + '</table>';
       continue;
     }
-    if (l.trim()) out += `<p>${cell(l.trim())}</p>`;
+    if (l.trim()) {
+      out += '<p>' + cell(l.trim()) + '</p>';
+    }
     i++;
   }
   return out;
+}
+
+const fmtNum = v => (typeof v === 'number' ? v.toLocaleString() : String(v));
+
+function sortedRows() {
+  const col = COLS.find(c => c.key === SORT.key);
+  const rows = ROWS.slice();
+  if (!col || !col.num) {
+    rows.sort((a, b) => String(a[SORT.key]).localeCompare(String(b[SORT.key])) * SORT.dir);
+  } else {
+    rows.sort((a, b) => (a[SORT.key] - b[SORT.key]) * SORT.dir);
+  }
+  return rows;
+}
+
+function renderTable() {
+  const box = $('results');
+  box.innerHTML = '';
+  if (!ROWS.length) {
+    return;
+  }
+  const table = document.createElement('table');
+  table.className = 'rtable';
+
+  const thead = document.createElement('thead');
+  const htr = document.createElement('tr');
+  COLS.forEach(col => {
+    const th = document.createElement('th');
+    if (col.num) {
+      th.className = 'sortable';
+      th.dataset.key = col.key;
+      const arrow = SORT.key === col.key ? (SORT.dir === -1 ? '▼' : '▲') : '';
+      th.innerHTML = col.label + (arrow ? ' <span class="arrow">' + arrow + '</span>' : '');
+      th.addEventListener('click', () => {
+        if (SORT.key === col.key) {
+          SORT.dir = -SORT.dir;
+        } else {
+          SORT.key = col.key;
+          SORT.dir = (col.key === 'time' || col.key === 'stops') ? 1 : -1;
+        }
+        renderTable();
+      });
+    } else {
+      th.textContent = col.label;
+    }
+    htr.appendChild(th);
+  });
+  const thAct = document.createElement('th');
+  thAct.textContent = '操作';
+  htr.appendChild(thAct);
+  thead.appendChild(htr);
+  table.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  sortedRows().forEach(r => {
+    const tr = document.createElement('tr');
+    COLS.forEach(col => {
+      const td = document.createElement('td');
+      if (col.num) {
+        td.className = 'num';
+        td.textContent = fmtNum(r[col.key]);
+      } else if (col.key === 'route') {
+        td.className = 'route';
+        td.textContent = r.route || r.title;
+      }
+      tr.appendChild(td);
+    });
+    const tdAct = document.createElement('td');
+    tdAct.className = 'acts';
+    if (r.md) {
+      const bd = document.createElement('button');
+      bd.textContent = r.open ? '收起 Detail' : 'Detail';
+      bd.addEventListener('click', () => {
+        r.open = !r.open;
+        renderTable();
+      });
+      tdAct.appendChild(bd);
+    }
+    if (r.key) {
+      const bp = document.createElement('button');
+      bp.textContent = r.pngHtml ? '收起图片' : '生成图片';
+      bp.addEventListener('click', () => {
+        if (r.pngHtml) {
+          r.showPng = !r.showPng;
+          renderTable();
+          return;
+        }
+        bp.disabled = true;
+        bp.textContent = '生成中…';
+        fetch('/api/png?key=' + encodeURIComponent(r.key) + '&scale=' + $('scale').value)
+          .then(res => res.json())
+          .then(g => {
+            if (!g.ok) {
+              alert('生成失败：' + (g.error || ''));
+              bp.textContent = '生成图片';
+              return;
+            }
+            r.pngHtml = '<img src="' + g.png + '" alt="路线图">'
+              + '<a class="dl" href="' + g.png + '" download="route_' + r.stops + 'leg_' + r.idx + '.png">下载 PNG</a>';
+            r.showPng = true;
+            renderTable();
+          })
+          .catch(err => {
+            alert('生成失败：' + err);
+            bp.textContent = '生成图片';
+          })
+          .finally(() => {
+            bp.disabled = false;
+          });
+      });
+      tdAct.appendChild(bp);
+    }
+    tr.appendChild(tdAct);
+    tbody.appendChild(tr);
+
+    if (r.open || (r.pngHtml && r.showPng)) {
+      const dtr = document.createElement('tr');
+      dtr.className = 'detail';
+      const dtd = document.createElement('td');
+      dtd.colSpan = COLS.length + 1;
+      const panel = document.createElement('div');
+      panel.className = 'panel';
+      if (r.open) {
+        if (!r.mdHtml) {
+          r.mdHtml = mdToHtml(r.md);
+        }
+        panel.innerHTML += r.mdHtml;
+      }
+      if (r.pngHtml && r.showPng) {
+        panel.innerHTML += r.pngHtml;
+      }
+      dtd.appendChild(panel);
+      dtr.appendChild(dtd);
+      tbody.appendChild(dtr);
+    }
+  });
+  table.appendChild(tbody);
+  box.appendChild(table);
 }
 
 async function init() {
   try {
     const d = await (await fetch('/api/ships')).json();
     $('ship').innerHTML = d.ships.map(s =>
-      `<option value="${s.key}">${s.name}（${s.scu} SCU / 箱${s.max_box}）</option>`).join('');
+      '<option value="' + s.key + '">' + s.name + '（' + s.scu + ' SCU / 箱' + s.max_box + '）</option>').join('');
     $('ship').value = d.default_ship;
     $('budget').value = d.budget_default;
     $('system').innerHTML = d.systems.map(s =>
-      `<option value="${s.id}"${s.id === '68' ? ' selected' : ''}>${s.name}</option>`).join('');
+      '<option value="' + s.id + '"' + (s.id === '68' ? ' selected' : '') + '>' + s.name + '</option>').join('');
     $('stops').innerHTML = d.stops.map(n =>
-      `<label><input type="checkbox" class="stops" value="${n}"${n === 3 || n === 5 ? ' checked' : ''}> ${n} 角</label>`).join('');
+      '<label><input type="checkbox" class="stops" value="' + n + '"' +
+      (n === 3 || n === 5 ? ' checked' : '') + '> ' + n + ' 角</label>').join('');
     DEFAULTS = { ship: $('ship').value, budget: $('budget').value, system: $('system').value,
-                 top: '2', mixed: true, auto: true, scale: '4', stops: [3, 5],
-                 sort: 'hourly', order: 'desc' };
+                 top: '2', mixed: true, auto: true, scale: '4', stops: [3, 5] };
     $('status').textContent = '选好参数点「检索路线」；想重来点 Reset。';
   } catch (e) {
     $('status').className = 'status err';
@@ -163,7 +313,9 @@ async function init() {
 }
 
 $('reset').addEventListener('click', () => {
-  if (!DEFAULTS) return;
+  if (!DEFAULTS) {
+    return;
+  }
   $('ship').value = DEFAULTS.ship;
   $('budget').value = DEFAULTS.budget;
   $('system').value = DEFAULTS.system;
@@ -171,9 +323,8 @@ $('reset').addEventListener('click', () => {
   $('scale').value = DEFAULTS.scale;
   $('mixed').checked = DEFAULTS.mixed;
   $('auto').checked = DEFAULTS.auto;
-  $('sort').value = DEFAULTS.sort;
-  $('order').value = DEFAULTS.order;
   document.querySelectorAll('.stops').forEach(c => { c.checked = DEFAULTS.stops.includes(+c.value); });
+  ROWS = [];
   $('results').innerHTML = '';
   $('status').className = 'status';
   $('status').textContent = '已重置为默认参数（3 角 + 5 角，各 2 条），可以重新检索。';
@@ -190,74 +341,34 @@ $('f').addEventListener('submit', async ev => {
   const q = new URLSearchParams({
     ship: $('ship').value, budget: $('budget').value, stops: stops.join(','),
     system: $('system').value, top: $('top').value,
-    sort: $('sort').value, order: $('order').value,
     mixed: $('mixed').checked ? 1 : 0, auto: $('auto').checked ? 1 : 0,
   });
   $('go').disabled = true;
   $('status').className = 'status';
-  $('status').textContent = `检索中…（角数 ${stops.join('/')}，每个 ${$('top').value} 条）`;
+  $('status').textContent = '检索中…（角数 ' + stops.join('/') + '，每个 ' + $('top').value + ' 条）';
   $('results').innerHTML = '';
   try {
     const d = await (await fetch('/api/routes?' + q)).json();
+    $('go').disabled = false;
     if (!d.ok) {
       $('status').className = 'status err';
       $('status').textContent = '失败：' + (d.error || '未知');
       return;
     }
     const p = d.params;
-    const sortName = { hourly: '时薪', profit: '圈利润', time: '圈时间', stops: '角数' }[p.sort] || p.sort;
-    $('status').textContent = `完成：${d.results.length} 条候选（${p.ship} · ${p.budget.toLocaleString()} · 角数 ${p.stops.join('/')} · 按${sortName}${p.order === 'asc' ? '升序' : '降序'}`);
-    d.results.forEach(r => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = `
-        <div class="meta">
-          <span class="tag">${r.stops} 角</span><span class="tag">第 ${r.idx} 条</span>${r.title}
-        </div>
-        <div class="rowbtns">
-          ${r.md ? '<button class="dbtn">Detail</button>' : ''}
-          ${r.key ? '<button class="pbtn">生成图片</button>' : ''}
-        </div>
-        <div class="panel dpanel"></div>
-        <div class="panel ppanel"></div>
-      `;
-      $('results').appendChild(card);
-
-      const dbtn = card.querySelector('.dbtn');
-      const dpanel = card.querySelector('.dpanel');
-      if (dbtn) dbtn.addEventListener('click', () => {
-        if (!dpanel.dataset.built) { dpanel.innerHTML = mdToHtml(r.md); dpanel.dataset.built = '1'; }
-        const show = dpanel.style.display !== 'block';
-        dpanel.style.display = show ? 'block' : 'none';
-        dbtn.textContent = show ? '收起 Detail' : 'Detail';
-      });
-
-      const pbtn = card.querySelector('.pbtn');
-      const ppanel = card.querySelector('.ppanel');
-      if (pbtn) pbtn.addEventListener('click', async () => {
-        if (ppanel.dataset.built) {
-          const on = ppanel.style.display !== 'block';
-          ppanel.style.display = on ? 'block' : 'none';
-          pbtn.textContent = on ? '收起图片' : '生成图片';
-          return;
-        }
-        pbtn.disabled = true;
-        pbtn.textContent = '生成中…';
-        try {
-          const g = await (await fetch(`/api/png?key=${r.key}&scale=${$('scale').value}`)).json();
-          if (!g.ok) { alert('生成失败：' + (g.error || '')); pbtn.textContent = '生成图片'; return; }
-          ppanel.innerHTML = `<img src="${g.png}" alt="路线图"><a class="dl" href="${g.png}" download="route_${r.stops}leg_${r.idx}.png">下载 PNG</a>`;
-          ppanel.dataset.built = '1';
-          ppanel.style.display = 'block';
-          pbtn.textContent = '收起图片';
-        } finally { pbtn.disabled = false; }
-      });
-    });
+    ROWS = d.results.map(r => ({
+      stops: r.stops, idx: r.idx, title: r.title, key: r.key, md: r.md,
+      route: r.route, profit: r.profit, time: r.time, hourly: r.hourly,
+      open: false, showPng: false, mdHtml: null, pngHtml: null,
+    }));
+    renderTable();
+    $('status').className = 'status';
+    $('status').textContent = '完成：' + ROWS.length + ' 条候选（' + p.ship + ' · '
+      + Number(p.budget).toLocaleString() + ' · 角数 ' + p.stops.join('/') + '）· 点表头改排序';
   } catch (e) {
+    $('go').disabled = false;
     $('status').className = 'status err';
     $('status').textContent = '请求失败：' + e;
-  } finally {
-    $('go').disabled = false;
   }
 });
 

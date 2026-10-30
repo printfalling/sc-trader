@@ -144,9 +144,13 @@ def build_routes(params: dict) -> dict:
     for stops in sorted(stops_list):
         md = run_recommend(ship, budget, stops, system, top, mixed, auto, rec_sort)
         if "未找到闭环" in md:
-            results.append({"stops": stops, "idx": 0, "title": "未找到闭环", "key": None, "md": md})
+            results.append({"stops": stops, "idx": 0, "title": "未找到闭环", "key": None,
+                            "md": md, "route": "", "profit": 0, "time": 0, "hourly": 0})
             continue
         for idx, chunk in enumerate(route_png.split_sections(md)):
+            # 路线串（md 里标题下那行缩进的 A → B → C）
+            route = next((l.strip() for l in chunk.split("\n")
+                          if l.startswith("    ") and "→" in l), "")
             title = next((l.replace("###", "", 1).strip() for l in chunk.split("\n")
                           if l.startswith("### ")), f"{stops} 角 环 {idx + 1}")
             # rec_sort 进了 key：换排序会产生不同的候选集，不能复用同一份 md
@@ -155,7 +159,11 @@ def build_routes(params: dict) -> dict:
                 f"-{rec_sort}-{idx}".encode()
             ).hexdigest()[:16]
             (CACHE_DIR / (key + ".md")).write_text(chunk, encoding="utf-8")
-            results.append({"stops": stops, "idx": idx + 1, "title": title, "key": key, "md": chunk})
+            metrics = metrics_of(title)
+            results.append({"stops": stops, "idx": idx + 1, "title": title, "key": key,
+                            "md": chunk, "route": route,
+                            "profit": metrics["profit"], "time": metrics["time"],
+                            "hourly": metrics["hourly"]})
 
     # 排序：默认按时薪降序
     def sort_key(r):
