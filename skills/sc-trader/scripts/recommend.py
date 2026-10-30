@@ -1282,6 +1282,8 @@ def run_loop_search(args) -> int:
             wl.setdefault("routes", []).append(route)
         C.save_watchlist(wl)
         print(f"已写入 watchlist：{len(out)} 条闭环")
+        # 再按展示规范输出标准监控块（★首选/圈利润/航段），与旧逻辑输出一致
+        print(render_watchlist_md(wl, budget))
     return 0
 
 
