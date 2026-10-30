@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "updated_at": "2026-10-29T08:53:20+00:00",
+  "updated_at": "2026-10-30T03:42:03+00:00",
   "routes": [
     {
       "id": "r525",
       "type": "intra",
-      "status": "candidate",
+      "status": "retired",
       "risk": "normal",
       "ship": "caterpillar",
       "created_at": "2026-10-29T08:53:01+00:00",
@@ -75,7 +75,7 @@
     {
       "id": "r526",
       "type": "there-back",
-      "status": "candidate",
+      "status": "retired",
       "risk": "normal",
       "ship": "caterpillar",
       "created_at": "2026-10-29T08:53:07+00:00",
@@ -187,7 +187,7 @@
     {
       "id": "r527",
       "type": "one-way",
-      "status": "candidate",
+      "status": "retired",
       "risk": "normal",
       "ship": "caterpillar",
       "created_at": "2026-10-29T08:53:14+00:00",
@@ -260,7 +260,7 @@
     {
       "id": "r528",
       "type": "intra",
-      "status": "candidate",
+      "status": "retired",
       "risk": "normal",
       "ship": "caterpillar",
       "created_at": "2026-10-29T08:53:14+00:00",
@@ -333,7 +333,7 @@
     {
       "id": "r529",
       "type": "one-way",
-      "status": "candidate",
+      "status": "retired",
       "risk": "normal",
       "ship": "caterpillar",
       "created_at": "2026-10-29T08:53:20+00:00",
@@ -402,9 +402,471 @@
           "source": "uex"
         }
       ]
+    },
+    {
+      "id": "r530",
+      "type": "intra",
+      "status": "candidate",
+      "risk": "normal",
+      "ship": "aurora_ts",
+      "created_at": "2026-10-30T03:41:44+00:00",
+      "legs": [
+        {
+          "commodity": "Compboard",
+          "id_commodity": 18,
+          "buy_terminal": {
+            "id": 69,
+            "name": "Rayari Anvik Research Outpost",
+            "auto": false,
+            "max_box": 24,
+            "system": "Stanton",
+            "loading_source": "override"
+          },
+          "sell_terminal": {
+            "id": 82,
+            "name": "Shubin Mining Facility SM0-18",
+            "auto": false,
+            "max_box": 32,
+            "system": "Stanton",
+            "loading_source": "hangar"
+          },
+          "id_planet_origin": 190,
+          "origin_planet": "MicroTech",
+          "id_planet_destination": 190,
+          "destination_planet": "MicroTech",
+          "destination_system": "Stanton",
+          "price_buy": 26450,
+          "price_sell": 37000,
+          "scu_stock": 9,
+          "status_buy": 3,
+          "status_sell": 1,
+          "qty": 3,
+          "box_sizes": [
+            1,
+            2
+          ],
+          "leg_profit": 31650,
+          "roi": 39.9,
+          "intra": true,
+          "pyro": false,
+          "source": "computed",
+          "qt_sec": 380.0
+        }
+      ],
+      "loop_profit": 31650,
+      "qt_sec_total": 380.0,
+      "transit_sec": null,
+      "closed": false,
+      "reposition_sec": 380.0,
+      "reposition_kind": "empty-return",
+      "loop_time_min": 25.7,
+      "profit_per_hour": 73891,
+      "snapshots": [
+        {
+          "ts": "2026-10-30T03:41:44+00:00",
+          "price_buy": 26450,
+          "price_sell": 37000,
+          "scu_stock": 9,
+          "source": "uex"
+        }
+      ]
+    },
+    {
+      "id": "r531",
+      "type": "intra",
+      "status": "candidate",
+      "risk": "normal",
+      "ship": "aurora_ts",
+      "created_at": "2026-10-30T03:41:44+00:00",
+      "legs": [
+        {
+          "commodity": "Compboard",
+          "id_commodity": 18,
+          "buy_terminal": {
+            "id": 69,
+            "name": "Rayari Anvik Research Outpost",
+            "auto": false,
+            "max_box": 24,
+            "system": "Stanton",
+            "loading_source": "override"
+          },
+          "sell_terminal": {
+            "id": 81,
+            "name": "Shubin Mining Facility SM0-13",
+            "auto": false,
+            "max_box": 24,
+            "system": "Stanton",
+            "loading_source": "hangar"
+          },
+          "id_planet_origin": 190,
+          "origin_planet": "MicroTech",
+          "id_planet_destination": 190,
+          "destination_planet": "MicroTech",
+          "destination_system": "Stanton",
+          "price_buy": 26450,
+          "price_sell": 37000,
+          "scu_stock": 9,
+          "status_buy": 3,
+          "status_sell": 1,
+          "qty": 3,
+          "box_sizes": [
+            1,
+            2
+          ],
+          "leg_profit": 31650,
+          "roi": 39.9,
+          "intra": true,
+          "pyro": false,
+          "source": "computed",
+          "qt_sec": 380.0
+        }
+      ],
+      "loop_profit": 31650,
+      "qt_sec_total": 380.0,
+      "transit_sec": null,
+      "closed": false,
+      "reposition_sec": 380.0,
+      "reposition_kind": "empty-return",
+      "loop_time_min": 25.7,
+      "profit_per_hour": 73891,
+      "snapshots": [
+        {
+          "ts": "2026-10-30T03:41:44+00:00",
+          "price_buy": 26450,
+          "price_sell": 37000,
+          "scu_stock": 9,
+          "source": "uex"
+        }
+      ]
+    },
+    {
+      "id": "r532",
+      "type": "there-back",
+      "status": "candidate",
+      "risk": "normal",
+      "ship": "aurora_ts",
+      "created_at": "2026-10-30T03:41:50+00:00",
+      "legs": [
+        {
+          "commodity": "Taranite",
+          "id_commodity": 73,
+          "buy_terminal": {
+            "id": 75,
+            "name": "Samson & Son's Salvage Center",
+            "auto": false,
+            "max_box": 24,
+            "system": "Stanton",
+            "loading_source": "override"
+          },
+          "sell_terminal": {
+            "id": 89,
+            "name": "TDD - Trade and Development Division - Commons - New Babbage",
+            "auto": true,
+            "max_box": 32,
+            "system": "Stanton",
+            "loading_source": "hangar"
+          },
+          "id_planet_origin": 4,
+          "origin_planet": "ArcCorp",
+          "id_planet_destination": 190,
+          "destination_planet": "MicroTech",
+          "destination_system": "Stanton",
+          "price_buy": 18792,
+          "price_sell": 28000,
+          "scu_stock": 41,
+          "status_buy": 3,
+          "status_sell": 1,
+          "qty": 3,
+          "box_sizes": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "leg_profit": 27624,
+          "roi": 49.0,
+          "intra": false,
+          "pyro": false,
+          "source": "computed",
+          "qt_sec": 295.0
+        },
+        {
+          "commodity": "Medical Supplies",
+          "id_commodity": 51,
+          "buy_terminal": {
+            "id": 69,
+            "name": "Rayari Anvik Research Outpost"
+          },
+          "sell_terminal": {
+            "id": 12,
+            "name": "TDD - Trade and Development Division - Area 18"
+          },
+          "id_planet_destination": 4,
+          "destination_planet": "ArcCorp",
+          "destination_system": "Stanton",
+          "price_buy": 3343,
+          "price_sell": 5500,
+          "scu_stock": 8,
+          "qty": 8,
+          "box_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16
+          ],
+          "leg_profit": 17256,
+          "roi": 64.5,
+          "intra": true,
+          "pyro": false,
+          "closed_terminal": false,
+          "qt_sec": 295.0
+        }
+      ],
+      "loop_profit": 44880,
+      "qt_sec_total": 590.0,
+      "transit_sec": 40.0,
+      "closed": false,
+      "reposition_sec": 160.0,
+      "reposition_kind": "ferry",
+      "loop_time_min": 37.2,
+      "profit_per_hour": 72387,
+      "snapshots": [
+        {
+          "ts": "2026-10-30T03:41:50+00:00",
+          "price_buy": 18792,
+          "price_sell": 28000,
+          "scu_stock": 41,
+          "source": "uex"
+        },
+        {
+          "ts": "2026-10-30T03:41:50+00:00",
+          "price_buy": 3343,
+          "price_sell": 5500,
+          "scu_stock": 8,
+          "source": "uex"
+        }
+      ]
+    },
+    {
+      "id": "r533",
+      "type": "there-back",
+      "status": "candidate",
+      "risk": "normal",
+      "ship": "aurora_ts",
+      "created_at": "2026-10-30T03:41:57+00:00",
+      "legs": [
+        {
+          "commodity": "Taranite",
+          "id_commodity": 73,
+          "buy_terminal": {
+            "id": 75,
+            "name": "Samson & Son's Salvage Center",
+            "auto": false,
+            "max_box": 24,
+            "system": "Stanton",
+            "loading_source": "override"
+          },
+          "sell_terminal": {
+            "id": 90,
+            "name": "TDD - Trade and Development Division - Cloudview Center - Orison",
+            "auto": true,
+            "max_box": 32,
+            "system": "Stanton",
+            "loading_source": "hangar"
+          },
+          "id_planet_origin": 4,
+          "origin_planet": "ArcCorp",
+          "id_planet_destination": 59,
+          "destination_planet": "Crusader",
+          "destination_system": "Stanton",
+          "price_buy": 18792,
+          "price_sell": 28000,
+          "scu_stock": 41,
+          "status_buy": 3,
+          "status_sell": 1,
+          "qty": 3,
+          "box_sizes": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "leg_profit": 27624,
+          "roi": 49.0,
+          "intra": false,
+          "pyro": false,
+          "source": "computed",
+          "qt_sec": 210.0
+        },
+        {
+          "commodity": "Iodine",
+          "id_commodity": 43,
+          "buy_terminal": {
+            "id": 23,
+            "name": "Deakins Research Outpost"
+          },
+          "sell_terminal": {
+            "id": 12,
+            "name": "TDD - Trade and Development Division - Area 18"
+          },
+          "id_planet_destination": 4,
+          "destination_planet": "ArcCorp",
+          "destination_system": "Stanton",
+          "price_buy": 9334,
+          "price_sell": 11000,
+          "scu_stock": 3,
+          "qty": 3,
+          "box_sizes": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "leg_profit": 4998,
+          "roi": 17.8,
+          "intra": true,
+          "pyro": false,
+          "closed_terminal": false,
+          "qt_sec": 210.0
+        }
+      ],
+      "loop_profit": 32622,
+      "qt_sec_total": 420.0,
+      "transit_sec": 20.0,
+      "closed": false,
+      "reposition_sec": 160.0,
+      "reposition_kind": "ferry",
+      "loop_time_min": 34.0,
+      "profit_per_hour": 57568,
+      "snapshots": [
+        {
+          "ts": "2026-10-30T03:41:57+00:00",
+          "price_buy": 18792,
+          "price_sell": 28000,
+          "scu_stock": 41,
+          "source": "uex"
+        },
+        {
+          "ts": "2026-10-30T03:41:57+00:00",
+          "price_buy": 9334,
+          "price_sell": 11000,
+          "scu_stock": 3,
+          "source": "uex"
+        }
+      ]
+    },
+    {
+      "id": "r534",
+      "type": "there-back",
+      "status": "candidate",
+      "risk": "normal",
+      "ship": "aurora_ts",
+      "created_at": "2026-10-30T03:42:03+00:00",
+      "legs": [
+        {
+          "commodity": "Agricium",
+          "id_commodity": 1,
+          "buy_terminal": {
+            "id": 85,
+            "name": "Shubin Mining Facility SMCa-8",
+            "auto": false,
+            "max_box": 24,
+            "system": "Stanton",
+            "loading_source": "hangar"
+          },
+          "sell_terminal": {
+            "id": 4,
+            "name": "Admin - ARC-L4",
+            "auto": true,
+            "max_box": 32,
+            "system": "Stanton",
+            "loading_source": "hangar"
+          },
+          "id_planet_origin": 190,
+          "origin_planet": "MicroTech",
+          "id_planet_destination": 4,
+          "destination_planet": "ArcCorp",
+          "destination_system": "Stanton",
+          "price_buy": 8721,
+          "price_sell": 12000,
+          "scu_stock": 500,
+          "status_buy": 7,
+          "status_sell": 1,
+          "qty": 8,
+          "box_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16
+          ],
+          "leg_profit": 26232,
+          "roi": 37.6,
+          "intra": false,
+          "pyro": false,
+          "source": "computed",
+          "qt_sec": 165.0
+        },
+        {
+          "commodity": "Dymantium",
+          "id_commodity": 127,
+          "buy_terminal": {
+            "id": 78,
+            "name": "Shubin Mining Facility SAL-5"
+          },
+          "sell_terminal": {
+            "id": 89,
+            "name": "TDD - Trade and Development Division - Commons - New Babbage"
+          },
+          "id_planet_destination": 190,
+          "destination_planet": "MicroTech",
+          "destination_system": "Stanton",
+          "price_buy": 21011,
+          "price_sell": 23000,
+          "scu_stock": 0,
+          "qty": 6,
+          "box_sizes": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "leg_profit": 11934,
+          "roi": 9.5,
+          "intra": true,
+          "pyro": false,
+          "closed_terminal": false,
+          "qt_sec": 295.0
+        }
+      ],
+      "loop_profit": 38166,
+      "qt_sec_total": 460.0,
+      "transit_sec": 145.0,
+      "closed": false,
+      "reposition_sec": 305.0,
+      "reposition_kind": "ferry",
+      "loop_time_min": 39.2,
+      "profit_per_hour": 58417,
+      "snapshots": [
+        {
+          "ts": "2026-10-30T03:42:03+00:00",
+          "price_buy": 8721,
+          "price_sell": 12000,
+          "scu_stock": 500,
+          "source": "uex"
+        },
+        {
+          "ts": "2026-10-30T03:42:03+00:00",
+          "price_buy": 21011,
+          "price_sell": 23000,
+          "scu_stock": 0,
+          "source": "uex"
+        }
+      ]
     }
   ],
-  "next_id": 530,
+  "next_id": 535,
   "tracked_commodities": {
     "51": "Medical Supplies",
     "44": "Iron",
@@ -432,13 +894,14 @@
     "1": "Agricium",
     "75": "Titanium",
     "63": "Recycled Material Composite",
-    "70": "Stims"
+    "70": "Stims",
+    "127": "Dymantium"
   },
   "ranking_prev": [
-    "r526",
-    "r525",
-    "r527",
-    "r528",
-    "r529"
+    "r532",
+    "r534",
+    "r533",
+    "r530",
+    "r531"
   ]
 }
