@@ -315,26 +315,19 @@ def main() -> int:
               f"\u5708\u65f6\u95f4 {r['loop_time_min']}min \u00b7 \u65f6\u85aa {ph}")
         print(f"    {stops}")
         print()
-        print("| \u6bb5 | \u5546\u54c1 | \u4e70 \u2192 \u5356 | \u5229\u6da6 | \u98de\u884c |")
-        print("|---|---|---|---|---|")
+        print("| \u6bb5 | \u5546\u54c1 | \u4e70 \u2192 \u5356 | \u5229\u6da6 | \u4f9b\u5e94 | \u9700\u6c42(\u56e4) |")
+        print("|---|---|---|---|---|---|")
         for n, (lg, d) in enumerate(zip(r["legs"], r["detail"]), 1):
             bn = term_by_id[lg["buy_terminal"]].name
             sn = term_by_id[lg["sell_terminal"]].name
-            print(f"| {n} | {lg['commodity']} {lg['qty']} SCU | "
-                  f"{bn} {lg['price_buy']:,} \u2192 {sn} {lg['price_sell']:,} | "
-                  f"+{lg['leg_profit']:,} | {d['qt_min']}min |")
-        qt = round(sum(d["qt_min"] for d in r["detail"]), 1)
-        print(f"| | | **\u5408\u8ba1** | **+{r['profit']:,}** | **{qt}min** |")
-        print()
-        parts = []
-        for n, d in enumerate(r["detail"], 1):
             sup = d.get("supply")
             dst = d.get("demand_stock")
-            parts.append(
-                f"\u6bb5{n} \u4f9b\u5e94 {sup if sup is not None else '-'}"
-                f"({st_name(d.get('buy_status'))}) / \u5356\u7aef\u56e4 "
-                f"{dst if dst is not None else '-'}({st_name(d.get('sell_status'))})")
-        print("- \u8865\u7ed9/\u9700\u6c42\uff1a" + "\uff1b".join(parts))
+            print(f"| {n} | {lg['commodity']} {lg['qty']} SCU | "
+                  f"{bn} {lg['price_buy']:,} \u2192 {sn} {lg['price_sell']:,} | "
+                  f"+{lg['leg_profit']:,} | "
+                  f"{sup if sup is not None else '-'}({st_name(d.get('buy_status'))}) | "
+                  f"{dst if dst is not None else '-'}({st_name(d.get('sell_status'))}) |")
+        print(f"| | | **\u5408\u8ba1** | **+{r['profit']:,}** | | |")
         print()
         if args.detail:
             print("| \u6bb5 | \u7bb1\u578b | \u7bb1\u6570 | \u91cf\u5b50 | \u505c\u8239 | "
