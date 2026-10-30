@@ -312,7 +312,7 @@ def main() -> int:
             print(f"| {n} | {lg['commodity']} {lg['qty']} SCU | "
                   f"{bn} {lg['price_buy']:,} \u2192 {sn} {lg['price_sell']:,} | "
                   f"+{lg['leg_profit']:,} | {d['qt_min']}min |")
-        qt = sum(d["qt_min"] for d in r["detail"])
+        qt = round(sum(d["qt_min"] for d in r["detail"]), 1)
         print(f"| | | **\u5408\u8ba1** | **+{r['profit']:,}** | **{qt}min** |")
         print()
         parts = []
