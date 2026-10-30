@@ -97,6 +97,7 @@
       <button id="reset" type="button">Reset</button>
     </div>
     <div class="hint">排序不在这里选 —— 结果出来后点表头随时改。检索只跑搜索、不渲染图片；点「生成图片」才按需出图。</div>
+    <div class="hint" id="caps">库存上限缓存：读取中…</div>
   </form>
 
   <main>
@@ -298,7 +299,30 @@ function renderTable() {
   box.appendChild(table);
 }
 
+async function refreshCaps() {
+  try {
+    const d = await (await fetch('/api/caps')).json();
+    if (!d.ok) {
+      return;
+    }
+    let txt;
+    if (!d.target) {
+      txt = '库存上限缓存：预热线程启动中…';
+    } else if (d.cached >= d.target) {
+      txt = '库存上限缓存：' + d.cached + ' / ' + d.target + '（已预热满，检索不必再补拉）';
+    } else {
+      txt = '库存上限缓存：' + d.cached + ' / ' + d.target
+        + '（后台预热中，满了之后检索会快很多）';
+    }
+    $('caps').textContent = txt;
+  } catch (e) {
+    $('caps').textContent = '库存上限缓存：读取失败';
+  }
+}
+
 async function init() {
+  refreshCaps();
+  setInterval(refreshCaps, 15000);
   try {
     const d = await (await fetch('/api/ships')).json();
     $('ship').innerHTML = d.ships.map(s =>

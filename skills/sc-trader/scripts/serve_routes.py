@@ -36,6 +36,7 @@ CACHE_DIR = WEB_DIR / ".cache"
 RECOMMEND = SCRIPT_DIR / "recommend.py"
 
 sys.path.insert(0, str(SCRIPT_DIR))
+import common as C                # noqa: E402  （库存上限缓存 / 预热）
 import route_png  # noqa: E402  （复用 render 与 split_sections）
 
 DEFAULT_PORT = 8765
@@ -274,7 +275,50 @@ def prune_cache(max_files: int | None = None) -> int:
     return removed
 
 
-# ── 异步检索任务（前端轮询进度，避免长时间干等）────────────────────────────
+# ── 库存上限后台预热 ─────────────────────────────────────────────────────────
+# 上限是静态属性（版本不变就不变），完全可以预先缓存满。总库 205 个商品、
+# 可买 99 个，按 6.5s 节流全量预热约 11 分钟——放在后台跑，检索期间让路，
+# 预热满之后检索就不再需要补拉。
+_SEARCH_ACTIVE = threading.Event()
+_WARMER_STARTED = False
+_WARM_TARGET = [0]                # 需要预热的商品数（= 可买商品数），由预热线程填
+
+
+def start_cap_warmer() -> None:
+    global _WARMER_STARTED
+    if _WARMER_STARTED:
+        return
+    _WARMER_STARTED = True
+
+    def loop():
+        while True:
+            try:
+                client = C.get_client()
+                rows = C.throttled_get(client, "commodities") or []
+                # 只预热买得到的：is_buyable=0 是硬闸门，永远不会出现在路线里
+                # （205 个里只有 99 个可买，过滤掉省一半预热时间）
+                ids = [r.get("id") for r in rows
+                       if r.get("id") is not None and r.get("is_buyable")]
+                _WARM_TARGET[0] = len(ids)
+            except Exception:                                  # noqa: BLE001
+                time.sleep(300)
+                continue
+            while True:
+                todo = C.uncached_cap_ids(ids)
+                if not todo:
+                    break
+                # 检索期间完全停下：子进程不共享节流状态，同时跑会把速率翻倍
+                while _SEARCH_ACTIVE.is_set():
+                    time.sleep(1.0)
+                try:
+                    C.fetch_stock_caps(client, todo, max_calls=1,
+                                       should_pause=_SEARCH_ACTIVE.is_set)
+                except Exception:                              # noqa: BLE001
+                    time.sleep(60)
+                    break
+            time.sleep(1800)      # 预热满了，半小时后再看一眼（版本更新）
+
+    threading.Thread(target=loop, daemon=True).start()
 _JOBS: dict = {}
 _JOBS_LOCK = threading.Lock()
 
@@ -297,6 +341,7 @@ def job_start(params: dict) -> str:
                 _JOBS.pop(old, None)
 
     def work():
+        _SEARCH_ACTIVE.set()      # 检索期间后台预热让路（节流状态不共享）
         try:
             res = build_routes(
                 params,
@@ -305,6 +350,8 @@ def job_start(params: dict) -> str:
         except Exception as e:                                  # noqa: BLE001
             _job_update(jid, state="error", label="失败",
                         error=f"{type(e).__name__}: {e}")
+        finally:
+            _SEARCH_ACTIVE.clear()
 
     threading.Thread(target=work, daemon=True).start()
     return jid
@@ -374,10 +421,18 @@ class Handler(BaseHTTPRequestHandler):
 
         if path == "/api/routes" or path == "/api/route":
             params = {k: v[0] for k, v in qs.items()}
+            _SEARCH_ACTIVE.set()
             try:
                 self._json(build_routes(params))
             except Exception as e:                              # noqa: BLE001
                 self._json({"ok": False, "error": f"{type(e).__name__}: {e}"}, 500)
+            finally:
+                _SEARCH_ACTIVE.clear()
+            return
+
+        if path == "/api/caps":
+            fresh, _ = C.stock_cap_coverage()
+            self._json({"ok": True, "cached": fresh, "target": _WARM_TARGET[0]})
             return
 
         if path.startswith("/img/"):
@@ -412,6 +467,9 @@ def main() -> int:
         n = prune_cache()
         if n:
             print(f"已清理 {n} 个过期缓存文件（保留最新 {CACHE_MAX_FILES} 个）")
+
+    start_cap_warmer()
+    print("库存上限后台预热已启动（检索期间自动让路）")
 
     srv = ThreadingHTTPServer((args.host, args.port), Handler)
     print(f"serving on http://{args.host}:{args.port}/  (Ctrl-C 停止)")

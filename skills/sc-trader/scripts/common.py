@@ -38,8 +38,9 @@ def _load_stock_cap_cache() -> dict:
         return {}
 
 
-def fetch_stock_caps(client, commodity_ids, max_calls: int = 12,
-                    ttl: int = STOCK_CAP_TTL_SEC, on_progress=None) -> dict:
+def fetch_stock_caps(client, commodity_ids, max_calls: int = 8,
+                    ttl: int = STOCK_CAP_TTL_SEC, on_progress=None,
+                    should_pause=None) -> dict:
     """(id_commodity, id_terminal) -> (scu_buy, scu_buy_max, scu_sell_stock, scu_sell_max)。
 
     四个数都只有 commodities_prices 端点有（_all 缺两个 *_max），按商品查一次
@@ -51,6 +52,10 @@ def fetch_stock_caps(client, commodity_ids, max_calls: int = 12,
 
     on_progress(i, n)：补拉阶段每次调用前回调一次——这一步受 6.5s 全局节流
     限制，是最长的一段静默等待，不报进度会让前端看起来卡死。
+
+    should_pause()：返回 True 时先让路（后台预热用）。检索是子进程，节流状态
+    不共享，预热和检索同时跑会把请求速率翻倍（UEX 匿名限 10 req/min），
+    所以预热必须在检索期间停下。
     """
     cache = _load_stock_cap_cache()
     now = time.time()
@@ -73,6 +78,8 @@ def fetch_stock_caps(client, commodity_ids, max_calls: int = 12,
     for ci, cid in enumerate(todo[:max_calls], 1):
         if on_progress:
             on_progress(ci, ntodo)
+        while should_pause and should_pause():
+            time.sleep(1.0)
         rows = throttled_get(client, "commodities_prices", {"id_commodity": cid}) or []
         gv = next((r.get("game_version") for r in rows if r.get("game_version")), None)
         if gv:
@@ -104,6 +111,27 @@ def fetch_stock_caps(client, commodity_ids, max_calls: int = 12,
                           f, ensure_ascii=False)
         except OSError:
             pass
+    return out
+
+
+def stock_cap_coverage(ttl: int = STOCK_CAP_TTL_SEC) -> tuple:
+    """(未过期的已缓存商品数, 缓存中商品总数) —— 给前端显示预热进度。"""
+    cache = _load_stock_cap_cache()
+    now = time.time()
+    items = cache.get("items", {})
+    fresh = sum(1 for v in items.values() if now - v.get("ts", 0) < ttl)
+    return fresh, len(items)
+
+
+def uncached_cap_ids(commodity_ids, ttl: int = STOCK_CAP_TTL_SEC) -> list:
+    """这些商品里还有哪些没进（有效）缓存。"""
+    cache = _load_stock_cap_cache()
+    now = time.time()
+    out = []
+    for cid in dict.fromkeys(int(c) for c in commodity_ids if c is not None):
+        ent = cache.get("items", {}).get(str(cid)) or {}
+        if not (ent and now - ent.get("ts", 0) < ttl):
+            out.append(cid)
     return out
 
 
