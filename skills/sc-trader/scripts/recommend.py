@@ -994,6 +994,7 @@ def mixed_leg_for(buy_at, sell_at, tid_a, tid_b, budget: int, profile: dict,
         "qty": sum(i["qty"] for i in items),
         "leg_profit": sum(i["leg_profit"] for i in items),
         "items": items,
+        "cands": cands,
         "mixed": len(items) > 1,
     }
 
@@ -1241,8 +1242,8 @@ def run_loop_search(args) -> int:
               f"\u5708\u65f6\u95f4 {r['loop_time_min']}min \u00b7 \u65f6\u85aa {ph}")
         print(f"    {stops}")
         print()
-        print("| \u6bb5 | \u5546\u54c1 | \u4e70 \u2192 \u5356 | \u5229\u6da6 | \u4f9b\u5e94 | \u9700\u6c42(\u56e4) |")
-        print("|---|---|---|---|---|---|")
+        print("| \u6bb5 | \u5546\u54c1 | \u4e70 \u2192 \u5356 | \u5229\u6da6 |")
+        print("|---|---|---|---|")
         for n, (lg, d) in enumerate(zip(r["legs"], r["detail"]), 1):
             bn = term_by_id[lg["buy_terminal"]].name
             sn = term_by_id[lg["sell_terminal"]].name
@@ -1264,10 +1265,25 @@ def run_loop_search(args) -> int:
                 buy_st = st_name(d.get("buy_status"))
                 dem_s = str(dst) if dst is not None else "-"
                 sell_st = st_name(d.get("sell_status"))
-            print(f"| {n} | {lg['commodity']} {lg['qty']} SCU | "
-                  f"{bn} {lg['price_buy']:,} \u2192 {sn} {lg['price_sell']:,} | "
-                  f"+{lg['leg_profit']:,} | {sup_s}({buy_st}) | {dem_s}({sell_st}) |")
-        print(f"| | | **\u5408\u8ba1** | **+{r['profit']:,}** | | |")
+            sys_a = getattr(term_by_id[lg["buy_terminal"]], "star_system_name", "")
+            sys_b = getattr(term_by_id[lg["sell_terminal"]], "star_system_name", "")
+            items = lg.get("items") or []
+            cands = lg.get("cands") or []
+            sel = {it["commodity"] for it in items}
+
+            def cell(it, with_qty):
+                sd = (it.get("sell_row") or {}).get("scu_sell_stock")
+                return (f"{it['commodity']}{it['qty']}" if with_qty else f"{it['commodity']}") \
+                    + f"(\u4f9b{it.get('scu_stock')}/\u9700{sd if sd is not None else '-'})"
+
+            goods = " + ".join(cell(it, True) for it in items)
+            alt = [cell(c, False) for c in cands if c["commodity"] not in sel]
+            if alt:
+                goods += " \uff5c\u5019\u8865: " + ", ".join(alt)
+            print(f"| {n} | {goods} | "
+                  f"{bn}[{sys_a}] {lg['price_buy']:,} \u2192 {sn}[{sys_b}] {lg['price_sell']:,} | "
+                  f"+{lg['leg_profit']:,} |")
+        print(f"| | | **\u5408\u8ba1** | **+{r['profit']:,}** |")
         print()
         if args.detail:
             print("| \u6bb5 | \u7bb1\u578b | \u7bb1\u6570 | \u91cf\u5b50 | \u505c\u8239 | "
